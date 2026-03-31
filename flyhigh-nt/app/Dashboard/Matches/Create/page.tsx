@@ -1,154 +1,76 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createMatch } from '@/lib/matchApi';
-import { getMyTeams } from '@/lib/teamApi';
-import { Team } from '@/types/team';
+import React from 'react';
+import { useCreateMatch } from '@/hooks/Matches/useCreateMatch';
+import { useTeamsList } from '@/hooks/Teams/useTeamList';
 import './CreateMatch.css';
 
 export default function CreateMatchPage() {
-    const router = useRouter();
-    const [managerTeams, setManagerTeams] = useState<Team[]>([]);
-    const [isLoadingTeams, setIsLoadingTeams] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState('');
-
-    const [formData, setFormData] = useState({
-        homeTeamId: '',
-        awayTeamId: '',
-        location: '',
-        scheduledAt: ''
-    });
-
-    useEffect(() => {
-        const fetchTeams = async () => {
-            try {
-                const teams = await getMyTeams();
-                const filtered = teams.filter(t => t.role === 'Owner' || t.role === 'Coach');
-                setManagerTeams(filtered);
-
-                if (filtered.length > 0) {
-                    setFormData(prev => ({ ...prev, homeTeamId: filtered[0].id }));
-                }
-            } catch (err) {
-                setError('Nepodařilo se načíst seznam vašich týmů.');
-            } finally {
-                setIsLoadingTeams(false);
-            }
-        };
-
-        fetchTeams();
-    }, []);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setIsSubmitting(true);
-
-        try {
-            const dateIso = new Date(formData.scheduledAt).toISOString();
-
-            await createMatch({
-                homeTeamId: formData.homeTeamId,
-                awayTeamId: formData.awayTeamId,
-                location: formData.location,
-                scheduledAt: dateIso
-            });
-
-            router.push('/Dashboard/Matches');
-        } catch (err: any) {
-            setError(err.message || 'Došlo k chybě při komunikaci se serverem.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    if (isLoadingTeams) return <div className="loading-state">Načítám vaše týmy...</div>;
+    const { formData, error, isLoading, handleChange, handleSubmit } = useCreateMatch();
+    const { teams } = useTeamsList();
 
     return (
-        <div className="dashboard-container create-match-container">
-            <h1 className="dashboard-heading">Založit nový zápas</h1>
-            <p className="dashboard-subtext">Vyberte svůj tým a zadejte informace o zápasu s hostujícím týmem.</p>
+        <div className="CreateMatchContainer">
+            <div className="CreateMatchCard">
+                <h1 className="CreateMatchTitle">Navrhnout nový zápas</h1>
 
-            {managerTeams.length === 0 ? (
-                <div className="empty-state glass-card">
-                    <p>Nemáte právo zakládat zápasy, protože nejste Vlastníkem nebo Trenérem u žádného týmu.</p>
-                    <button className="btn-primary" onClick={() => router.push('/Dashboard/Teams')}>Zpět na týmy</button>
-                </div>
-            ) : (
-                <form onSubmit={handleSubmit} className="create-match-form glass-card">
-                    {error && <div className="error-message">{error}</div>}
+                {error && <div className="ErrorMessage">{error}</div>}
 
-                    <div className="form-group">
-                        <label htmlFor="homeTeamId">Váš tým</label>
+                <form className="CreateMatchForm" onSubmit={handleSubmit}>
+                    <div className="FormGroup">
+                        <label className="FormLabel">Tvůj tým (Domácí)</label>
                         <select
-                            id="homeTeamId"
                             name="homeTeamId"
+                            className="FormSelect"
                             value={formData.homeTeamId}
                             onChange={handleChange}
                             required
                         >
-                            {managerTeams.map(team => (
-                                <option key={team.id} value={team.id}>
-                                    {team.teamName} ({team.shortName})
-                                </option>
+                            <option value="">-- Vyberte --</option>
+                            {teams.map(t => (
+                                <option key={t.id} value={t.id}>{t.teamName}</option>
                             ))}
                         </select>
                     </div>
-
-                    <div className="form-group">
-                        <label htmlFor="awayTeamId">ID Hostujícího Týmu</label>
+                    <div className="FormGroup">
+                        <label className="FormLabel">Tým soupeře (ID Hostů)</label>
                         <input
                             type="text"
-                            id="awayTeamId"
                             name="awayTeamId"
+                            className="FormInput"
+                            placeholder="Zadejte unikátní ID týmu"
                             value={formData.awayTeamId}
                             onChange={handleChange}
                             required
-                            placeholder="Zadejte ID soupeře"
                         />
                     </div>
-
-                    <div className="form-group">
-                        <label htmlFor="location">Místo konání</label>
-                        <input
-                            type="text"
-                            id="location"
-                            name="location"
-                            value={formData.location}
-                            onChange={handleChange}
-                            required
-                            placeholder="Např. Sportovní hala Opava"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="scheduledAt">Datum a Čas</label>
+                    <div className="FormGroup">
+                        <label className="FormLabel">Datum a čas výhozu</label>
                         <input
                             type="datetime-local"
-                            id="scheduledAt"
                             name="scheduledAt"
+                            className="FormInput"
                             value={formData.scheduledAt}
                             onChange={handleChange}
                             required
                         />
                     </div>
-
-                    <div className="form-actions">
-                        <button type="button" className="btn-secondary" onClick={() => router.push('/Dashboard/Matches')}>
-                            Zrušit
-                        </button>
-                        <button type="submit" className="btn-primary" disabled={isSubmitting}>
-                            {isSubmitting ? 'Vytvářím...' : 'Vytvořit Zápas'}
-                        </button>
+                    <div className="FormGroup">
+                        <label className="FormLabel">Místo konání (Hala)</label>
+                        <input
+                            type="text"
+                            name="location"
+                            className="FormInput"
+                            value={formData.location}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
+                    <button type="submit" className="SubmitButton" disabled={isLoading}>
+                        {isLoading ? 'Odesílám...' : 'Navrhnout zápas soupeři'}
+                    </button>
                 </form>
-            )}
+            </div>
         </div>
     );
 }

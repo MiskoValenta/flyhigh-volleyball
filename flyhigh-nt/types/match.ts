@@ -17,6 +17,7 @@ export interface CreateMatchDto {
     awayTeamId: string;
     location: string;
     scheduledAt: string;
+    refereeId?: string | null;
 }
 
 export interface AssignPositionDto {
@@ -25,7 +26,7 @@ export interface AssignPositionDto {
     position: PlayerPosition | number;
 }
 
-export interface AddRosterEntryDto {
+export interface RosterPlayerDto {
     teamMemberId: string;
     teamId: string;
     jerseyNumber: number;
@@ -39,25 +40,38 @@ export interface ProposeMatchResponse {
     matchId: string;
 }
 
-export interface MatchSet {
+export interface MatchSetDto {
     setNumber: number;
     type: string;
     homeScore: number;
     awayScore: number;
     isFinished: boolean;
-    winner: string;
+    isStarted: boolean;
+    winner?: string | null;
+}
+
+export interface MatchResponseDto {
+    id: string;
+    homeTeamId: string;
+    homeTeamName: string;
+    awayTeamId: string;
+    awayTeamName: string;
+    location: string;
+    scheduledAt: string;
+    status: string;
 }
 
 export interface Match {
     id: string;
     creatorId: string;
     homeTeamId: string;
-    homeTeamName?: string;
+    homeTeamName: string;
     awayTeamId: string;
-    awayTeamName?: string;
+    awayTeamName: string;
     location: string;
     scheduledAt: string;
     status: string;
-    roster?: AddRosterEntryDto[];
-    sets?: MatchSet[];
+    roster: RosterPlayerDto[];
+    sets: MatchSetDto[];
+    winnerId?: string | null;
 }

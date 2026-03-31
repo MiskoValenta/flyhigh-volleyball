@@ -1,29 +1,45 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { ContactFormData } from '@/types/contact';
 
 export function useContact() {
-    const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-    const [status, setStatus] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const submitContactForm = async (data: ContactFormData) => {
         setIsLoading(true);
-        setStatus('');
+        setError('');
+        setSuccess(false);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setStatus('Zpráva byla úspěšně odeslána.');
-            setFormData({ name: '', email: '', message: '' });
-        } catch (err: any) {
-            setStatus('Došlo k chybě při odesílání zprávy.');
+            const response = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({
+                    access_key: '7a348403-af04-4860-a948-669f75508abc',
+                    name: data.name,
+                    email: data.email,
+                    message: data.message,
+                    subject: 'Nová zpráva z webu FlyHigh Volleyball'
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setSuccess(true);
+            } else {
+                setError('Odeslání selhalo, zkuste to prosím znovu.');
+            }
+        } catch (err) {
+            setError('Došlo k chybě při komunikaci se serverem.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    return { formData, status, isLoading, handleChange, handleSubmit };
+    return { submitContactForm, isLoading, error, success };
 }

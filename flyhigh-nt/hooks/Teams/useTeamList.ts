@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getMyTeams } from '@/lib/teamApi';
+import { Team } from '@/types/team';
 
 export function useTeamsList() {
-    const [teams, setTeams] = useState<any[]>([]);
+    const [teams, setTeams] = useState<Team[]>([]);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 

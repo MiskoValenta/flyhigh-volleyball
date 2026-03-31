@@ -10,36 +10,37 @@ export enum EventResponse {
     Declined = "Declined",
 }
 
-export interface EventParticipant {
+export interface EventParticipantDto {
     userId: string;
-    response: EventResponse;
+    response: EventResponse | string;
 }
 
 export interface TeamEvent {
     id: string;
     teamId: string;
-    creatorId?: string;
+    creatorId: string;
     title: string;
     description?: string;
     type: EventType | string;
     eventDate?: string;
     location?: string;
-    createdAt?: string;
+    createdAt: string;
+    participants?: EventParticipantDto[];
     myResponse: EventResponse | string;
-    acceptedCount?: number;
-    declinedCount?: number;
+    acceptedCount: number;
+    declinedCount: number;
 }
 
-export interface CreateEventRequest {
+export interface CreateEventDto {
     teamId: string;
     title: string;
     description?: string;
-    type: EventType;
+    type: EventType | string;
     eventDate?: string;
     location?: string;
     invitedUserIds: string[];
 }
 
-export interface RespondToEventRequest {
-    response: EventResponse;
+export interface RespondToEventDto {
+    response: EventResponse | string;
 }

@@ -48,7 +48,6 @@ namespace API
           {
             policy.WithOrigins(
                     "http://localhost:3000",
-                    "http://192.168.56.1:3000",
                     "https://flyhigh-volleyball.cz",
                     "https://www.flyhigh-volleyball.cz")
                   .AllowAnyHeader()

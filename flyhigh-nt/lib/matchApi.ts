@@ -1,8 +1,9 @@
 import { fetchWithAuth } from './apiClient';
+import { Match, MatchResponseDto } from '@/types/match';
 
 const MATCH_URL = '/matches';
 
-export const getMyMatches = async (): Promise<any[]> => {
+export const getMyMatches = async (): Promise<MatchResponseDto[]> => {
     const res = await fetchWithAuth(`${MATCH_URL}`);
     if (!res.ok) {
         throw new Error('Nepodařilo se načíst zápasy.');
@@ -10,7 +11,7 @@ export const getMyMatches = async (): Promise<any[]> => {
     return res.json();
 }
 
-export const getMatchById = async (matchId: string): Promise<any> => {
+export const getMatchById = async (matchId: string): Promise<Match> => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}`);
     if (!res.ok) {
         throw new Error('Nepodařilo se načíst detail zápasu.');

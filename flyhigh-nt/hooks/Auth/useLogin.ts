@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginUser } from '@/lib/apiClient';
+import { loginUser } from '@/lib/api';
 
 export function useLogin() {
     const router = useRouter();
@@ -18,11 +18,7 @@ export function useLogin() {
             await loginUser({ email, password });
             router.push('/Dashboard');
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Chyba při přihlášení.');
-            }
+            setError(err.message || 'Chyba při přihlášení.');
         } finally {
             setIsLoading(false);
         }

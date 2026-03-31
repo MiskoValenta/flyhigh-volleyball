@@ -1,57 +1,71 @@
 'use client';
 
-import React from 'react';
+import React, { use } from 'react';
 import { useLiveMatch } from '@/hooks/Matches/useLiveMatch';
+import { useMatchDetail } from '@/hooks/Matches/useMatchDetail';
 import './Live.css';
 
-export default function LiveMatchPage({ params }: { params: { matchId: string } }) {
-    const { error, isLoading, handleStartMatch, handleStartSet, handleAddPoint } = useLiveMatch(params.matchId);
+export default function LiveMatchPage({ params }: { params: Promise<{ matchId: string }> }) {
+    const { matchId } = use(params);
 
-    let errorMessage = null;
-    if (error !== '') {
-        errorMessage = <p className="error-message">{error}</p>;
-    }
+    const { match, isLoading: isMatchLoading } = useMatchDetail(matchId);
+
+    const { error, isLoading: isLiveLoading, handleStartMatch, handleStartSet, handleAddPoint } = useLiveMatch(matchId);
+
+    if (isMatchLoading) return <div className="LiveLoading">Načítám scoreboard...</div>;
+    if (!match) return <div className="ErrorMessage">Zápas nenalezen.</div>;
+
+    const currentSet = match.sets && match.sets.length > 0 ? match.sets[match.sets.length - 1] : null;
 
     return (
-        <div className="live-match-container">
-            <h1 className="live-title">Živý zápas</h1>
+        <div className="LiveContainer">
+            <header className="LiveHeader">
+                <h1 className="LiveTitle">LIVE: {match.homeTeamName} vs {match.awayTeamName}</h1>
+                <span className="LiveStatusBadge">{match.status}</span>
+            </header>
 
-            {errorMessage}
+            {error && <div className="ErrorMessage">{error}</div>}
 
-            <div className="controls-grid">
-                <button
-                    onClick={handleStartMatch}
-                    className="control-button start-match"
-                    disabled={isLoading}
-                >
-                    Zahájit zápas
-                </button>
+            <div className="ScoreboardCard">
+                <div className="TeamScore">
+                    <h2 className="TeamName">{match.homeTeamName}</h2>
+                    <div className="PointsDisplay">{currentSet ? currentSet.homeScore : 0}</div>
+                    <button
+                        className="AddPointBtn"
+                        onClick={() => handleAddPoint('Home')}
+                        disabled={isLiveLoading || match.status !== 'InProgress'}
+                    >
+                        + Domácí Bod
+                    </button>
+                </div>
 
-                <button
-                    onClick={handleStartSet}
-                    className="control-button start-set"
-                    disabled={isLoading}
-                >
-                    Odstartovat aktuální set
-                </button>
+                <div className="ScoreDivider">:</div>
+
+                <div className="TeamScore">
+                    <h2 className="TeamName">{match.awayTeamName}</h2>
+                    <div className="PointsDisplay">{currentSet ? currentSet.awayScore : 0}</div>
+                    <button
+                        className="AddPointBtn"
+                        onClick={() => handleAddPoint('Away')}
+                        disabled={isLiveLoading || match.status !== 'InProgress'}
+                    >
+                        + Hosté Bod
+                    </button>
+                </div>
             </div>
 
-            <div className="score-controls">
-                <button
-                    onClick={() => { handleAddPoint('Home'); }}
-                    className="point-button home-point"
-                    disabled={isLoading}
-                >
-                    +1 Bod (Domácí)
-                </button>
+            <div className="MatchControls">
+                {match.status === 'Accepted' && (
+                    <button className="ControlBtn start" onClick={handleStartMatch} disabled={isLiveLoading}>
+                        Odpískat začátek zápasu
+                    </button>
+                )}
 
-                <button
-                    onClick={() => { handleAddPoint('Away'); }}
-                    className="point-button away-point"
-                    disabled={isLoading}
-                >
-                    +1 Bod (Hosté)
-                </button>
+                {match.status === 'InProgress' && (!currentSet || currentSet.isFinished) && (
+                    <button className="ControlBtn set" onClick={handleStartSet} disabled={isLiveLoading}>
+                        Odstartovat nový set
+                    </button>
+                )}
             </div>
         </div>
     );
