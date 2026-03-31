@@ -8,50 +8,47 @@ export default function CreateTeamPage() {
     const { formData, error, isLoading, handleChange, handleSubmit } = useCreateTeam();
 
     return (
-        <div className="CreateTeamContainer">
-            <div className="CreateTeamCard">
-                <h1 className="CreateTeamTitle">Založit nový tým</h1>
+        <div className="create-team-container">
+            <h1>Založit nový tým</h1>
 
-                {error && <div className="ErrorMessage">{error}</div>}
+            {error && <div className="error-message">{error}</div>}
 
-                <form className="CreateTeamForm" onSubmit={handleSubmit}>
-                    <div className="FormGroup">
-                        <label className="FormLabel">Název týmu</label>
-                        <input
-                            type="text"
-                            name="teamName"
-                            className="FormInput"
-                            value={formData.teamName}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div className="FormGroup">
-                        <label className="FormLabel">Zkratka (např. FLY)</label>
-                        <input
-                            type="text"
-                            name="shortName"
-                            className="FormInput"
-                            value={formData.shortName}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div className="FormGroup">
-                        <label className="FormLabel">Popis (volitelné)</label>
-                        <textarea
-                            name="description"
-                            className="FormTextarea"
-                            value={formData.description}
-                            onChange={handleChange}
-                            rows={4}
-                        />
-                    </div>
-                    <button type="submit" className="SubmitButton" disabled={isLoading}>
+            <form className="create-team-form" onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label>Název týmu</label>
+                    <input
+                        type="text"
+                        name="teamName"
+                        value={formData.teamName}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Zkratka (např. FLY)</label>
+                    <input
+                        type="text"
+                        name="shortName"
+                        value={formData.shortName}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Popis (volitelné)</label>
+                    <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        rows={4}
+                    />
+                </div>
+                <div className="form-actions">
+                    <button type="submit" disabled={isLoading} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#38bdf8', color: '#0f172a', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
                         {isLoading ? 'Vytvářím tým...' : 'Založit tým'}
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     );
 }

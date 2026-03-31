@@ -9,9 +9,7 @@ import './CreateEvent.css';
 
 export default function CreateEventPage() {
     const router = useRouter();
-
     const { teams, isLoading: isLoadingTeams } = useTeamsList();
-
     const { handleCreateEvent, isLoading, error } = useCreateEvent();
 
     const [formData, setFormData] = useState<CreateEventDto>({
@@ -34,7 +32,6 @@ export default function CreateEventPage() {
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!formData.teamId) return;
 
         try {
@@ -46,18 +43,20 @@ export default function CreateEventPage() {
     };
 
     return (
-        <div className="CreateEventContainer">
-            <div className="CreateEventCard">
-                <h1 className="CreateEventTitle">Naplánovat událost</h1>
+        <div className="createevent">
+            <div className="create-event-header">
+                <h1 className="create-event-heading">Naplánovat událost</h1>
+                <p className="create-event-subtext">Vytvořte novou událost pro váš tým.</p>
+            </div>
 
-                {error && <div className="ErrorMessage">{error}</div>}
+            {error && <div className="error-alert">{error}</div>}
 
-                <form className="CreateEventForm" onSubmit={onSubmit}>
-                    <div className="FormGroup">
-                        <label className="FormLabel">Vyberte tým</label>
+            <form className="event-form" onSubmit={onSubmit}>
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Vyberte tým</label>
                         <select
                             name="teamId"
-                            className="FormSelect"
                             value={formData.teamId}
                             onChange={handleChange}
                             required
@@ -70,23 +69,10 @@ export default function CreateEventPage() {
                         </select>
                     </div>
 
-                    <div className="FormGroup">
-                        <label className="FormLabel">Název události</label>
-                        <input
-                            type="text"
-                            name="title"
-                            className="FormInput"
-                            value={formData.title}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="FormGroup">
-                        <label className="FormLabel">Typ události</label>
+                    <div className="form-group">
+                        <label>Typ události</label>
                         <select
                             name="type"
-                            className="FormSelect"
                             value={formData.type as string}
                             onChange={handleChange}
                         >
@@ -95,45 +81,57 @@ export default function CreateEventPage() {
                             <option value={EventType.Poll}>Anketa (Trénink)</option>
                         </select>
                     </div>
+                </div>
 
-                    <div className="FormGroup">
-                        <label className="FormLabel">Datum a čas</label>
+                <div className="form-group">
+                    <label>Název události</label>
+                    <input
+                        type="text"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Datum a čas</label>
                         <input
                             type="datetime-local"
                             name="eventDate"
-                            className="FormInput"
                             value={formData.eventDate}
                             onChange={handleChange}
                         />
                     </div>
 
-                    <div className="FormGroup">
-                        <label className="FormLabel">Místo konání</label>
+                    <div className="form-group">
+                        <label>Místo konání</label>
                         <input
                             type="text"
                             name="location"
-                            className="FormInput"
                             value={formData.location}
                             onChange={handleChange}
                         />
                     </div>
+                </div>
 
-                    <div className="FormGroup">
-                        <label className="FormLabel">Popis (volitelné)</label>
-                        <textarea
-                            name="description"
-                            className="FormTextarea"
-                            value={formData.description}
-                            onChange={handleChange}
-                            rows={4}
-                        />
-                    </div>
+                <div className="form-group">
+                    <label>Popis (volitelné)</label>
+                    <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        rows={4}
+                    />
+                </div>
 
-                    <button type="submit" className="SubmitButton" disabled={isLoading || !formData.teamId}>
+                <div className="form-actions">
+                    <button type="submit" disabled={isLoading || !formData.teamId} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#38bdf8', color: '#0f172a', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
                         {isLoading ? 'Ukládám...' : 'Vytvořit událost'}
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     );
 }

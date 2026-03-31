@@ -1,138 +1,82 @@
-"use client";
+'use client';
 
 import React, { useState } from "react";
-import "@/app/globals.css";
+import { IoChevronDownOutline } from "react-icons/io5";
 import "./FAQ.css";
 
-import { IoChevronDown, IoChevronUp } from "react-icons/io5";
-
-type FaqItem = {
-    question: string;
-    answer: string;
-};
-
-type FaqCategory = {
-    title: string;
-    items: FaqItem[];
-};
-
-const faqData: FaqCategory[] = [
+// Data pro FAQ vytažená bokem pro větší čistotu kódu
+const faqData = [
     {
-        title: "General",
-        items: [
-            {
-                question: "What is this app for?",
-                answer: "Fly High slouží ke kompletní správě volejbalových týmů – od docházky přes zápasy až po statistiky."
-            },
-            {
-                question: "Is it free?",
-                answer: "Ano, v rámci maturitního projektu a testovacího provozu je aplikace zdarma."
-            },
-            {
-                question: "Do I need an account?",
-                answer: "Ano, pro správu týmu a ukládání statistik je nutná registrace."
-            }
-        ]
+        question: "Co je to FlyHigh Volleyball?",
+        answer: "FlyHigh Volleyball je moderní webová platforma navržená speciálně pro volejbalové týmy. Umožňuje snadnou správu hráčů, plánování tréninků, organizaci zápasů a podrobný zápis herních statistik na jednom místě."
     },
     {
-        title: "For Players & Coaches",
-        items: [
-            {
-                question: "Can I track my own stats?",
-                answer: "Samozřejmě. Každý hráč má svůj profil s historií výkonů."
-            },
-            {
-                question: "Can I join more teams?",
-                answer: "Ano, jeden účet může být členem více týmů (např. školní tým a klub)."
-            },
-            {
-                question: "Can I export stats?",
-                answer: "Tato funkce je momentálně ve vývoji pro budoucí verze (export do PDF/CSV)."
-            }
-        ]
+        question: "Je používání aplikace placené?",
+        answer: "Ne, aplikace je v současné době zcela zdarma. Tento systém vznikl primárně jako můj maturitní projekt s cílem usnadnit organizaci amatérským a poloprofesionálním týmům, které často bojují s nepřehlednou komunikací."
     },
     {
-        title: "Technical",
-        items: [
-            {
-                question: "Is my data safe?",
-                answer: "Používáme standardní šifrování hesel a bezpečné databázové postupy."
-            },
-            {
-                question: "Is there a mobile app?",
-                answer: "Fly High je plně responzivní webová aplikace (PWA), takže funguje skvěle v prohlížeči na mobilu i tabletu. Nativní aplikace pro iOS/Android je v plánu do budoucna."
-            }
-        ]
+        question: "Pro koho je platforma určena?",
+        answer: "Aplikace je ideální pro hráče, trenéry, kapitány, školní týmy i amatérské kluby. Může ji využívat jakákoliv skupina lidí, která se pravidelně schází k volejbalu a chce mít ve věcech pořádek."
     },
     {
-        title: "School / Maturita Project",
-        items: [
-            {
-                question: "Is this a real project?",
-                answer: "Ano, ačkoliv jde o maturitní práci, aplikace je plně funkční a připravená k použití reálnými uživateli."
-            },
-            {
-                question: "How long did development take?",
-                answer: "Vývoj probíhal několik měsíců, od prvotního návrhu architektury až po finální ladění UI."
-            }
-        ]
+        question: "Kdo za vývojem tohoto projektu stojí?",
+        answer: "Celý systém, tedy od návrhu databáze přes backend v C# .NET až po tento frontend v Next.js, je dílem jednoho vývojáře (studenta) v rámci tvorby komplexní maturitní práce."
+    },
+    {
+        question: "Jak jsou má data chráněna?",
+        answer: "Bezpečnost bereme vážně. Hesla jsou šifrována pomocí algoritmu BCrypt, přihlašování probíhá přes zabezpečené JWT tokeny a přístup k interním datům týmu mají pouze jeho schválení členové."
+    },
+    {
+        question: "Našel jsem chybu nebo mám nápad. Co mám dělat?",
+        answer: "Zpětná vazba je pro mě obrovsky cenná! Můžete využít formulář v sekci Kontakt, nebo pokud máte účet na GitHubu, můžete otevřít tzv. 'Issue' přímo v repozitáři projektu."
     }
 ];
 
-const AccordionItem = ({ item }: { item: FaqItem }) => {
-    const [isOpen, setIsOpen] = useState(false);
+export default function FAQPage() {
+    const [openIndex, setOpenIndex] = useState<number | null>(0); // První otázka je výchozí otevřená
+
+    const toggleFAQ = (index: number) => {
+        setOpenIndex(openIndex === index ? null : index);
+    };
 
     return (
-        <div className={`AccordionWrapper ${isOpen ? "open" : ""}`}>
-            <button
-                className="AccordionHeader"
-                onClick={() => setIsOpen(!isOpen)}
-                aria-expanded={isOpen}
-            >
-                <span className="QuestionText">{item.question}</span>
-                <span className="AccordionIcon">
-                    {isOpen ? <IoChevronUp /> : <IoChevronDown />}
-                </span>
-            </button>
-            <div className="AccordionContent">
-                <div className="AccordionInner">
-                    {item.answer}
+        <main className="faq-main">
+            <section className="faq-hero">
+                <h1 className="faq-title">Často kladené dotazy</h1>
+                <p className="faq-subtitle">
+                    Odpovědi na nejběžnější otázky ohledně fungování a účelu platformy FlyHigh.
+                </p>
+            </section>
+
+            <div className="faq-container">
+                <div className="faq-accordion">
+                    {faqData.map((faq, index) => {
+                        const isOpen = openIndex === index;
+
+                        return (
+                            <div
+                                key={index}
+                                className={`faq-item ${isOpen ? 'open' : ''}`}
+                            >
+                                <button
+                                    className="faq-question"
+                                    onClick={() => toggleFAQ(index)}
+                                    aria-expanded={isOpen}
+                                >
+                                    <span>{faq.question}</span>
+                                    <IoChevronDownOutline className="faq-icon" />
+                                </button>
+
+                                <div className="faq-answer-wrapper">
+                                    <p className="faq-answer-text">
+                                        {faq.answer}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
-        </div>
-    );
-};
-
-export default function FAQ() {
-    return (
-        <main>
-            <div className="section-container" style={{ minHeight: '60vh' }}>
-                <div className="FaqHero">
-                    <h1 className="FaqTitle">Questions people usually ask</h1>
-                    <p className="FaqSubtitle">
-                        Vše, co vás zajímá o fungování, technologiích a účelu aplikace.
-                    </p>
-                </div>
-            </div>
-
-            {faqData.map((category, index) => (
-                <div key={index} className="section-container">
-                    <div className="FaqCategoryCard">
-
-                        <div className="CategoryHeader">
-                            <h2>{category.title}</h2>
-                        </div>
-
-                        <div className="CategoryItems">
-                            {category.items.map((item, i) => (
-                                <AccordionItem key={i} item={item} />
-                            ))}
-                        </div>
-
-                    </div>
-                </div>
-            ))}
-
         </main>
     );
 }
