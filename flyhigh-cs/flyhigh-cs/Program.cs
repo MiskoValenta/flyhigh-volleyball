@@ -40,30 +40,31 @@ namespace API
 
       builder.Services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<FlyHighDbContext>());
 
+      var MyCorsPolicy = "_myCorsPolicy";
+
       builder.Services.AddCors(options =>
       {
-        options.AddPolicy("FrontendPolicy", policy =>
-        {
-          if (builder.Environment.IsDevelopment())
-          {
-            policy.WithOrigins(
-                    "http://localhost:3000",
-                    "https://flyhigh-volleyball.cz",
-                    "https://www.flyhigh-volleyball.cz")
+        options.AddPolicy(name: MyCorsPolicy,
+            policy =>
+            {
+              if (builder.Environment.IsDevelopment())
+              {
+                policy.WithOrigins("http://localhost:3000")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
-          }
-          else
-          {
-            policy.WithOrigins(
+              }
+              else
+              {
+                policy.WithOrigins(
                     "https://flyhigh-volleyball.cz",
-                    "https://www.flyhigh-volleyball.cz")
+                    "https://www.flyhigh-volleyball.cz"
+                  )
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
-          }
-        });
+              }
+            });
       });
 
       builder.Services.AddSingleton<ISetRules, VolleyballSetRules>();
@@ -162,7 +163,7 @@ namespace API
         }
       }
 
-      app.UseCors("FrontendPolicy");
+      app.UseCors(MyCorsPolicy);
       app.UseAuthentication();
       app.UseAuthorization();
       app.MapControllers();

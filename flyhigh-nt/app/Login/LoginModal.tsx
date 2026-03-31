@@ -4,12 +4,8 @@ import React, { useState } from "react";
 import "./LoginModal.css";
 import { IoClose } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import { login, register, forgotPassword } from "@/lib/api";
-
-interface LoginModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { loginUser, registerUser, forgotPassword } from "@/lib/api";
+import { LoginModalProps } from "@/types/user";
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     const [isRegister, setIsRegister] = useState(false);
@@ -62,7 +58,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         const safeEmail = email.trim().toLowerCase();
 
         try {
-            await login({ email: safeEmail, password });
+            await loginUser({ email: safeEmail, password });
             router.push("/Dashboard");
             onClose();
         } catch (err: any) {
@@ -88,7 +84,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         const safeLastName = lastName.trim();
 
         try {
-            await register({
+            await registerUser({
                 firstName: safeFirstName,
                 lastName: safeLastName,
                 email: safeEmail,

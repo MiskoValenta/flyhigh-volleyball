@@ -24,3 +24,8 @@ export interface AuthTokens {
 export interface ForgotPasswordRequest {
     email: string;
 }
+
+export interface LoginModalProps{
+    isOpen: boolean;
+    onClose: () => void;
+}

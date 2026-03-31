@@ -1,9 +1,13 @@
 export let BASE_URL = '';
 
-if (process.env.NEXT_PUBLIC_API_URL) {
-    BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost') {
+        BASE_URL = 'http://localhost:5000/api';
+    } else {
+        BASE_URL = 'https://api.flyhigh-volleyball.cz/api';
+    }
 } else {
-    BASE_URL = 'https://flyhigh-volleyball.cz/api';
+    BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 }
 
 export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
