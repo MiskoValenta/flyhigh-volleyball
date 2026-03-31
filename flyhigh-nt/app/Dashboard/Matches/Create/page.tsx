@@ -12,13 +12,13 @@ export default function CreateMatchPage() {
     return (
         <div className="CreateMatchContainer">
             <div className="CreateMatchCard">
-                <h1 className="CreateMatchTitle">Navrhnout nový zápas</h1>
+                <h1 className="dashboard-heading">Navrhnout nový zápas</h1>
 
                 {error && <div className="ErrorMessage">{error}</div>}
 
-                <form className="CreateMatchForm" onSubmit={handleSubmit}>
-                    <div className="FormGroup">
-                        <label className="FormLabel">Tvůj tým (Domácí)</label>
+                <form className="match-form-container glass-card-dark" onSubmit={handleSubmit}>
+                    <div className="FormGroup-cm">
+                        <label className="FormLabel-cm">Tvůj tým (Domácí)</label>
                         <select
                             name="homeTeamId"
                             className="FormSelect"
@@ -32,8 +32,8 @@ export default function CreateMatchPage() {
                             ))}
                         </select>
                     </div>
-                    <div className="FormGroup">
-                        <label className="FormLabel">Tým soupeře (ID Hostů)</label>
+                    <div className="FormGroup-cm">
+                        <label className="FormLabel-cm">Tým soupeře (ID Hostů)</label>
                         <input
                             type="text"
                             name="awayTeamId"
@@ -44,8 +44,8 @@ export default function CreateMatchPage() {
                             required
                         />
                     </div>
-                    <div className="FormGroup">
-                        <label className="FormLabel">Datum a čas výhozu</label>
+                    <div className="FormGroup-cm">
+                        <label className="FormLabel-cm">Datum a čas výhozu</label>
                         <input
                             type="datetime-local"
                             name="scheduledAt"
@@ -55,8 +55,8 @@ export default function CreateMatchPage() {
                             required
                         />
                     </div>
-                    <div className="FormGroup">
-                        <label className="FormLabel">Místo konání (Hala)</label>
+                    <div className="FormGroup-cm">
+                        <label className="FormLabel-cm">Místo konání (Hala)</label>
                         <input
                             type="text"
                             name="location"
@@ -66,7 +66,7 @@ export default function CreateMatchPage() {
                             required
                         />
                     </div>
-                    <button type="submit" className="SubmitButton" disabled={isLoading}>
+                    <button type="submit" className="button-primary" disabled={isLoading}>
                         {isLoading ? 'Odesílám...' : 'Navrhnout zápas soupeři'}
                     </button>
                 </form>

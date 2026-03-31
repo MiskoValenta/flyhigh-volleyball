@@ -5,106 +5,92 @@
     width: 100%;
 }
 
-.create-match-header {
-    margin-bottom: 2rem;
-}
-
 .create-match-subtext {
     color: rgba(255, 255, 255, 0.6);
-    margin-top: 0.5rem;
+    margin-top: -1rem;
+    margin-bottom: 2rem;
     font-size: 1.1rem;
 }
 
-.match-form {
+.match-form-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
     padding: 2.5rem;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .match-vs-divider {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    color: rgba(255, 255, 255, 0.3);
+    font-weight: 900;
+    color: rgba(56, 189, 248, 0.4);
+    font-size: 1.5rem;
     text-transform: uppercase;
-    margin: 1rem 0;
 }
 
-.form-row {
+.form-row-cm {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
 
-.form-group {
+.form-group-cm {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.form-group label {
+.form-group-cm label {
     font-size: 0.95rem;
     color: rgba(255, 255, 255, 0.85);
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.form-group input,
-.form-group select {
+.form-group-cm input,
+.form-group-cm textarea,
+.form-group-cm select {
     width: 100%;
     padding: 0.8rem 1rem;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
     font-size: 1rem;
-    transition: all 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group-cm input:focus,
+.form-group-cm textarea:focus,
+.form-group-cm select:focus {
     outline: none;
-    border-color: #34d399;
-    background: rgba(0, 0, 0, 0.4);
+    border-color: #38bdf8;
 }
 
-.form-group select option {
+.form-group-cm select option {
     background-color: #0f172a;
-    color: #ffffff;
 }
 
-.form-actions {
-    margin-top: 1rem;
+.form-actions-cm {
     display: flex;
     justify-content: flex-end;
+    margin-top: 1rem;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .create-match-container {
         padding: 1rem;
     }
 
-    .form-row {
+    .match-form-container {
+        padding: 1.5rem;
+    }
+
+    .form-row-cm {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
     }
 
-    .match-form {
-        padding: 1.25rem;
-    }
-
-    .form-group input,
-    .form-group select {
-        font-size: 16px;
-    }
-
-    .form-actions button {
+    .form-actions-cm button {
         width: 100%;
     }
 }

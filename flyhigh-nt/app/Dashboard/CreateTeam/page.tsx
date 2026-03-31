@@ -1,8 +1,8 @@
 'use client';
 
-import React from "react";
-import { useCreateTeam } from "@/hooks/Teams/useCreateTeam";
-import "./CreateTeam.css";
+import React from 'react';
+import { useCreateTeam } from '@/hooks/Teams/useCreateTeam';
+import './CreateTeam.css';
 
 export default function CreateTeamPage() {
     const { formData, error, isLoading, handleChange, handleSubmit } = useCreateTeam();
@@ -13,7 +13,7 @@ export default function CreateTeamPage() {
 
             {error && <div className="error-message">{error}</div>}
 
-            <form className="create-team-form" onSubmit={handleSubmit}>
+            <form className="create-team-form glass-card-dark" onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label>Název týmu</label>
                     <input
@@ -24,7 +24,7 @@ export default function CreateTeamPage() {
                         required
                     />
                 </div>
-                <div className="form-group">
+                <div className="form-group-ct">
                     <label>Zkratka (např. FLY)</label>
                     <input
                         type="text"
@@ -34,7 +34,7 @@ export default function CreateTeamPage() {
                         required
                     />
                 </div>
-                <div className="form-group">
+                <div className="form-group-ct">
                     <label>Popis (volitelné)</label>
                     <textarea
                         name="description"
@@ -43,8 +43,8 @@ export default function CreateTeamPage() {
                         rows={4}
                     />
                 </div>
-                <div className="form-actions">
-                    <button type="submit" className="btn-primary" disabled={isLoading}>
+                <div className="form-actions-ct">
+                    <button type="submit" className="button-primary" disabled={isLoading}>
                         {isLoading ? 'Vytvářím tým...' : 'Založit tým'}
                     </button>
                 </div>
