@@ -1,15 +1,15 @@
 'use client';
 
-import React from 'react';
-import { useCreateTeam } from '@/hooks/Teams/useCreateTeam';
-import './CreateTeam.css';
+import React from "react";
+import { useCreateTeam } from "@/hooks/Teams/useCreateTeam";
+import "./CreateTeam.css";
 
 export default function CreateTeamPage() {
     const { formData, error, isLoading, handleChange, handleSubmit } = useCreateTeam();
 
     return (
         <div className="create-team-container">
-            <h1>Založit nový tým</h1>
+            <h1 className="dashboard-heading">Založit nový tým</h1>
 
             {error && <div className="error-message">{error}</div>}
 
@@ -44,7 +44,7 @@ export default function CreateTeamPage() {
                     />
                 </div>
                 <div className="form-actions">
-                    <button type="submit" disabled={isLoading} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#38bdf8', color: '#0f172a', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
+                    <button type="submit" className="btn-primary" disabled={isLoading}>
                         {isLoading ? 'Vytvářím tým...' : 'Založit tým'}
                     </button>
                 </div>

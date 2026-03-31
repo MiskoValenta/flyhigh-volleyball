@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { getMyTeams } from '@/lib/teamApi';
-import { getTeamEvents } from '@/lib/eventApi';
-import { getCurrentUser } from '@/lib/api';
-import { UserProfile } from '@/types/user';
-import { TeamEvent } from '@/types/event';
-import DashboardEvents from '@/components/DashboardEvents/DashboardEvents';
+import Link from "next/link";
+import { getMyTeams } from "@/lib/teamApi";
+import { getTeamEvents } from "@/lib/eventApi";
+import { getCurrentUser } from "@/lib/api";
+import { UserProfile } from "@/types/user";
+import { TeamEvent } from "@/types/event";
+import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
 import {
     IoCopyOutline,
     IoPeopleOutline,

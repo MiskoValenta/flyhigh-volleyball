@@ -5,7 +5,7 @@
     background: transparent;
 }
 
-.dashboard-content-area {
+.dashboard-main-content {
     flex: 1;
     margin-left: 280px;
     padding: var(--space-4);

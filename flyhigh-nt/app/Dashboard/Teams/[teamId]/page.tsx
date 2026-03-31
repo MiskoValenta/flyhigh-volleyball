@@ -1,10 +1,10 @@
 'use client';
 
-import React, { use } from 'react';
-import { useTeamDetail } from '@/hooks/Teams/useTeamDetail';
-import { TeamMemberDto } from '@/types/team';
-import DashboardEvents from '@/components/DashboardEvents/DashboardEvents';
-import './TeamDetail.css';
+import React, { use } from "react";
+import { useTeamDetail } from "@/hooks/Teams/useTeamDetail";
+import { TeamMemberDto } from "@/types/team";
+import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
+import "./TeamDetail.css";
 
 export default function TeamDetailPage({ params }: { params: Promise<{ teamId: string }> }) {
     const { teamId } = use(params);

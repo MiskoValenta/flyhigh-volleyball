@@ -1,9 +1,9 @@
 'use client';
 
-import React, { use } from 'react';
-import Link from 'next/link';
-import { useMatchDetail } from '@/hooks/Matches/useMatchDetail';
-import './MatchDetail.css';
+import React, { use } from "react";
+import Link from "next/link";
+import { useMatchDetail } from "@/hooks/Matches/useMatchDetail";
+import "./MatchDetail.css";
 
 export default function MatchDetailPage({ params }: { params: Promise<{ matchId: string }> }) {
     const { matchId } = use(params);

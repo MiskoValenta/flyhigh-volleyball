@@ -1,9 +1,9 @@
 'use client';
 
-import React, { use } from 'react';
-import { useLiveMatch } from '@/hooks/Matches/useLiveMatch';
-import { useMatchDetail } from '@/hooks/Matches/useMatchDetail';
-import './Live.css';
+import React, { use } from "react";
+import { useLiveMatch } from "@/hooks/Matches/useLiveMatch";
+import { useMatchDetail } from "@/hooks/Matches/useMatchDetail";
+import "./Live.css";
 
 export default function LiveMatchPage({ params }: { params: Promise<{ matchId: string }> }) {
     const { matchId } = use(params);

@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCreateEvent } from '@/hooks/Events/useCreateEvent';
-import { useTeamsList } from '@/hooks/Teams/useTeamList';
-import { CreateEventDto, EventType } from '@/types/event';
-import './CreateEvent.css';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCreateEvent } from "@/hooks/Events/useCreateEvent";
+import { useTeamsList } from "@/hooks/Teams/useTeamList";
+import { CreateEventDto, EventType } from "@/types/event";
+import "./CreateEvent.css";
 
 export default function CreateEventPage() {
     const router = useRouter();
@@ -45,7 +45,7 @@ export default function CreateEventPage() {
     return (
         <div className="createevent">
             <div className="create-event-header">
-                <h1 className="create-event-heading">Naplánovat událost</h1>
+                <h1 className="create-event-heading dashboard-heading">Naplánovat událost</h1>
                 <p className="create-event-subtext">Vytvořte novou událost pro váš tým.</p>
             </div>
 
@@ -127,7 +127,7 @@ export default function CreateEventPage() {
                 </div>
 
                 <div className="form-actions">
-                    <button type="submit" disabled={isLoading || !formData.teamId} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#38bdf8', color: '#0f172a', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
+                    <button type="submit" className="btn-primary" disabled={isLoading || !formData.teamId}>
                         {isLoading ? 'Ukládám...' : 'Vytvořit událost'}
                     </button>
                 </div>

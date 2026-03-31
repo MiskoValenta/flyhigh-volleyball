@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useProfile } from '@/hooks/Profile/useProfile';
-import './Profile.css';
+import React, { useState, useEffect } from "react";
+import { useProfile } from "@/hooks/Profile/useProfile";
+import "./Profile.css";
 
 export default function ProfilePage() {
     const { user, isLoading, error: fetchError, handleUpdateProfile, handleChangePassword } = useProfile();
@@ -39,12 +39,12 @@ export default function ProfilePage() {
         }
     };
 
-    if (isLoading) return <div>Načítám profil...</div>;
+    if (isLoading) return <div className="profile-container">Načítám profil...</div>;
 
     return (
         <div className="profile-container">
-            <div className="profile-card glass-card-addition">
-                <h1 className="profile-title">Základní údaje</h1>
+            <div className="profile-card glass-card-addition glass-card">
+                <h1 className="profile-title dashboard-heading">Základní údaje</h1>
 
                 {fetchError && <div className="error-alert-profile">{fetchError}</div>}
                 {statusMessage.text && (
@@ -83,8 +83,8 @@ export default function ProfilePage() {
                 </form>
             </div>
 
-            <div className="profile-card profile-settings-card">
-                <h2 className="profile-title">Změna hesla</h2>
+            <div className="profile-card profile-settings-card glass-card">
+                <h2 className="profile-title dashboard-heading">Změna hesla</h2>
                 <form className="profile-form" onSubmit={onChangePassword}>
                     <div className="form-group-profile">
                         <label>Staré heslo</label>
