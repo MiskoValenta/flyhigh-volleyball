@@ -1,76 +1,135 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCreateEvent } from '@/hooks/Events/useCreateEvent';
+import { useTeamsList } from '@/hooks/Teams/useTeamList';
+import { CreateEventDto, EventType } from '@/types/event';
 import './CreateEvent.css';
 
 export default function CreateEventPage() {
-    const { formData, error, isLoading, handleChange, handleSubmit } = useCreateEvent();
+    const router = useRouter();
+    const { teams, isLoading: isLoadingTeams } = useTeamsList();
+    const { handleCreateEvent, isLoading, error } = useCreateEvent();
 
-    let errorMessage = null;
-    if (error !== '') {
-        errorMessage = <p className="error-message">{error}</p>;
-    }
+    const [formData, setFormData] = useState<CreateEventDto>({
+        teamId: '',
+        title: '',
+        description: '',
+        type: EventType.Announcement,
+        eventDate: '',
+        location: '',
+        invitedUserIds: []
+    });
 
-    let buttonText = "Vytvořit událost";
-    if (isLoading === true) {
-        buttonText = "Vytvářím...";
-    }
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.teamId) return;
+
+        try {
+            await handleCreateEvent(formData);
+            router.push(`/Dashboard/Teams/${formData.teamId}`);
+        } catch (err) {
+        }
+    };
 
     return (
-        <div className="create-event-container">
-            <h1 className="create-event-title">Nová událost</h1>
+        <div className="CreateEventContainer">
+            <div className="CreateEventCard">
+                <h1 className="CreateEventTitle">Naplánovat událost</h1>
 
-            <form onSubmit={handleSubmit} className="create-event-form">
-                <input
-                    type="text"
-                    name="teamId"
-                    value={formData.teamId}
-                    onChange={handleChange}
-                    placeholder="ID Týmu"
-                    className="form-input"
-                    required
-                />
-                <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="Název události"
-                    className="form-input"
-                    required
-                />
-                <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Popis (volitelné)"
-                    className="form-textarea"
-                />
-                <input
-                    type="datetime-local"
-                    name="eventDate"
-                    value={formData.eventDate}
-                    onChange={handleChange}
-                    className="form-input"
-                    required
-                />
-                <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder="Místo konání"
-                    className="form-input"
-                    required
-                />
+                {error && <div className="ErrorMessage">{error}</div>}
 
-                {errorMessage}
+                <form className="CreateEventForm" onSubmit={onSubmit}>
+                    <div className="FormGroup">
+                        <label className="FormLabel">Vyberte tým</label>
+                        <select
+                            name="teamId"
+                            className="FormSelect"
+                            value={formData.teamId}
+                            onChange={handleChange}
+                            required
+                            disabled={isLoadingTeams}
+                        >
+                            <option value="">-- Vyberte tým --</option>
+                            {teams.map(t => (
+                                <option key={t.id} value={t.id}>{t.teamName}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                <button type="submit" className="submit-button" disabled={isLoading}>
-                    {buttonText}
-                </button>
-            </form>
+                    <div className="FormGroup">
+                        <label className="FormLabel">Název události</label>
+                        <input
+                            type="text"
+                            name="title"
+                            className="FormInput"
+                            value={formData.title}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="FormGroup">
+                        <label className="FormLabel">Typ události</label>
+                        <select
+                            name="type"
+                            className="FormSelect"
+                            value={formData.type as string}
+                            onChange={handleChange}
+                        >
+                            <option value={EventType.Announcement}>Oznámení</option>
+                            <option value={EventType.Match}>Zápas</option>
+                            <option value={EventType.Poll}>Anketa</option>
+                        </select>
+                    </div>
+
+                    <div className="FormGroup">
+                        <label className="FormLabel">Datum a čas</label>
+                        <input
+                            type="datetime-local"
+                            name="eventDate"
+                            className="FormInput"
+                            value={formData.eventDate}
+                            onChange={handleChange}
+                        />
+                    </div>
+
+                    <div className="FormGroup">
+                        <label className="FormLabel">Místo konání</label>
+                        <input
+                            type="text"
+                            name="location"
+                            className="FormInput"
+                            value={formData.location}
+                            onChange={handleChange}
+                        />
+                    </div>
+
+                    <div className="FormGroup">
+                        <label className="FormLabel">Popis</label>
+                        <textarea
+                            name="description"
+                            className="FormTextarea"
+                            value={formData.description}
+                            onChange={handleChange}
+                            rows={4}
+                        />
+                    </div>
+
+                    <button type="submit" className="SubmitButton" disabled={isLoading || !formData.teamId}>
+                        {isLoading ? 'Ukládám...' : 'Vytvořit událost'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }
