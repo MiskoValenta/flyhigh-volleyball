@@ -69,7 +69,6 @@ export default function DashboardPage() {
                     let totalPlayedMatches = 0;
                     allMatchesArrays.forEach(res => {
                         if (res.status === 'fulfilled' && Array.isArray(res.value)) {
-                            // Filtrování pouze na ty, které už jsou "Completed"
                             const completed = res.value.filter((m: any) => m.status === 'Completed');
                             totalPlayedMatches += completed.length;
                         }
@@ -100,9 +99,9 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="dashboard-container">
-            <h1 className="dashboard-heading">Přehled</h1>
-            <p className="dashboard-subtext">
+        <div className="DashboardContainer">
+            <h1 className="WelcomeTitle">Přehled</h1>
+            <p className="WelcomeSubtitle">
                 {isLoading
                     ? "Načítám profil a data..."
                     : `Vítejte, ${currentUser?.firstName} ${currentUser?.lastName}! Zde je váš rychlý přehled.`}
