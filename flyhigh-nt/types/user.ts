@@ -25,7 +25,11 @@ export interface ForgotPasswordRequest {
     email: string;
 }
 
-export interface LoginModalProps{
+export interface LoginModalProps {
     isOpen: boolean;
     onClose: () => void;
+}
+
+export interface SidebarProps {
+    user: UserProfile | null;
 }

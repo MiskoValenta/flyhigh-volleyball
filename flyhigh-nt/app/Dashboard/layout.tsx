@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const { user, isLoading } = useProfile();
 
     if (isLoading) {
-        return <div className="LayoutLoading">Načítání aplikace...</div>;
+        return <div className="LayoutLoading">Načítání...</div>;
     }
 
     return (

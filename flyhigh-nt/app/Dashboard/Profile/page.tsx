@@ -22,9 +22,9 @@ export default function ProfilePage() {
         e.preventDefault();
         try {
             await handleUpdateProfile(profileData);
-            setStatusMessage({ type: 'success', text: 'Profil byl úspěšně aktualizován.' });
+            setStatusMessage({ type: 'success-alert-profile', text: 'Profil byl úspěšně aktualizován.' });
         } catch (err: any) {
-            setStatusMessage({ type: 'error', text: err.message });
+            setStatusMessage({ type: 'error-alert-profile', text: err.message });
         }
     };
 
@@ -32,73 +32,85 @@ export default function ProfilePage() {
         e.preventDefault();
         try {
             await handleChangePassword(passwordData);
-            setStatusMessage({ type: 'success', text: 'Heslo bylo změněno.' });
+            setStatusMessage({ type: 'success-alert-profile', text: 'Heslo bylo změněno.' });
             setPasswordData({ oldPassword: '', newPassword: '' });
         } catch (err: any) {
-            setStatusMessage({ type: 'error', text: err.message });
+            setStatusMessage({ type: 'error-alert-profile', text: err.message });
         }
     };
 
-    if (isLoading) return <div className="ProfileLoading">Načítám profil...</div>;
+    if (isLoading) return <div>Načítám profil...</div>;
 
     return (
-        <div className="ProfileContainer">
-            <h1 className="ProfileTitle">Nastavení Profilu</h1>
+        <div className="profile-container">
+            <div className="profile-card glass-card-addition">
+                <h1 className="profile-title">Základní údaje</h1>
 
-            {fetchError && <div className="ErrorMessage">{fetchError}</div>}
-            {statusMessage.text && (
-                <div className={`StatusBanner ${statusMessage.type}`}>
-                    {statusMessage.text}
-                </div>
-            )}
+                {fetchError && <div className="error-alert-profile">{fetchError}</div>}
+                {statusMessage.text && (
+                    <div className={statusMessage.type}>
+                        {statusMessage.text}
+                    </div>
+                )}
 
-            <div className="ProfileFormsWrapper">
-                <form className="ProfileFormCard" onSubmit={onUpdateProfile}>
-                    <h2 className="FormHeading">Základní údaje</h2>
+                <form className="profile-form" onSubmit={onUpdateProfile}>
+                    <div className="form-row-profile">
+                        <div className="form-group-profile">
+                            <label>Jméno</label>
+                            <input
+                                type="text"
+                                className="auth-input-profile"
+                                value={profileData.firstName}
+                                onChange={e => setProfileData({ ...profileData, firstName: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="form-group-profile">
+                            <label>Příjmení</label>
+                            <input
+                                type="text"
+                                className="auth-input-profile"
+                                value={profileData.lastName}
+                                onChange={e => setProfileData({ ...profileData, lastName: e.target.value })}
+                                required
+                            />
+                        </div>
+                    </div>
 
-                    <label className="FormLabel">Jméno</label>
-                    <input
-                        type="text"
-                        className="FormInput"
-                        value={profileData.firstName}
-                        onChange={e => setProfileData({ ...profileData, firstName: e.target.value })}
-                        required
-                    />
-
-                    <label className="FormLabel">Příjmení</label>
-                    <input
-                        type="text"
-                        className="FormInput"
-                        value={profileData.lastName}
-                        onChange={e => setProfileData({ ...profileData, lastName: e.target.value })}
-                        required
-                    />
-
-                    <button type="submit" className="SaveButton">Uložit změny</button>
+                    <div className="profile-btn-container">
+                        <button type="submit" className="btn-primary">Uložit změny</button>
+                    </div>
                 </form>
+            </div>
 
-                <form className="PasswordFormCard" onSubmit={onChangePassword}>
-                    <h2 className="FormHeading">Změna hesla</h2>
+            <div className="profile-card profile-settings-card">
+                <h2 className="profile-title">Změna hesla</h2>
+                <form className="profile-form" onSubmit={onChangePassword}>
+                    <div className="form-group-profile">
+                        <label>Staré heslo</label>
+                        <input
+                            type="password"
+                            className="auth-input-profile"
+                            value={passwordData.oldPassword}
+                            onChange={e => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                            required
+                        />
+                    </div>
 
-                    <label className="FormLabel">Staré heslo</label>
-                    <input
-                        type="password"
-                        className="FormInput"
-                        value={passwordData.oldPassword}
-                        onChange={e => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
-                        required
-                    />
+                    <div className="form-group-profile">
+                        <label>Nové heslo</label>
+                        <input
+                            type="password"
+                            className="auth-input-profile"
+                            value={passwordData.newPassword}
+                            onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                            required
+                        />
+                    </div>
 
-                    <label className="FormLabel">Nové heslo</label>
-                    <input
-                        type="password"
-                        className="FormInput"
-                        value={passwordData.newPassword}
-                        onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                        required
-                    />
-
-                    <button type="submit" className="SaveButton">Změnit heslo</button>
+                    <div className="profile-btn-container">
+                        <button type="submit" className="btn-primary">Změnit heslo</button>
+                    </div>
                 </form>
             </div>
         </div>
