@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(FlyHighDbContext))]
-    [Migration("20260318224940_Migrations")]
-    partial class Migrations
+    [Migration("20260331122639_AutoMigrationUpdate")]
+    partial class AutoMigrationUpdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,7 +47,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Location")
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
@@ -209,6 +210,9 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsFinished")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsStarted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid?>("MatchId")
                         .HasColumnType("uuid");
 
@@ -358,7 +362,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("timestamp with time zone");

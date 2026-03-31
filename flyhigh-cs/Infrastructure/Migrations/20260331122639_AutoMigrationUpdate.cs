@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Migrations : Migration
+    public partial class AutoMigrationUpdate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
                     Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     EventDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Location = table.Column<string>(type: "text", nullable: true),
+                    Location = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     isDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -85,7 +85,7 @@ namespace Infrastructure.Migrations
                     LastName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     PasswordHash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    RefreshToken = table.Column<string>(type: "text", nullable: true),
+                    RefreshToken = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -148,6 +148,7 @@ namespace Infrastructure.Migrations
                     HomeScore = table.Column<int>(type: "integer", nullable: false),
                     AwayScore = table.Column<int>(type: "integer", nullable: false),
                     IsFinished = table.Column<bool>(type: "boolean", nullable: false),
+                    IsStarted = table.Column<bool>(type: "boolean", nullable: false),
                     Winner = table.Column<int>(type: "integer", nullable: false),
                     MatchId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
