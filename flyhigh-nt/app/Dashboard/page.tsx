@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Link from "next/link";
-import { getMyTeams } from "@/lib/teamApi";
-import { getTeamEvents } from "@/lib/eventApi";
-import { getCurrentUser } from "@/lib/api";
-import { UserProfile } from "@/types/user";
-import { TeamEvent } from "@/types/event";
-import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
+import Link from 'next/link';
+import { getMyTeams } from '@/lib/teamApi';
+import { getTeamEvents } from '@/lib/eventApi';
+import { getCurrentUser } from '@/lib/api';
+import { UserProfile } from '@/types/user';
+import { TeamEvent } from '@/types/event';
+import DashboardEvents from '@/components/DashboardEvents/DashboardEvents';
 import {
     IoCopyOutline,
     IoPeopleOutline,
@@ -76,7 +76,7 @@ export default function DashboardPage() {
                     setPlayedMatchesCount(totalPlayedMatches);
                 }
             } catch (error) {
-                console.error('Chyba při načítání dat pro dashboard:', error);
+
             } finally {
                 setIsLoading(false);
             }
@@ -93,25 +93,24 @@ export default function DashboardPage() {
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
         } catch (err) {
-            console.error('Nepodařilo se kopírovat:', err);
-            alert('Chyba při kopírování. Označte ID ručně.');
+
         }
     };
 
     return (
-        <div className="DashboardContainer">
-            <h1 className="WelcomeTitle">Přehled</h1>
-            <p className="WelcomeSubtitle">
+        <div className="dashboard-container">
+            <h1 className="dashboard-heading">Přehled</h1>
+            <p className="dashboard-subtext">
                 {isLoading
                     ? "Načítám profil a data..."
                     : `Vítejte, ${currentUser?.firstName} ${currentUser?.lastName}! Zde je váš rychlý přehled.`}
             </p>
 
             {currentUser?.id && (
-                <div className="user-id-card glass-card">
+                <div className="user-id-card glass-card-dark">
                     <div className="user-id-text-container">
                         <h3 className="user-id-heading">Vaše uživatelské ID</h3>
-                        <p className="user-id-subtext">Předejte toto ID svému trenérovi, aby vás mohl přidat do týmu na soupisku.</p>
+                        <p className="user-id-subtext">Předejte toto ID svému trenérovi, aby vás mohl přidat do týmu.</p>
                     </div>
                     <div className="user-id-actions">
                         <code className="user-id-code">
@@ -126,7 +125,7 @@ export default function DashboardPage() {
             )}
 
             <div className="stats-grid">
-                <div className="stat-card glass-card">
+                <div className="stat-card glass-card-dark">
                     <div className="stat-icon-wrapper teams">
                         <IoPeopleOutline />
                     </div>
@@ -135,7 +134,7 @@ export default function DashboardPage() {
                         <div className="stat-label">Moje Týmy</div>
                     </div>
                 </div>
-                <div className="stat-card glass-card">
+                <div className="stat-card glass-card-dark">
                     <div className="stat-icon-wrapper matches">
                         <IoTrophyOutline />
                     </div>
@@ -144,7 +143,7 @@ export default function DashboardPage() {
                         <div className="stat-label">Odehrané zápasy</div>
                     </div>
                 </div>
-                <div className="stat-card glass-card">
+                <div className="stat-card glass-card-dark">
                     <div className="stat-icon-wrapper events">
                         <IoCalendarOutline />
                     </div>
@@ -155,8 +154,8 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <div className="dashboard-info glass-card dashboard-section">
-                <h2>Rychlé Akce</h2>
+            <div className="dashboard-info glass-card-dark dashboard-section">
+                <h2 className="dashboard-heading">Rychlé Akce</h2>
                 <div className="action-buttons">
                     <Link href="/Dashboard/CreateTeam" className="btn-action primary">
                         <IoAddCircleOutline className="icon-md" />
@@ -174,7 +173,7 @@ export default function DashboardPage() {
             </div>
 
             {!isLoading && currentUser?.id && userTeamIds.length > 0 && (
-                <div className="dashboard-section events-section" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="dashboard-section events-section">
                     {userTeamIds.map(teamId => (
                         <DashboardEvents key={teamId} teamId={teamId} />
                     ))}

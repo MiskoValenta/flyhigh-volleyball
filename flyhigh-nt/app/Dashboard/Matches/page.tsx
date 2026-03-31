@@ -1,10 +1,10 @@
 'use client';
 
-import React from "react";
-import Link from "next/link";
-import { useMatchesList } from "@/hooks/Matches/useMatchesList";
-import { MatchResponseDto } from "@/types/match";
-import "./Matches.css";
+import React from 'react';
+import Link from 'next/link';
+import { useMatchesList } from '@/hooks/Matches/useMatchesList';
+import { MatchResponseDto } from '@/types/match';
+import './Matches.css';
 
 export default function MatchesPage() {
     const { matches, error, isLoading } = useMatchesList();
@@ -14,8 +14,8 @@ export default function MatchesPage() {
     return (
         <div className="matches-section">
             <div className="matches-header-row">
-                <h1 className="dashboard-heading section-title">Rozpis Zápasů</h1>
-                <Link href="/Dashboard/Matches/Create" className="btn-primary">
+                <h1 className="dashboard-heading">Rozpis Zápasů</h1>
+                <Link href="/Dashboard/Matches/Create" className="button-primary">
                     + Navrhnout zápas
                 </Link>
             </div>
@@ -23,13 +23,13 @@ export default function MatchesPage() {
             {error && <div className="error-message">{error}</div>}
 
             {matches.length === 0 ? (
-                <div className="matches-empty-state">
+                <div className="matches-empty-state glass-card-dark">
                     <p>Zatím nemáte naplánované žádné zápasy.</p>
                 </div>
             ) : (
                 <div className="matches-grid">
                     {matches.map((match: MatchResponseDto) => (
-                        <Link href={`/Dashboard/Matches/${match.id}`} key={match.id} className="match-card clickable glass-card">
+                        <Link href={`/Dashboard/Matches/${match.id}`} key={match.id} className="match-card clickable glass-card-dark">
                             <div className="match-header">
                                 <span className="match-date">
                                     {new Date(match.scheduledAt).toLocaleDateString('cs-CZ')}

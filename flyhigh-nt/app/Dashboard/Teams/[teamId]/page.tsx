@@ -10,9 +10,14 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
     const { teamId } = use(params);
     const { team, isLoading, error, handleRemoveMember } = useTeamDetail(teamId);
 
-    if (isLoading) return <div className="TeamDetailLoading">Načítám detaily týmu...</div>;
-    if (error) return <div className="TeamDetailError">{error}</div>;
-    if (!team) return <div className="TeamDetailError">Tým nenalezen.</div>;
+    if (isLoading)
+        return <div className="TeamDetailLoading">Načítám detaily týmu...</div>;
+
+    if (error)
+        return <div className="TeamDetailError">{error}</div>;
+
+    if (!team)
+        return <div className="TeamDetailError">Tým nenalezen.</div>;
 
     return (
         <div className="TeamDetailContainer">

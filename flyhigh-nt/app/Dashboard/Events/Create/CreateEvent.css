@@ -1,121 +1,85 @@
-.createevent {
+.createevent-container {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
     width: 100%;
 }
 
-.create-event-header {
-    margin-bottom: 2rem;
-}
-
 .create-event-subtext {
     color: rgba(255, 255, 255, 0.6);
-    margin-top: 0.5rem;
+    margin-top: -1rem;
+    margin-bottom: 2rem;
     font-size: 1.1rem;
 }
 
-.event-form {
+.event-form-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
     padding: 2.5rem;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.form-row {
+.form-row-ce {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
 
-.form-group {
+.form-group-ce {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.form-group label {
+.form-group-ce label {
     font-size: 0.95rem;
     color: rgba(255, 255, 255, 0.85);
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
+.form-group-ce input,
+.form-group-ce textarea,
+.form-group-ce select {
     width: 100%;
     padding: 0.8rem 1rem;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
     font-size: 1rem;
-    transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.form-group-ce input:focus,
+.form-group-ce textarea:focus,
+.form-group-ce select:focus {
     outline: none;
     border-color: #38bdf8;
-    background: rgba(0, 0, 0, 0.4);
 }
 
-.form-group select option {
+.form-group-ce select option {
     background-color: #0f172a;
-    color: #ffffff;
 }
 
-.form-actions {
-    margin-top: 1rem;
+.form-actions-ce {
     display: flex;
     justify-content: flex-end;
+    margin-top: 1rem;
 }
 
-@media (max-width: 768px) {
-    .createevent {
-        padding: 1.5rem;
-    }
-
-    .event-form {
-        padding: 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .createevent {
+@media (max-width: 600px) {
+    .createevent-container {
         padding: 1rem;
     }
 
-    .form-row {
+    .event-form-container {
+        padding: 1.5rem;
+    }
+
+    .form-row-ce {
         grid-template-columns: 1fr;
-        gap: 1.25rem;
     }
 
-    .event-form {
-        padding: 1.25rem;
-        gap: 1.25rem;
-        border-radius: 12px;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        font-size: 16px;
-        padding: 0.75rem;
-    }
-
-    .form-actions {
-        justify-content: stretch;
-    }
-
-    .form-actions button {
+    .form-actions-ce button {
         width: 100%;
     }
 }

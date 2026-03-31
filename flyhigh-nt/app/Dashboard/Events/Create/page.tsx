@@ -43,17 +43,17 @@ export default function CreateEventPage() {
     };
 
     return (
-        <div className="createevent">
+        <div className="createevent-container">
             <div className="create-event-header">
-                <h1 className="create-event-heading dashboard-heading">Naplánovat událost</h1>
+                <h1 className="dashboard-heading">Naplánovat událost</h1>
                 <p className="create-event-subtext">Vytvořte novou událost pro váš tým.</p>
             </div>
 
             {error && <div className="error-alert">{error}</div>}
 
-            <form className="event-form" onSubmit={onSubmit}>
-                <div className="form-row">
-                    <div className="form-group">
+            <form className="event-form-ce" onSubmit={onSubmit}>
+                <div className="form-row-ce">
+                    <div className="form-group-ce">
                         <label>Vyberte tým</label>
                         <select
                             name="teamId"
@@ -69,7 +69,7 @@ export default function CreateEventPage() {
                         </select>
                     </div>
 
-                    <div className="form-group">
+                    <div className="form-group-ce">
                         <label>Typ události</label>
                         <select
                             name="type"
@@ -83,7 +83,7 @@ export default function CreateEventPage() {
                     </div>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group-ce">
                     <label>Název události</label>
                     <input
                         type="text"
@@ -94,8 +94,8 @@ export default function CreateEventPage() {
                     />
                 </div>
 
-                <div className="form-row">
-                    <div className="form-group">
+                <div className="form-row-ce">
+                    <div className="form-group-ce">
                         <label>Datum a čas</label>
                         <input
                             type="datetime-local"
@@ -105,7 +105,7 @@ export default function CreateEventPage() {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className="form-group-ce">
                         <label>Místo konání</label>
                         <input
                             type="text"
@@ -116,7 +116,7 @@ export default function CreateEventPage() {
                     </div>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group-ce">
                     <label>Popis (volitelné)</label>
                     <textarea
                         name="description"
@@ -126,8 +126,8 @@ export default function CreateEventPage() {
                     />
                 </div>
 
-                <div className="form-actions">
-                    <button type="submit" className="btn-primary" disabled={isLoading || !formData.teamId}>
+                <div className="form-actions-ce">
+                    <button type="submit" className="button-primary:" disabled={isLoading || !formData.teamId}>
                         {isLoading ? 'Ukládám...' : 'Vytvořit událost'}
                     </button>
                 </div>

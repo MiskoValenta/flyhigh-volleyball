@@ -287,6 +287,60 @@
     filter: invert(1) hue-rotate(180deg);
 }
 
+.dashboard-heading {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--typo-hero-color, #f8fafc);
+    margin: 0 0 1.5rem 0;
+}
+
+.glass-card,
+.glass-card-dark {
+    background: var(--glassed-gradient, linear-gradient(180deg, oklch(var(--card) / calc(var(--glass-alpha) * 1.12)), transparent 40%, oklch(var(--card) / var(--glass-alpha))));
+    border: var(--glassed-border, 1px solid hsl(var(--foreground) / var(--glass-border-alpha)));
+    -webkit-backdrop-filter: var(--glassed-webkit-backdrop-filter, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
+    backdrop-filter: var(--glassed-backdrop-filter, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
+    box-shadow: var(--glassed-box-shadow, var(--glass-shadow));
+    color: var(--glassed-color, var(--typo-hero-color));
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.button-primary {
+    background: #38bdf8;
+    color: #0f172a;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.button-primary:hover {
+    background: #0284c7;
+    color: #ffffff;
+}
+
+.button-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;

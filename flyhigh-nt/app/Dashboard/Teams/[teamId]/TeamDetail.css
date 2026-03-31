@@ -1,4 +1,4 @@
-.team-detail-container {
+.TeamDetailContainer {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
@@ -8,14 +8,14 @@
     gap: 2rem;
 }
 
-.team-info-card {
-    background: rgba(255, 255, 255, 0.03);
+.TeamHeaderCard {
+    background: rgba(0, 0, 0, 0.45);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
-    padding: 2.5rem;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -23,191 +23,181 @@
     gap: 2rem;
 }
 
-.team-header-left {
+.TeamHeaderInfo {
     display: flex;
-    align-items: center;
-    gap: 1.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.team-avatar-large {
-    width: 80px;
-    height: 80px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #38bdf8, #818cf8);
+.TeamHeading {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #f8fafc;
+    margin: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #ffffff;
+    gap: 0.75rem;
+}
+
+.TeamHeading span {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    padding: 0.3rem 0.8rem;
+    border-radius: 99px;
+}
+
+.TeamDescription {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+.TeamHeaderRole {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+
+.TeamHeaderRole span {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.TeamHeaderRole strong {
+    color: #a78bfa;
+    font-size: 1.2rem;
     text-transform: uppercase;
 }
 
-.team-header-text h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 800;
-    color: #f8fafc;
+.TeamContentGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
 }
 
-.team-code-badge {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0.3rem 0.6rem;
-    border-radius: 6px;
-    font-family: monospace;
-    font-size: 0.9rem;
-    color: #a5f3fc;
-    margin-top: 0.5rem;
-}
-
-.team-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-/* Seznam členů */
-.team-members-section {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+.MembersSection,
+.EventsSection {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     padding: 2rem;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    min-height: 400px;
 }
 
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+.SectionHeading {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 1.5rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 1rem;
+    padding-bottom: 0.75rem;
 }
 
-.section-header h2 {
+.MembersList {
+    list-style: none;
+    padding: 0;
     margin: 0;
-    font-size: 1.4rem;
-    font-weight: 600;
-}
-
-.members-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
 
-.member-card {
+.MemberItem {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.04);
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 1rem 1.25rem;
     border-radius: 12px;
     transition: background 0.2s ease;
 }
 
-.member-card:hover {
-    background: rgba(255, 255, 255, 0.08);
+.MemberItem:hover {
+    background: rgba(255, 255, 255, 0.06);
 }
 
-.member-info {
+.MemberInfo {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
 }
 
-.member-name {
+.MemberName {
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     color: #ffffff;
 }
 
-.member-email {
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.member-role {
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
+.MemberRole {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
-.role-badge-admin {
-    background: rgba(244, 63, 94, 0.15);
-    color: #f43f5e;
+.RemoveMemberBtn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.role-badge-coach {
-    background: rgba(167, 139, 250, 0.15);
-    color: #a78bfa;
+.RemoveMemberBtn:hover {
+    background: #ef4444;
+    color: #ffffff;
 }
 
-.role-badge-player {
-    background: rgba(56, 189, 248, 0.15);
-    color: #38bdf8;
-}
 
-@media (max-width: 768px) {
-    .team-detail-container {
-        padding: 1.5rem;
-    }
-
-    .team-info-card {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .team-actions {
-        width: 100%;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-    }
-}
-
-@media (max-width: 480px) {
-    .team-detail-container {
-        padding: 1rem;
-        gap: 1rem;
-    }
-
-    .team-info-card {
-        padding: 1.5rem;
-        gap: 1.5rem;
-        border-radius: 12px;
-    }
-
-    .team-avatar-large {
-        width: 60px;
-        height: 60px;
-        font-size: 1.8rem;
-    }
-
-    .team-header-text h1 {
-        font-size: 1.5rem;
-    }
-
-    .team-actions button,
-    .team-actions a {
-        width: 100%;
-        text-align: center;
-        justify-content: center;
-    }
-
-    .team-members-section {
-        padding: 1.25rem;
-        border-radius: 12px;
-    }
-
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .members-grid {
+@media (max-width: 900px) {
+    .TeamContentGrid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .TeamDetailContainer {
+        padding: 1rem;
+    }
+
+    .TeamHeaderCard {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.5rem;
+    }
+
+    .TeamHeaderRole {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .MembersSection,
+    .EventsSection {
+        padding: 1.5rem;
+    }
+
+    .TeamHeading {
+        font-size: 1.8rem;
+        flex-wrap: wrap;
     }
 }

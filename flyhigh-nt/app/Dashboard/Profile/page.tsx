@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
-import { useProfile } from "@/hooks/Profile/useProfile";
-import "./Profile.css";
+import React, { useState, useEffect } from 'react';
+import { useProfile } from '@/hooks/Profile/useProfile';
+import './Profile.css';
 
 export default function ProfilePage() {
     const { user, isLoading, error: fetchError, handleUpdateProfile, handleChangePassword } = useProfile();
@@ -32,7 +32,7 @@ export default function ProfilePage() {
         e.preventDefault();
         try {
             await handleChangePassword(passwordData);
-            setStatusMessage({ type: 'success-alert-profile', text: 'Heslo bylo změněno.' });
+            setStatusMessage({ type: 'success-alert-profile', text: 'Heslo bylo úspěšně změněno.' });
             setPasswordData({ oldPassword: '', newPassword: '' });
         } catch (err: any) {
             setStatusMessage({ type: 'error-alert-profile', text: err.message });
@@ -43,8 +43,8 @@ export default function ProfilePage() {
 
     return (
         <div className="profile-container">
-            <div className="profile-card glass-card-addition glass-card">
-                <h1 className="profile-title dashboard-heading">Základní údaje</h1>
+            <div className="profile-card glass-card-dark">
+                <h1 className="dashboard-heading">Základní údaje</h1>
 
                 {fetchError && <div className="error-alert-profile">{fetchError}</div>}
                 {statusMessage.text && (
@@ -54,22 +54,22 @@ export default function ProfilePage() {
                 )}
 
                 <form className="profile-form" onSubmit={onUpdateProfile}>
-                    <div className="form-row-profile">
-                        <div className="form-group-profile">
+                    <div className="form-row-cp">
+                        <div className="form-group-cp">
                             <label>Jméno</label>
                             <input
                                 type="text"
-                                className="auth-input-profile"
+                                className="auth-input-cp"
                                 value={profileData.firstName}
                                 onChange={e => setProfileData({ ...profileData, firstName: e.target.value })}
                                 required
                             />
                         </div>
-                        <div className="form-group-profile">
+                        <div className="form-group-cp">
                             <label>Příjmení</label>
                             <input
                                 type="text"
-                                className="auth-input-profile"
+                                className="auth-input-cp"
                                 value={profileData.lastName}
                                 onChange={e => setProfileData({ ...profileData, lastName: e.target.value })}
                                 required
@@ -78,30 +78,30 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="profile-btn-container">
-                        <button type="submit" className="btn-primary">Uložit změny</button>
+                        <button type="submit" className="button-primary">Uložit změny</button>
                     </div>
                 </form>
             </div>
 
-            <div className="profile-card profile-settings-card glass-card">
-                <h2 className="profile-title dashboard-heading">Změna hesla</h2>
+            <div className="profile-card profile-settings-card glass-card-dark">
+                <h2 className="dashboard-heading">Změna hesla</h2>
                 <form className="profile-form" onSubmit={onChangePassword}>
-                    <div className="form-group-profile">
+                    <div className="form-group-cp">
                         <label>Staré heslo</label>
                         <input
                             type="password"
-                            className="auth-input-profile"
+                            className="auth-input-cp"
                             value={passwordData.oldPassword}
                             onChange={e => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
                             required
                         />
                     </div>
 
-                    <div className="form-group-profile">
+                    <div className="form-group-cp">
                         <label>Nové heslo</label>
                         <input
                             type="password"
-                            className="auth-input-profile"
+                            className="auth-input-cp"
                             value={passwordData.newPassword}
                             onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                             required
@@ -109,7 +109,7 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="profile-btn-container">
-                        <button type="submit" className="btn-primary">Změnit heslo</button>
+                        <button type="submit" className="button-primary">Změnit heslo</button>
                     </div>
                 </form>
             </div>

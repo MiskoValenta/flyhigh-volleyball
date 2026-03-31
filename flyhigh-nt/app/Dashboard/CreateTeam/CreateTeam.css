@@ -9,71 +9,45 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
     padding: 2.5rem;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     margin-top: 1.5rem;
 }
 
-.form-group {
+/* Custom třídy pro tento formulář */
+.form-group-ct {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.form-group label {
+.form-group-ct label {
     font-size: 0.95rem;
     color: rgba(255, 255, 255, 0.85);
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.form-group input,
-.form-group textarea {
+.form-group-ct input,
+.form-group-ct textarea {
     width: 100%;
     padding: 0.8rem 1rem;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
     font-size: 1rem;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: all 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.form-group-ct input:focus,
+.form-group-ct textarea:focus {
     outline: none;
     border-color: #38bdf8;
-    background: rgba(0, 0, 0, 0.4);
 }
 
-.form-actions {
+.form-actions-ct {
     margin-top: 1rem;
     display: flex;
     justify-content: flex-end;
-}
-
-.error-message {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    font-size: 0.95rem;
-}
-
-@media (max-width: 768px) {
-    .create-team-container {
-        padding: 1.5rem;
-    }
-
-    .create-team-form {
-        padding: 2rem;
-    }
 }
 
 @media (max-width: 480px) {
@@ -82,23 +56,10 @@
     }
 
     .create-team-form {
-        padding: 1.25rem;
-        gap: 1.25rem;
-        margin-top: 1rem;
-        border-radius: 12px;
+        padding: 1.5rem;
     }
 
-    .form-group input,
-    .form-group textarea {
-        font-size: 16px;
-        padding: 0.75rem;
-    }
-
-    .form-actions {
-        justify-content: stretch;
-    }
-
-    .form-actions button {
+    .form-actions-ct button {
         width: 100%;
     }
 }

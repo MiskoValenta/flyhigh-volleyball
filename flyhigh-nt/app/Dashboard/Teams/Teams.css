@@ -10,119 +10,106 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    gap: 1rem;
-}
-
-.header-actions {
-    display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
 }
 
 .teams-empty-state {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px dashed rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
     padding: 3rem 1rem;
     text-align: center;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .teams-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1.5rem;
 }
 
 .team-card {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
     padding: 1.5rem;
     text-decoration: none;
     color: #ffffff;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .team-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-5px);
+    border-color: rgba(56, 189, 248, 0.4);
 }
 
-.team-header {
+.team-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     padding-bottom: 1rem;
+    margin-bottom: 1rem;
     gap: 1rem;
 }
 
-.team-name {
-    font-size: 1.25rem;
-    font-weight: 700;
+.team-name-title {
+    font-size: 1.4rem;
+    font-weight: 800;
     margin: 0;
+    color: #ffffff;
     word-break: break-word;
 }
 
-.team-role-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.3rem 0.6rem;
-    border-radius: 6px;
-    text-transform: uppercase;
+.team-code-pill {
+    background: #38bdf8;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 99px;
+    letter-spacing: 1px;
     flex-shrink: 0;
 }
 
-/* Role barvy */
-.role-player {
-    background: rgba(56, 189, 248, 0.15);
-    color: #38bdf8;
-}
-
-.role-coach {
-    background: rgba(167, 139, 250, 0.15);
-    color: #a78bfa;
-}
-
-.role-admin {
-    background: rgba(244, 63, 94, 0.15);
-    color: #f43f5e;
-}
-
-.team-details {
+.team-card-body {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
 }
 
-.detail-row {
+.team-stat-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+}
+
+.stat-label {
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.6);
 }
 
-.team-code {
-    font-family: monospace;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    color: #ffffff;
-    font-weight: 600;
+.stat-value-text {
+    font-weight: 700;
+    font-size: 1rem;
 }
 
-@media (max-width: 768px) {
-    .teams-container {
-        padding: 1.5rem;
-    }
+.role-text {
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.role-player {
+    color: #38bdf8;
+}
+
+.role-coach {
+    color: #a78bfa;
+}
+
+.role-admin {
+    color: #f43f5e;
 }
 
 @media (max-width: 480px) {
@@ -135,10 +122,7 @@
         align-items: stretch;
     }
 
-    .header-actions {
-        width: 100%;
-    }
-
+    .header-actions,
     .header-actions a {
         width: 100%;
         text-align: center;
