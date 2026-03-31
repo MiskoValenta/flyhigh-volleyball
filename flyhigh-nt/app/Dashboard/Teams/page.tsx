@@ -1,28 +1,28 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { useTeamsList } from '@/hooks/Teams/useTeamList';
-import { Team } from '@/types/team';
-import './Teams.css';
+import React from "react";
+import Link from "next/link";
+import { useTeamsList } from "@/hooks/Teams/useTeamList";
+import { Team } from "@/types/team";
+import "./Teams.css";
 
 export default function TeamsPage() {
     const { teams, error, isLoading } = useTeamsList();
 
-    if (isLoading) return <div>Načítám tvé týmy...</div>;
+    if (isLoading) return <div className="teams-empty-state">Načítám tvé týmy...</div>;
 
     return (
         <div className="teams-container">
             <div className="teams-header-row">
                 <h1 className="dashboard-heading">Moje Týmy</h1>
                 <div className="header-actions">
-                    <Link href="/Dashboard/CreateTeam" style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#38bdf8', color: '#0f172a', fontWeight: 'bold', textDecoration: 'none' }}>
+                    <Link href="/Dashboard/CreateTeam" className="btn-primary">
                         + Založit nový tým
                     </Link>
                 </div>
             </div>
 
-            {error && <div style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '1rem', borderRadius: '8px' }}>{error}</div>}
+            {error && <div className="error-message">{error}</div>}
 
             {teams.length === 0 ? (
                 <div className="teams-empty-state">
@@ -34,7 +34,7 @@ export default function TeamsPage() {
                         <Link
                             href={`/Dashboard/Teams/${team.id}`}
                             key={team.id}
-                            className="team-card"
+                            className="team-card glass-card"
                         >
                             <div className="team-header">
                                 <h2 className="team-name">{team.teamName}</h2>

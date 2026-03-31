@@ -3,7 +3,7 @@
 import React from 'react';
 import { useDashboardEvents } from '@/hooks/Events/useDashboardEvents';
 import { TeamEvent } from '@/types/event';
-import './DashboardEvents.css';
+import "./DashboardEvents.css";
 
 interface DashboardEventsProps {
     teamId: string;

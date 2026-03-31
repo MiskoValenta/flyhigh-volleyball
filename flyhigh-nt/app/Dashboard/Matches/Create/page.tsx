@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
-import { useCreateMatch } from '@/hooks/Matches/useCreateMatch';
-import { useTeamsList } from '@/hooks/Teams/useTeamList';
-import './CreateMatch.css';
+import React from "react";
+import { useCreateMatch } from "@/hooks/Matches/useCreateMatch";
+import { useTeamsList } from "@/hooks/Teams/useTeamList";
+import "./CreateMatch.css";
 
 export default function CreateMatchPage() {
     const { formData, error, isLoading, handleChange, handleSubmit } = useCreateMatch();

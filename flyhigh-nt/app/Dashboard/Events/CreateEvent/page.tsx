@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCreateEvent } from '@/hooks/Events/useCreateEvent';
-import { useTeamsList } from '@/hooks/Teams/useTeamList';
-import { CreateEventDto, EventType } from '@/types/event';
-import './CreateEvent.css';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCreateEvent } from "@/hooks/Events/useCreateEvent";
+import { useTeamsList } from "@/hooks/Teams/useTeamList";
+import { CreateEventDto, EventType } from "@/types/event";
+import "./CreateEvent.css";
 
 export default function CreateEventPage() {
     const router = useRouter();
