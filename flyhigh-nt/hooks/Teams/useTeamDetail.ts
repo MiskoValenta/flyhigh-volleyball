@@ -1,45 +1,90 @@
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { deleteTeam, removeTeamMember } from '@/lib/teamApi';
+import { useState, useEffect, useCallback } from 'react';
+import {
+    getTeamById,
+    updateTeam,
+    deleteTeam,
+    addTeamMember,
+    removeTeamMember,
+    changeTeamMemberRole
+} from '@/lib/teamApi';
+import { TeamDetail, UpdateTeamDto } from '@/types/team';
 
 export function useTeamDetail(teamId: string) {
-    const router = useRouter();
+    const [team, setTeam] = useState<TeamDetail | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+
+    const fetchTeam = useCallback(async () => {
+        if (!teamId) return;
+        setIsLoading(true);
+        setError('');
+        try {
+            const data = await getTeamById(teamId);
+            setTeam(data);
+        } catch (err: any) {
+            setError(err.message || 'Nepodařilo se načíst detail týmu.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [teamId]);
+
+    useEffect(() => {
+        fetchTeam();
+    }, [fetchTeam]);
+
+    const handleUpdateTeam = async (data: UpdateTeamDto) => {
+        try {
+            await updateTeam(teamId, data);
+            await fetchTeam();
+        } catch (err: any) {
+            throw new Error(err.message || 'Nepodařilo se upravit tým.');
+        }
+    };
 
     const handleDeleteTeam = async () => {
-        setIsLoading(true);
-        setError('');
         try {
             await deleteTeam(teamId);
-            router.push('/Dashboard/Teams');
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Chyba při mazání týmu.');
-            }
-        } finally {
-            setIsLoading(false);
+            throw new Error(err.message || 'Nepodařilo se smazat tým.');
         }
     };
 
-    const handleRemoveMember = async (memberId: string) => {
-        setIsLoading(true);
-        setError('');
+    const handleAddMember = async (userId: string, role: string | number) => {
         try {
-            await removeTeamMember(teamId, memberId);
-            window.location.reload();
+            await addTeamMember(teamId, userId, role);
+            await fetchTeam();
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Chyba při odebírání člena.');
-            }
-        } finally {
-            setIsLoading(false);
+            throw new Error(err.message || 'Nepodařilo se pozvat člena.');
         }
     };
 
-    return { error, isLoading, handleDeleteTeam, handleRemoveMember };
+    const handleRemoveMember = async (userId: string) => {
+        try {
+            await removeTeamMember(teamId, userId);
+            await fetchTeam();
+        } catch (err: any) {
+            throw new Error(err.message || 'Nepodařilo se odebrat člena.');
+        }
+    };
+
+    const handleChangeRole = async (memberId: string, newRole: string | number) => {
+        try {
+            await changeTeamMemberRole(teamId, memberId, newRole);
+            await fetchTeam();
+        } catch (err: any) {
+            throw new Error(err.message || 'Nepodařilo se změnit roli.');
+        }
+    };
+
+    return {
+        team,
+        isLoading,
+        error,
+        refreshTeam: fetchTeam,
+        handleUpdateTeam,
+        handleDeleteTeam,
+        handleAddMember,
+        handleRemoveMember,
+        handleChangeRole
+    };
 }

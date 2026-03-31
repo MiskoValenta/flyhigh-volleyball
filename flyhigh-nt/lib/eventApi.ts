@@ -3,20 +3,18 @@ import { TeamEvent, EventResponse } from '@/types/event';
 
 const BASE_URL = '/events';
 
-export const eventApi = {
-    createEvent: async (data: any) => {
-        const res = await fetchWithAuth(`${BASE_URL}`, {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Nepodařilo se vytvořit událost.');
-        }
-        const text = await res.text();
-        return text ? JSON.parse(text) : {};
+export const createEvent = async (data: any) => {
+    const res = await fetchWithAuth(`${BASE_URL}`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Nepodařilo se vytvořit událost.');
     }
-}
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
+};
 
 export const getTeamEvents = async (teamId: string): Promise<TeamEvent[]> => {
     const res = await fetchWithAuth(`${BASE_URL}/team/${teamId}`, {

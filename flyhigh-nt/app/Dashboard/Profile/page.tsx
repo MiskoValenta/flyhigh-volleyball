@@ -1,72 +1,106 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/hooks/Profile/useProfile';
 import './Profile.css';
 
 export default function ProfilePage() {
-    const { formData, error, success, isLoading, handleChange, handleSubmit } = useProfile();
+    const { user, isLoading, error: fetchError, handleUpdateProfile, handleChangePassword } = useProfile();
 
-    let errorMessage = null;
-    if (error !== '') {
-        errorMessage = <p className="error-message">{error}</p>;
-    }
+    const [profileData, setProfileData] = useState({ firstName: '', lastName: '', email: '' });
+    const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' });
 
-    let successMessage = null;
-    if (success !== '') {
-        successMessage = <p className="success-message">{success}</p>;
-    }
+    const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
 
-    let buttonText = "Uložit změny";
-    if (isLoading === true) {
-        buttonText = "Ukládám...";
-    }
+    useEffect(() => {
+        if (user) {
+            setProfileData({ firstName: user.firstName, lastName: user.lastName, email: user.email });
+        }
+    }, [user]);
+
+    const onUpdateProfile = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await handleUpdateProfile(profileData);
+            setStatusMessage({ type: 'success', text: 'Profil byl úspěšně aktualizován.' });
+        } catch (err: any) {
+            setStatusMessage({ type: 'error', text: err.message });
+        }
+    };
+
+    const onChangePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await handleChangePassword(passwordData);
+            setStatusMessage({ type: 'success', text: 'Heslo bylo změněno.' });
+            setPasswordData({ oldPassword: '', newPassword: '' });
+        } catch (err: any) {
+            setStatusMessage({ type: 'error', text: err.message });
+        }
+    };
+
+    if (isLoading) return <div className="ProfileLoading">Načítám profil...</div>;
 
     return (
-        <div className="profile-container">
-            <h1 className="profile-title">Můj profil</h1>
+        <div className="ProfileContainer">
+            <h1 className="ProfileTitle">Nastavení Profilu</h1>
 
-            <form onSubmit={handleSubmit} className="profile-form">
-                <div className="form-group">
-                    <label>Jméno</label>
+            {fetchError && <div className="ErrorMessage">{fetchError}</div>}
+            {statusMessage.text && (
+                <div className={`StatusBanner ${statusMessage.type}`}>
+                    {statusMessage.text}
+                </div>
+            )}
+
+            <div className="ProfileFormsWrapper">
+                <form className="ProfileFormCard" onSubmit={onUpdateProfile}>
+                    <h2 className="FormHeading">Základní údaje</h2>
+
+                    <label className="FormLabel">Jméno</label>
                     <input
                         type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        className="form-input"
+                        className="FormInput"
+                        value={profileData.firstName}
+                        onChange={e => setProfileData({ ...profileData, firstName: e.target.value })}
+                        required
                     />
-                </div>
 
-                <div className="form-group">
-                    <label>Příjmení</label>
+                    <label className="FormLabel">Příjmení</label>
                     <input
                         type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        className="form-input"
+                        className="FormInput"
+                        value={profileData.lastName}
+                        onChange={e => setProfileData({ ...profileData, lastName: e.target.value })}
+                        required
                     />
-                </div>
 
-                <div className="form-group">
-                    <label>E-mail</label>
+                    <button type="submit" className="SaveButton">Uložit změny</button>
+                </form>
+
+                <form className="PasswordFormCard" onSubmit={onChangePassword}>
+                    <h2 className="FormHeading">Změna hesla</h2>
+
+                    <label className="FormLabel">Staré heslo</label>
                     <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="form-input"
+                        type="password"
+                        className="FormInput"
+                        value={passwordData.oldPassword}
+                        onChange={e => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                        required
                     />
-                </div>
 
-                {errorMessage}
-                {successMessage}
+                    <label className="FormLabel">Nové heslo</label>
+                    <input
+                        type="password"
+                        className="FormInput"
+                        value={passwordData.newPassword}
+                        onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        required
+                    />
 
-                <button type="submit" className="submit-button" disabled={isLoading}>
-                    {buttonText}
-                </button>
-            </form>
+                    <button type="submit" className="SaveButton">Změnit heslo</button>
+                </form>
+            </div>
         </div>
     );
 }

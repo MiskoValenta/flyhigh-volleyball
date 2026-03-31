@@ -1,60 +1,98 @@
 'use client';
 
-import React from 'react';
-import { useContact } from '@/hooks/Contact/useContact';
+import React, { useState } from 'react';
 import './Contact.css';
 
 export default function ContactPage() {
-    const { formData, status, isLoading, handleChange, handleSubmit } = useContact();
+    const [result, setResult] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
-    let statusMessage = null;
-    if (status !== '') {
-        statusMessage = <p className="status-message">{status}</p>;
-    }
+    const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setIsLoading(true);
+        setResult("");
 
-    let buttonText = "Odeslat zprávu";
-    if (isLoading === true) {
-        buttonText = "Odesílám...";
-    }
+        const formData = new FormData(event.currentTarget);
+        formData.append("access_key", "7a348403-af04-4860-a948-669f75508abc");
+
+        try {
+            const response = await fetch("https://api.web3forms.com/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setResult("Zpráva byla úspěšně odeslána! Děkujeme.");
+                (event.target as HTMLFormElement).reset();
+            } else {
+                setResult("Při odesílání došlo k chybě. Zkuste to prosím znovu.");
+            }
+        } catch (error) {
+            setResult("Došlo k chybě připojení k serveru.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
-        <div className="contact-container">
-            <h1 className="contact-title">Kontaktujte nás</h1>
+        <div className="ContactContainer">
+            <div className="ContactFormCard">
+                <h1 className="ContactHeading">Kontaktujte nás</h1>
+                <p className="ContactSubText">
+                    Máte dotaz, návrh na zlepšení nebo potřebujete s něčím poradit? Napište nám!
+                </p>
 
-            <form onSubmit={handleSubmit} className="contact-form">
-                <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Vaše jméno"
-                    className="form-input"
-                    required
-                />
-                <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Váš e-mail"
-                    className="form-input"
-                    required
-                />
-                <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Vaše zpráva"
-                    className="form-textarea"
-                    required
-                />
+                <form className="ContactForm" onSubmit={onSubmit}>
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Vaše jméno"
+                        className="FormInput"
+                        required
+                    />
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Váš e-mail"
+                        className="FormInput"
+                        required
+                    />
+                    <textarea
+                        name="message"
+                        placeholder="Vaše zpráva"
+                        className="FormTextarea"
+                        rows={6}
+                        required
+                    ></textarea>
 
-                {statusMessage}
+                    <button type="submit" className="ContactButton" disabled={isLoading}>
+                        {isLoading ? 'Odesílám...' : 'Odeslat zprávu'}
+                    </button>
 
-                <button type="submit" className="submit-button" disabled={isLoading}>
-                    {buttonText}
-                </button>
-            </form>
+                    {result && <p className="ContactSubText" style={{ marginTop: '1rem' }}>{result}</p>}
+                </form>
+            </div>
+
+            <div className="ContactInfoCard">
+                <div className="ContactInfoItem">
+                    <div className="ContactIconBox">📍</div>
+                    <div className="ContactInfoText">
+                        <span className="Label">Lokace</span>
+                        <span className="Value">Česká republika</span>
+                    </div>
+                </div>
+                <div className="ContactInfoItem">
+                    <div className="ContactIconBox">✉️</div>
+                    <div className="ContactInfoText">
+                        <span className="Label">Podpora</span>
+                        <a href="mailto:info@flyhigh-volleyball.cz" className="Value">
+                            info@flyhigh-volleyball.cz
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { fetchWithAuth } from './apiClient';
-import { Team, TeamDetail, CreateTeamDto, UpdateTeamDto } from '@/types/team';
+import { Team, TeamDetail, CreateTeamDto, UpdateTeamDto, PendingInvitationDto } from '@/types/team';
 
 const TEAM_URL = '/teams';
 
@@ -27,10 +27,11 @@ export const getTeamById = async (teamId: string): Promise<TeamDetail> => {
         teamName: data.teamName || data.TeamName || data.name || data.Name,
         shortName: data.shortName || data.ShortName || '',
         description: data.description || data.Description || '',
-        currentUserRole: data.currentUserRole || data.CurrentUserRole || '',
+        myRole: data.myRole || data.MyRole || '',
         members: data.members || data.Members || []
     };
 }
+
 export const createTeam = async (data: CreateTeamDto): Promise<{ teamId: string }> => {
     const res = await fetchWithAuth(`${TEAM_URL}/create`, {
         method: 'POST',
@@ -48,27 +49,19 @@ export const addTeamMember = async (teamId: string, userId: string, role: string
         method: 'POST',
         body: JSON.stringify({
             targetId: userId,
-            setRole: role
+            setRole: role,
+            pending: "Pending"
         }),
     });
 
     if (!res.ok) {
         let errorData: any = {};
         try { errorData = await res.json(); } catch (e) { }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se pozvat člena.');
-        }
+        throw new Error(errorData.message || 'Nepodařilo se pozvat člena.');
     }
 
     const text = await res.text();
-    if (text !== '') {
-        return JSON.parse(text);
-    } else {
-        return {};
-    }
+    return text !== '' ? JSON.parse(text) : {};
 };
 
 export const removeTeamMember = async (teamId: string, userId: string): Promise<void> => {
@@ -90,36 +83,21 @@ export const changeTeamMemberRole = async (teamId: string, memberId: string, new
     if (!res.ok) {
         let errorData: any = {};
         try { errorData = await res.json(); } catch (e) { }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se změnit roli.');
-        }
+        throw new Error(errorData.message || 'Nepodařilo se změnit roli.');
     }
 
     const text = await res.text();
-    if (text !== '') {
-        return JSON.parse(text);
-    } else {
-        return {};
-    }
+    return text !== '' ? JSON.parse(text) : {};
 };
 
-export const getPendingInvites = async (): Promise<any[]> => {
-    const res = await fetchWithAuth(`${TEAM_URL}/invites/pending`, {
-        method: 'GET',
-    });
-    if (!res.ok) {
-        return [];
-    }
+export const getPendingInvites = async (): Promise<PendingInvitationDto[]> => {
+    const res = await fetchWithAuth(`${TEAM_URL}/invites/pending`, { method: 'GET' });
+    if (!res.ok) return [];
     return res.json();
 };
 
 export const acceptTeamInvite = async (teamId: string): Promise<any> => {
-    const res = await fetchWithAuth(`${TEAM_URL}/${teamId}/invites/accept`, {
-        method: 'PATCH',
-    });
+    const res = await fetchWithAuth(`${TEAM_URL}/${teamId}/invites/accept`, { method: 'PATCH' });
     if (!res.ok) {
         const error = await res.json().catch(() => ({}));
         throw new Error(error.message || 'Nepodařilo se přijmout pozvánku.');
@@ -128,9 +106,7 @@ export const acceptTeamInvite = async (teamId: string): Promise<any> => {
 };
 
 export const declineTeamInvite = async (teamId: string): Promise<any> => {
-    const res = await fetchWithAuth(`${TEAM_URL}/${teamId}/invites/decline`, {
-        method: 'PATCH',
-    });
+    const res = await fetchWithAuth(`${TEAM_URL}/${teamId}/invites/decline`, { method: 'PATCH' });
     if (!res.ok) {
         const error = await res.json().catch(() => ({}));
         throw new Error(error.message || 'Nepodařilo se odmítnout pozvánku.');
@@ -147,22 +123,16 @@ export const updateTeam = async (teamId: string, data: UpdateTeamDto): Promise<v
     if (!res.ok) {
         let errorData: any = {};
         try { errorData = await res.json(); } catch (e) { }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se aktualizovat údaje o týmu.');
-        }
+        throw new Error(errorData.message || 'Nepodařilo se aktualizovat údaje o týmu.');
     }
 };
 
 export const deleteTeam = async (teamId: string) => {
-    const res = await fetchWithAuth(`/Team/${teamId}`, { method: 'DELETE' });
+    const res = await fetchWithAuth(`${TEAM_URL}/${teamId}`, { method: 'DELETE' });
 
     if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || 'Nepodařilo se smazat tým.');
     }
-
     return true;
 };
