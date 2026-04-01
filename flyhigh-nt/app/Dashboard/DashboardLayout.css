@@ -27,7 +27,7 @@
 }
 
 @media (max-width: 900px) {
-    .dashboard-content-area {
+    .dashboard-main-content {
         margin-left: 0;
         padding-top: 80px;
     }

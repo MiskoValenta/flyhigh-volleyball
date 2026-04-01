@@ -14,7 +14,7 @@ export default function CreateTeamPage() {
             {error && <div className="error-message">{error}</div>}
 
             <form className="create-team-form glass-card-dark" onSubmit={handleSubmit}>
-                <div className="form-group">
+                <div className="form-group-ct">
                     <label>Název týmu</label>
                     <input
                         type="text"

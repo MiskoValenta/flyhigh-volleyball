@@ -41,15 +41,13 @@
     gap: 0.5rem;
 }
 
-.form-group-cm label {
+.form-label-cm {
     font-size: 0.95rem;
     color: rgba(255, 255, 255, 0.85);
     font-weight: 600;
 }
 
-.form-group-cm input,
-.form-group-cm textarea,
-.form-group-cm select {
+.form-input-cm {
     width: 100%;
     padding: 0.8rem 1rem;
     border-radius: 8px;
@@ -57,16 +55,16 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
     font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-group-cm input:focus,
-.form-group-cm textarea:focus,
-.form-group-cm select:focus {
+.form-input-cm:focus {
     outline: none;
     border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
 }
 
-.form-group-cm select option {
+select.form-input-cm option {
     background-color: #0f172a;
 }
 

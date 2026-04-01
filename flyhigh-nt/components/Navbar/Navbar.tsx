@@ -13,7 +13,7 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 export const Navbar = () => {
 
     const [isLoginOpen, setLoginOpen] = useState(false);
-    
+
     return (
         <>
             <nav className="navbar">
@@ -28,9 +28,9 @@ export const Navbar = () => {
 
                     <div className="navbar-menu">
                         <ul>
-                            <li><Link href="/Features">Features</Link></li>
+                            <li><Link href="/Features">Funkce</Link></li>
                             <li><Link href="/FAQ">FAQ</Link></li>
-                            <li><Link href="/Contact">Contact</Link></li>
+                            <li><Link href="/Contact">Kontakt</Link></li>
                         </ul>
                     </div>
 
@@ -42,7 +42,7 @@ export const Navbar = () => {
                             className="navbar-login-button"
                             onClick={() => setLoginOpen(true)}
                         >
-                            Login
+                            Přihlásit
                         </Button>
                     </div>
 

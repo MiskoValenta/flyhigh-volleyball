@@ -44,7 +44,7 @@ export default function FAQPage() {
                     </p>
                 </section>
 
-                <div className="faq-container">
+                <div className="faq-container glass-card-dark">
                     <div className="faq-accordion">
                         {faqData.map((faq, index) => {
                             const isOpen = openIndex === index;
@@ -52,7 +52,7 @@ export default function FAQPage() {
                             return (
                                 <div
                                     key={index}
-                                    className={`faq-item glass-card ${isOpen ? 'open' : ''}`}
+                                    className={`faq-item glass-card-dark ${isOpen ? 'open' : ''}`}
                                 >
                                     <button
                                         className="faq-question"
