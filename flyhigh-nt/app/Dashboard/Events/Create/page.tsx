@@ -127,7 +127,7 @@ export default function CreateEventPage() {
                 </div>
 
                 <div className="form-actions-ce">
-                    <button type="submit" className="button-primary:" disabled={isLoading || !formData.teamId}>
+                    <button type="submit" className="button-primary" disabled={isLoading || !formData.teamId}>
                         {isLoading ? 'Ukládám...' : 'Vytvořit událost'}
                     </button>
                 </div>

@@ -17,11 +17,11 @@ export default function CreateMatchPage() {
                 {error && <div className="ErrorMessage">{error}</div>}
 
                 <form className="match-form-container glass-card-dark" onSubmit={handleSubmit}>
-                    <div className="FormGroup-cm">
-                        <label className="FormLabel-cm">Tvůj tým (Domácí)</label>
+                    <div className="form-group-cm">
+                        <label className="form-label-cm">Tvůj tým (Domácí)</label>
                         <select
                             name="homeTeamId"
-                            className="FormSelect"
+                            className="form-input-cm"
                             value={formData.homeTeamId}
                             onChange={handleChange}
                             required
@@ -32,35 +32,35 @@ export default function CreateMatchPage() {
                             ))}
                         </select>
                     </div>
-                    <div className="FormGroup-cm">
-                        <label className="FormLabel-cm">Tým soupeře (ID Hostů)</label>
+                    <div className="form-group-cm">
+                        <label className="form-label-cm">Tým soupeře (ID Hostů)</label>
                         <input
                             type="text"
                             name="awayTeamId"
-                            className="FormInput"
+                            className="form-input-cm"
                             placeholder="Zadejte unikátní ID týmu"
                             value={formData.awayTeamId}
                             onChange={handleChange}
                             required
                         />
                     </div>
-                    <div className="FormGroup-cm">
-                        <label className="FormLabel-cm">Datum a čas výhozu</label>
+                    <div className="form-group-cm">
+                        <label className="form-label-cm">Datum a čas výhozu</label>
                         <input
                             type="datetime-local"
                             name="scheduledAt"
-                            className="FormInput"
+                            className="form-input-cm"
                             value={formData.scheduledAt}
                             onChange={handleChange}
                             required
                         />
                     </div>
-                    <div className="FormGroup-cm">
-                        <label className="FormLabel-cm">Místo konání (Hala)</label>
+                    <div className="form-group-cm">
+                        <label className="form-label-cm">Místo konání (Hala)</label>
                         <input
                             type="text"
                             name="location"
-                            className="FormInput"
+                            className="form-input-cm"
                             value={formData.location}
                             onChange={handleChange}
                             required

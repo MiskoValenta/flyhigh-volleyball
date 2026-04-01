@@ -20,7 +20,8 @@ import {
 
 export default function Features() {
     return (
-        <div className="section-container">
+        <>
+            <div className="section-container">
             <div className="FeaturesWrapper">
 
                 <div className="FeaturesHeroCard">
@@ -93,9 +94,11 @@ export default function Features() {
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
+            <div className="section-container">
                 <div className="BottomGrid">
-
                     <div className="InfoBarCard">
                         <h3>Pro koho je určena</h3>
                         <div className="InfoListVertical">
@@ -135,6 +138,6 @@ export default function Features() {
                 </div>
 
             </div>
-        </div>
+        </>
     );
 }

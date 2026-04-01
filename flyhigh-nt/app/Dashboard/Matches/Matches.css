@@ -106,13 +106,23 @@
 }
 
 .match-location {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.5);
     text-align: center;
     background: rgba(0, 0, 0, 0.3);
-    padding: 0.5rem;
+    padding: 0.6rem;
     border-radius: 8px;
     margin-top: auto;
+}
+
+.location-icon {
+    font-size: 1.2rem;
+    color: #38bdf8;
+    flex-shrink: 0;
 }
 
 @media (max-width: 480px) {
