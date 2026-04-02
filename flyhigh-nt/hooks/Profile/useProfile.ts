@@ -34,9 +34,16 @@ export function useProfile() {
         }
     };
 
-    const handleChangePassword = async (data: { oldPassword: string; newPassword: string }) => {
+    const handleChangePassword = async (data: { oldPassword: string; newPassword: string; confirmNewPassword: string }) => {
+        if (data.newPassword !== data.confirmNewPassword) {
+            throw new Error('Nová hesla se neshodují.');
+        }
+
         try {
-            await changePassword(data);
+            await changePassword({
+                oldPassword: data.oldPassword,
+                newPassword: data.newPassword
+            });
             return true;
         } catch (err: any) {
             throw new Error(err.message || 'Nepodařilo se změnit heslo. Zkontrolujte původní heslo.');

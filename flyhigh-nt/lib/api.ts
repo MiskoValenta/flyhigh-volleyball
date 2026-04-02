@@ -70,13 +70,14 @@ export const updateProfile = async (data: { firstName: string; lastName: string;
 };
 
 export const changePassword = async (data: { oldPassword: string; newPassword: string }): Promise<void> => {
-    const res = await fetchWithAuth(`/users/password`, {
+    const res = await fetchWithAuth(`/users/change-password`, {
         method: 'PUT',
         body: JSON.stringify(data),
     });
 
     if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
+        let errorData: any = {};
+        try { errorData = await res.json(); } catch (e) { }
         throw new Error(errorData.message || 'Nepodařilo se změnit heslo.');
     }
 };
