@@ -23,4 +23,5 @@ public interface ITeamService
   Task RemoveMemberAsync(Guid teamId, Guid actorId, Guid targetMemberId);
   Task PromoteMemberAsync(Guid teamId, Guid actorId, Guid targetMemberId, ChangeRoleDto dto);
   Task UpdateTeamAsync(Guid id, UpdateTeamDto dto, Guid currentUserId, CancellationToken ct);
+  Task<int> GetPlayedMatchesCountAsync(Guid teamId, CancellationToken cancellationToken = default);
 }

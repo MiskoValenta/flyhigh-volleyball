@@ -32,7 +32,7 @@ public record CreateEventDto(
     string Description,
     EventType Type,
     DateTime? EventDate,
-    string Location,
+    string? Location,
     List<Guid> InvitedUserIds
 );
 

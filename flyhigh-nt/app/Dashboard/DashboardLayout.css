@@ -32,3 +32,10 @@
         padding-top: 80px;
     }
 }
+
+@media (min-width: 901px) and (max-width: 1400px) {
+    .dashboard-main-content {
+        margin-left: 220px;
+        padding: 1.5rem;
+    }
+}

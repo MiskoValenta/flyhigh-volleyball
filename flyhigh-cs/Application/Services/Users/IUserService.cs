@@ -9,4 +9,5 @@ public interface IUserService
 {
   Task UpdateProfileAsync(Guid userId, UpdateProfileDto dto, CancellationToken cancellationToken = default);
   Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, CancellationToken cancellationToken = default);
+  Task<int> GetPlayedMatchesCountAsync(Guid userId, CancellationToken cancellationToken = default);
 }
