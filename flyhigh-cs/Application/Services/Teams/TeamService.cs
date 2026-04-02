@@ -3,6 +3,7 @@ using Application.DTOs.Teams;
 using Application.Interfaces.Teams;
 using Domain.Entities.Teams;
 using Domain.Entities.Teams.TeamEnums;
+using Domain.Repositories.Matches;
 using Domain.Repositories.Teams;
 using Domain.Repositories.Users;
 using Domain.Value_Objects.Teams;
@@ -19,17 +20,20 @@ public class TeamService : ITeamService
   private readonly IUserRepository _userRepository;
   private readonly ITeamAuthorizationService _auth;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly IMatchRepository _matchRepository;
 
   public TeamService(
       ITeamRepository teamRepository,
       IUserRepository userRepository,
       ITeamAuthorizationService auth,
-      IUnitOfWork unitOfWork)
+      IUnitOfWork unitOfWork,
+      IMatchRepository matchRepository)
   {
     _teamRepository = teamRepository;
     _userRepository = userRepository;
     _auth = auth;
     _unitOfWork = unitOfWork;
+    _matchRepository = matchRepository;
   }
 
   public async Task<Guid> CreateTeamAsync(CreateTeamDto dto, Guid currentUserId)
@@ -334,5 +338,10 @@ public class TeamService : ITeamService
 
     await _teamRepository.UpdateAsync(team, cancellationToken);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
+  }
+
+  public async Task<int> GetPlayedMatchesCountAsync(Guid teamId, CancellationToken cancellationToken = default)
+  {
+    return await _matchRepository.GetPlayedMatchesCountByTeamAsync(new TeamId(teamId), cancellationToken);
   }
 }

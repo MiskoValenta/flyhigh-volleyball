@@ -136,3 +136,11 @@ export const deleteTeam = async (teamId: string) => {
     }
     return true;
 };
+
+export const getTeamStats = async (teamId: string): Promise<{ matchesPlayed: number; MatchesPlayed?: number }> => {
+    const res = await fetchWithAuth(`/teams/${teamId}/stats`);
+    if (!res.ok) {
+        throw new Error('Nepodařilo se načíst statistiky týmu.');
+    }
+    return res.json();
+};

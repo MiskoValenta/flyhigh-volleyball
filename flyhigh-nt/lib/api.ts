@@ -86,3 +86,11 @@ export const isManagerRole = (role: any): boolean => {
     const r = role.toString().toLowerCase();
     return r === 'owner' || r === '0' || r === 'coach' || r === '1';
 };
+
+export const getUserStats = async (): Promise<{ matchesPlayed: number; MatchesPlayed?: number }> => {
+    const res = await fetchWithAuth(`/users/stats`);
+    if (!res.ok) {
+        throw new Error('Nepodařilo se načíst statistiky uživatele.');
+    }
+    return res.json();
+};

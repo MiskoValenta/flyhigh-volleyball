@@ -1,110 +1,104 @@
 .TeamDetailContainer {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    padding: 2rem;
+    color: var(--text-primary);
+}
+
+.TeamDetailLoading,
+.TeamDetailError {
+    padding: 2rem;
+    font-size: 1.2rem;
+    text-align: center;
 }
 
 .TeamHeaderCard {
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    background-color: var(--card-bg-dark);
     padding: 2rem;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 2rem;
-}
-
-.TeamHeaderInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
 }
 
 .TeamHeading {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #f8fafc;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
 }
 
 .TeamHeading span {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #38bdf8;
-    background: rgba(56, 189, 248, 0.15);
-    padding: 0.3rem 0.8rem;
-    border-radius: 99px;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
 }
 
 .TeamDescription {
-    font-size: 1.05rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
     margin: 0;
-    max-width: 600px;
-    line-height: 1.5;
 }
 
 .TeamHeaderRole {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem 1.5rem;
+    font-size: 1.2rem;
+    background-color: var(--bg-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.TeamStatsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.TeamStatBox {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
     border-radius: 12px;
-    font-size: 1.1rem;
+}
+
+.TeamStatIcon {
+    font-size: 2.5rem;
+    color: var(--accent-color, #4f46e5);
+}
+
+.TeamStatContent {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 0.25rem;
 }
 
-.TeamHeaderRole span {
+.TeamStatValue {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.TeamStatLabel {
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.TeamHeaderRole strong {
-    color: #a78bfa;
-    font-size: 1.2rem;
-    text-transform: uppercase;
+    color: var(--text-secondary);
 }
 
 .TeamContentGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    align-items: start;
 }
 
-.MembersSection,
-.EventsSection {
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 2rem;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    min-height: 400px;
+@media (max-width: 900px) {
+    .TeamContentGrid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .SectionHeading {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #f8fafc;
-    margin: 0 0 1.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 0.75rem;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
 }
 
 .MembersList {
@@ -117,87 +111,133 @@
 }
 
 .MemberItem {
+    background-color: var(--card-bg-dark);
+    padding: 1rem;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 1rem 1.25rem;
-    border-radius: 12px;
-    transition: background 0.2s ease;
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
 }
 
 .MemberItem:hover {
-    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border-color);
 }
 
 .MemberInfo {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
 }
 
 .MemberName {
-    font-weight: 600;
+    font-weight: bold;
     font-size: 1.1rem;
-    color: #ffffff;
 }
 
 .MemberRole {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.TeamManagementSection {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.ManagementCard {
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+.ManagementForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.FormGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.FormGroup label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.FormGroup input,
+.FormGroup select,
+.FormGroup textarea {
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: inherit;
+}
+
+.FormGroup textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.FormActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.BtnPrimary,
+.BtnSecondary,
+.RemoveMemberBtn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+    font-family: inherit;
+    transition: opacity 0.2s;
+}
+
+.BtnPrimary:hover,
+.BtnSecondary:hover,
+.RemoveMemberBtn:hover {
+    opacity: 0.8;
+}
+
+.BtnPrimary {
+    background-color: #4f46e5;
+    color: white;
+}
+
+.BtnSecondary {
+    background-color: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
 }
 
 .RemoveMemberBtn {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    background-color: #ef4444;
+    color: white;
+    padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
-    font-weight: 600;
+}
+
+.MemberActions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.RoleSelect {
+    padding: 0.4rem;
+    border-radius: 6px;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.RemoveMemberBtn:hover {
-    background: #ef4444;
-    color: #ffffff;
-}
-
-
-@media (max-width: 900px) {
-    .TeamContentGrid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    .TeamDetailContainer {
-        padding: 1rem;
-    }
-
-    .TeamHeaderCard {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 1.5rem;
-    }
-
-    .TeamHeaderRole {
-        width: 100%;
-        align-items: flex-start;
-    }
-
-    .MembersSection,
-    .EventsSection {
-        padding: 1.5rem;
-    }
-
-    .TeamHeading {
-        font-size: 1.8rem;
-        flex-wrap: wrap;
-    }
 }

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getMyTeams } from '@/lib/teamApi';
 import { getTeamEvents } from '@/lib/eventApi';
-import { getCurrentUser } from '@/lib/api';
+import { getCurrentUser, getUserStats } from '@/lib/api';
 import { UserProfile } from '@/types/user';
 import { TeamEvent } from '@/types/event';
 import DashboardEvents from '@/components/DashboardEvents/DashboardEvents';
@@ -33,6 +33,13 @@ export default function DashboardPage() {
                 const user = await getCurrentUser();
                 setCurrentUser(user);
 
+                const stats = await getUserStats();
+                if (stats.matchesPlayed !== undefined) {
+                    setPlayedMatchesCount(stats.matchesPlayed);
+                } else if (stats.MatchesPlayed !== undefined) {
+                    setPlayedMatchesCount(stats.MatchesPlayed);
+                }
+
                 const myTeams = await getMyTeams();
                 setTeamsCount(myTeams.length);
 
@@ -48,35 +55,21 @@ export default function DashboardPage() {
                         .flatMap(res => res.value);
 
                     const now = new Date();
-                    const upcomingEvents = combinedEvents.filter(evt =>
-                        evt.eventDate && new Date(evt.eventDate) > now
-                    );
-                    setUpcomingEventsCount(upcomingEvents.length);
-
-                    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-                    const token = localStorage.getItem('token');
-
-                    const allMatchesPromises = teamIds.map(async (id) => {
-                        const res = await fetch(`${baseUrl}/Matches/team/${id}`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (!res.ok) return [];
-                        return res.json();
-                    });
-
-                    const allMatchesArrays = await Promise.allSettled(allMatchesPromises);
-
-                    let totalPlayedMatches = 0;
-                    allMatchesArrays.forEach(res => {
-                        if (res.status === 'fulfilled' && Array.isArray(res.value)) {
-                            const completed = res.value.filter((m: any) => m.status === 'Completed');
-                            totalPlayedMatches += completed.length;
+                    const upcomingEvents = combinedEvents.filter(evt => {
+                        if (evt.eventDate) {
+                            if (new Date(evt.eventDate) > now) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            return false;
                         }
                     });
-                    setPlayedMatchesCount(totalPlayedMatches);
+                    setUpcomingEventsCount(upcomingEvents.length);
                 }
             } catch (error) {
-
+                console.error(error);
             } finally {
                 setIsLoading(false);
             }
@@ -86,27 +79,41 @@ export default function DashboardPage() {
     }, []);
 
     const copyToClipboard = async () => {
-        if (!currentUser?.id) return;
-
-        try {
-            await navigator.clipboard.writeText(currentUser.id);
-            setCopySuccess(true);
-            setTimeout(() => setCopySuccess(false), 2000);
-        } catch (err) {
-
+        if (currentUser !== null) {
+            if (currentUser.id) {
+                try {
+                    await navigator.clipboard.writeText(currentUser.id);
+                    setCopySuccess(true);
+                    setTimeout(() => {
+                        setCopySuccess(false);
+                    }, 2000);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
         }
     };
 
-    return (
-        <div className="dashboard-container">
-            <h1 className="dashboard-heading">Přehled</h1>
-            <p className="dashboard-subtext">
-                {isLoading
-                    ? "Načítám profil a data..."
-                    : `Vítejte, ${currentUser?.firstName} ${currentUser?.lastName}! Zde je váš rychlý přehled.`}
-            </p>
+    let subtext = "Načítám profil a data...";
+    if (!isLoading) {
+        if (currentUser !== null) {
+            subtext = `Vítejte, ${currentUser.firstName} ${currentUser.lastName}! Zde je váš rychlý přehled.`;
+        } else {
+            subtext = "Vítejte! Zde je váš rychlý přehled.";
+        }
+    }
 
-            {currentUser?.id && (
+    let copyButtonText = 'Kopírovat';
+    let copyButtonClass = 'btn-copy';
+    if (copySuccess) {
+        copyButtonText = 'Zkopírováno!';
+        copyButtonClass = 'btn-copy success';
+    }
+
+    let userIdCard = null;
+    if (currentUser !== null) {
+        if (currentUser.id) {
+            userIdCard = (
                 <div className="user-id-card glass-card-dark">
                     <div className="user-id-text-container">
                         <h3 className="user-id-heading">Vaše uživatelské ID</h3>
@@ -116,13 +123,49 @@ export default function DashboardPage() {
                         <code className="user-id-code">
                             {currentUser.id}
                         </code>
-                        <button className={`btn-copy ${copySuccess ? 'success' : ''}`} onClick={copyToClipboard}>
+                        <button className={copyButtonClass} onClick={copyToClipboard}>
                             <IoCopyOutline className="icon-sm" />
-                            {copySuccess ? 'Zkopírováno!' : 'Kopírovat'}
+                            {copyButtonText}
                         </button>
                     </div>
                 </div>
-            )}
+            );
+        }
+    }
+
+    let teamsCountDisplay = teamsCount.toString();
+    let matchesCountDisplay = playedMatchesCount.toString();
+    let eventsCountDisplay = upcomingEventsCount.toString();
+
+    if (isLoading) {
+        teamsCountDisplay = '...';
+        matchesCountDisplay = '...';
+        eventsCountDisplay = '...';
+    }
+
+    let eventsSection = null;
+    if (!isLoading) {
+        if (currentUser !== null) {
+            if (currentUser.id) {
+                if (userTeamIds.length > 0) {
+                    eventsSection = (
+                        <div className="dashboard-section events-section">
+                            {userTeamIds.map(teamId => (
+                                <DashboardEvents key={teamId} teamId={teamId} />
+                            ))}
+                        </div>
+                    );
+                }
+            }
+        }
+    }
+
+    return (
+        <div className="dashboard-container">
+            <h1 className="dashboard-heading">Přehled</h1>
+            <p className="dashboard-subtext">{subtext}</p>
+
+            {userIdCard}
 
             <div className="stats-grid">
                 <div className="stat-card glass-card-dark">
@@ -130,7 +173,7 @@ export default function DashboardPage() {
                         <IoPeopleOutline />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-value">{isLoading ? '...' : teamsCount}</div>
+                        <div className="stat-value">{teamsCountDisplay}</div>
                         <div className="stat-label">Moje Týmy</div>
                     </div>
                 </div>
@@ -139,7 +182,7 @@ export default function DashboardPage() {
                         <IoTrophyOutline />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-value">{isLoading ? '...' : playedMatchesCount}</div>
+                        <div className="stat-value">{matchesCountDisplay}</div>
                         <div className="stat-label">Odehrané zápasy</div>
                     </div>
                 </div>
@@ -148,7 +191,7 @@ export default function DashboardPage() {
                         <IoCalendarOutline />
                     </div>
                     <div className="stat-content">
-                        <div className="stat-value">{isLoading ? '...' : upcomingEventsCount}</div>
+                        <div className="stat-value">{eventsCountDisplay}</div>
                         <div className="stat-label">Nadcházející události</div>
                     </div>
                 </div>
@@ -172,13 +215,7 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {!isLoading && currentUser?.id && userTeamIds.length > 0 && (
-                <div className="dashboard-section events-section">
-                    {userTeamIds.map(teamId => (
-                        <DashboardEvents key={teamId} teamId={teamId} />
-                    ))}
-                </div>
-            )}
+            {eventsSection}
         </div>
     );
 }

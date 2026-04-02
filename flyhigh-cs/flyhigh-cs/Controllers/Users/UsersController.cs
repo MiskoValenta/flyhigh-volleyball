@@ -51,4 +51,18 @@ public class UsersController : ControllerBase
       return BadRequest(new { message = ex.Message });
     }
   }
+
+  [HttpGet("stats")]
+  public async Task<IActionResult> GetUserStats(CancellationToken ct)
+  {
+    try
+    {
+      var count = await _userService.GetPlayedMatchesCountAsync(GetCurrentUserId(), ct);
+      return Ok(new { MatchesPlayed = count });
+    }
+    catch (Exception ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
+  }
 }

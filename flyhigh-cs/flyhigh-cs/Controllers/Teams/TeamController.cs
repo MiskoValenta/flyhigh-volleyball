@@ -176,4 +176,18 @@ public class TeamController : ControllerBase
       return BadRequest(new { message = ex.Message });
     }
   }
+
+  [HttpGet("{teamId}/stats")]
+  public async Task<IActionResult> GetTeamStats([FromRoute] Guid teamId, CancellationToken ct)
+  {
+    try
+    {
+      var count = await _teamService.GetPlayedMatchesCountAsync(teamId, ct);
+      return Ok(new { MatchesPlayed = count });
+    }
+    catch (Exception ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
+  }
 }
