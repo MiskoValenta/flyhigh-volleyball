@@ -120,7 +120,7 @@ export default function DashboardPage() {
                         <p className="user-id-subtext">Předejte toto ID svému trenérovi, aby vás mohl přidat do týmu.</p>
                     </div>
                     <div className="user-id-actions">
-                        <code className="user-id-code">
+                        <code className="user-id-code hide-on-mobile">
                             {currentUser.id}
                         </code>
                         <button className={copyButtonClass} onClick={copyToClipboard}>

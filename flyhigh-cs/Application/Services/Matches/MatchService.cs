@@ -3,22 +3,15 @@ using Application.DTOs.Events;
 using Application.DTOs.Matches;
 using Application.Interfaces.Events;
 using Application.Interfaces.Matches;
-using Application.Interfaces.Teams;
 using Domain.Entities.Matches;
 using Domain.Entities.Matches.Exceptions;
 using Domain.Entities.Matches.MatchEnums;
 using Domain.Entities.Matches.Rules;
 using Domain.Repositories.Matches;
 using Domain.Repositories.Teams;
-using Domain.Repositories.Users;
 using Domain.Value_Objects.Matches;
 using Domain.Value_Objects.Teams;
 using Domain.Value_Objects.Users;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Services.Matches;
 
 public class MatchService : IMatchService
 {
@@ -55,10 +48,10 @@ public class MatchService : IMatchService
 
   public async Task<Guid> ProposeMatchAsync(CreateMatchDto dto, Guid currentUserId, CancellationToken cancellationToken = default)
   {
-    UserId refereeIdObj = null;
-    if (dto.RefereeId != null)
+    UserId refereeId = null;
+    if (dto.RefereeId.HasValue)
     {
-      refereeIdObj = new UserId(dto.RefereeId.Value);
+      refereeId = new UserId(dto.RefereeId.Value);
     }
 
     var match = Match.CreateInvitation(
@@ -67,7 +60,7 @@ public class MatchService : IMatchService
         new TeamId(dto.AwayTeamId),
         dto.ScheduledAt,
         dto.Location,
-        refereeIdObj
+        refereeId
     );
 
     await _matchRepository.AddAsync(match, cancellationToken);
@@ -169,6 +162,12 @@ public class MatchService : IMatchService
       finalWinnerId = match.WinnerId.Value;
     }
 
+    Guid? finalRefereeId = null;
+    if (match.RefereeId != null)
+    {
+      finalRefereeId = match.RefereeId.Value;
+    }
+
     return new MatchDetailDto(
         match.Id.Value,
         match.CreatorId.Value,
@@ -181,7 +180,8 @@ public class MatchService : IMatchService
         match.Status.ToString(),
         rosterDtos,
         setDtos,
-        finalWinnerId
+        finalWinnerId,
+        finalRefereeId
     );
   }
 

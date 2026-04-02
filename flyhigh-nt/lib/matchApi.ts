@@ -20,17 +20,30 @@ export const getMatchById = async (matchId: string): Promise<Match> => {
 }
 
 export const proposeMatch = async (data: any) => {
-    let refereeIdValue = data.refereeId;
-    if (refereeIdValue === "") {
-        refereeIdValue = null;
+    let finalDate = data.scheduledAt;
+    if (!finalDate || finalDate === "") {
+        throw new Error("Datum zápasu je povinné.");
+    }
+    finalDate = new Date(finalDate).toISOString();
+
+    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!guidRegex.test(data.homeTeamId) || !guidRegex.test(data.awayTeamId)) {
+        throw new Error("Vyberte platný domácí a hostující tým.");
+    }
+
+    let finalRefereeId = null;
+    if (data.refereeId) {
+        if (data.refereeId !== "") {
+            finalRefereeId = data.refereeId;
+        }
     }
 
     const payload = {
         homeTeamId: data.homeTeamId,
         awayTeamId: data.awayTeamId,
-        scheduledAt: data.scheduledAt,
+        scheduledAt: finalDate,
         location: data.location,
-        refereeId: refereeIdValue
+        refereeId: finalRefereeId
     };
 
     const res = await fetchWithAuth(`${MATCH_URL}/propose`, {

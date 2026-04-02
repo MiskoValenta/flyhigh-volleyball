@@ -25,7 +25,7 @@ public class EventController : ControllerBase
     return User.GetUserId();
   }
 
-  [HttpPost]
+  [HttpPost("create")]
   public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto, CancellationToken ct)
   {
     try

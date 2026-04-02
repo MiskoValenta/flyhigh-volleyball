@@ -33,7 +33,8 @@ public record MatchDetailDto(
     string Status,
     List<RosterPlayerDto> Roster,
     List<MatchSetDto> Sets,
-    Guid? WinnerId
+    Guid? WinnerId,
+    Guid? RefereeId
 );
 
 public record RosterPlayerDto(
