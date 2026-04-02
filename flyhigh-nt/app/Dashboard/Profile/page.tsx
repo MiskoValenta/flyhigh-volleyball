@@ -2,18 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '@/hooks/Profile/useProfile';
+import { ThemeToggle } from '@/app/theme-toggle';
 import './Profile.css';
 
 export default function ProfilePage() {
     const { user, isLoading, error: fetchError, handleUpdateProfile, handleChangePassword } = useProfile();
 
     const [profileData, setProfileData] = useState({ firstName: '', lastName: '', email: '' });
-    const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' });
+    const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
 
     const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
 
     useEffect(() => {
-        if (user) {
+        if (user !== null) {
             setProfileData({ firstName: user.firstName, lastName: user.lastName, email: user.email });
         }
     }, [user]);
@@ -33,25 +34,33 @@ export default function ProfilePage() {
         try {
             await handleChangePassword(passwordData);
             setStatusMessage({ type: 'success-alert-profile', text: 'Heslo bylo úspěšně změněno.' });
-            setPasswordData({ oldPassword: '', newPassword: '' });
+            setPasswordData({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
         } catch (err: any) {
             setStatusMessage({ type: 'error-alert-profile', text: err.message });
         }
     };
 
-    if (isLoading) return <div className="profile-container">Načítám profil...</div>;
+    if (isLoading) {
+        return <div className="profile-container">Načítám profil...</div>;
+    }
+
+    let errorDisplay = null;
+    if (fetchError !== "") {
+        errorDisplay = <div className="error-alert-profile global-alert">{fetchError}</div>;
+    }
+
+    let statusDisplay = null;
+    if (statusMessage.text !== "") {
+        statusDisplay = <div className={`${statusMessage.type} global-alert`}>{statusMessage.text}</div>;
+    }
 
     return (
         <div className="profile-container">
+            {errorDisplay}
+            {statusDisplay}
+
             <div className="profile-card glass-card-dark">
                 <h1 className="dashboard-heading">Základní údaje</h1>
-
-                {fetchError && <div className="error-alert-profile">{fetchError}</div>}
-                {statusMessage.text && (
-                    <div className={statusMessage.type}>
-                        {statusMessage.text}
-                    </div>
-                )}
 
                 <form className="profile-form" onSubmit={onUpdateProfile}>
                     <div className="form-row-cp">
@@ -108,11 +117,36 @@ export default function ProfilePage() {
                         />
                     </div>
 
+                    <div className="form-group-cp">
+                        <label>Potvrdit nové heslo</label>
+                        <input
+                            type="password"
+                            className="auth-input-cp"
+                            value={passwordData.confirmNewPassword}
+                            onChange={e => setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })}
+                            required
+                        />
+                    </div>
+
                     <div className="profile-btn-container">
                         <button type="submit" className="button-primary">Změnit heslo</button>
                     </div>
                 </form>
             </div>
+
+            <div className="profile-card glass-card-dark">
+                <h2 className="dashboard-heading">Vzhled aplikace</h2>
+                <div className="theme-settings-row">
+                    <div className="theme-settings-text">
+                        <h3>Motiv aplikace</h3>
+                        <p>Přepínejte mezi světlým a tmavým režimem podle vašich preferencí.</p>
+                    </div>
+                    <div className="theme-settings-action">
+                        <ThemeToggle />
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 }

@@ -20,16 +20,32 @@ export const getMatchById = async (matchId: string): Promise<Match> => {
 }
 
 export const proposeMatch = async (data: any) => {
+    let refereeIdValue = data.refereeId;
+    if (refereeIdValue === "") {
+        refereeIdValue = null;
+    }
+
+    const payload = {
+        homeTeamId: data.homeTeamId,
+        awayTeamId: data.awayTeamId,
+        scheduledAt: data.scheduledAt,
+        location: data.location,
+        refereeId: refereeIdValue
+    };
+
     const res = await fetchWithAuth(`${MATCH_URL}/propose`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
     });
+
     if (!res.ok) {
         let errorData: any = {};
         try { errorData = await res.json(); } catch (e) { }
 
         if (errorData.message) {
             throw new Error(errorData.message);
+        } else if (errorData.errors) {
+            throw new Error(Object.values(errorData.errors).flat().join(' '));
         } else {
             throw new Error('Nepodařilo se vytvořit zápas.');
         }

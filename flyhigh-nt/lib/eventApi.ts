@@ -23,11 +23,9 @@ export const createEvent = async (data: CreateEventDto) => {
         let errorData: any = {};
         try {
             errorData = await res.json();
-        } catch (e) {
-        }
+        } catch (e) { }
 
         let errorMessage = 'Nepodařilo se vytvořit událost.';
-
         if (errorData.message) {
             errorMessage = errorData.message;
         } else if (errorData.errors) {
@@ -71,9 +69,7 @@ export const respondToEvent = async (eventId: string, response: EventResponse | 
     });
     if (!res.ok) {
         let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) { }
+        try { errorData = await res.json(); } catch (e) { }
         throw new Error(errorData.message || 'Nepodařilo se uložit odpověď.');
     }
 };
@@ -84,9 +80,7 @@ export const deleteEvent = async (eventId: string): Promise<void> => {
     });
     if (!res.ok) {
         let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) { }
+        try { errorData = await res.json(); } catch (e) { }
         throw new Error(errorData.message || 'Nepodařilo se smazat událost.');
     }
 };
