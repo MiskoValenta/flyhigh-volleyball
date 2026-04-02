@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getTeamById, removeTeamMember, addTeamMember, changeTeamMemberRole, updateTeam } from '@/lib/teamApi';
+import { getCurrentUser } from '@/lib/api';
 import { TeamDetail } from '@/types/team';
 
 export const useTeamDetail = (teamId: string) => {
     const [team, setTeam] = useState<TeamDetail | null>(null);
+    const [currentUserId, setCurrentUserId] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
 
@@ -13,6 +15,8 @@ export const useTeamDetail = (teamId: string) => {
         try {
             const data = await getTeamById(teamId);
             setTeam(data);
+            const user = await getCurrentUser();
+            setCurrentUserId(user.id);
         } catch (err: any) {
             if (err.message) {
                 setError(err.message);
@@ -85,5 +89,5 @@ export const useTeamDetail = (teamId: string) => {
         }
     };
 
-    return { team, isLoading, error, handleRemoveMember, handleAddMember, handleChangeRole, handleUpdateTeam };
+    return { team, currentUserId, isLoading, error, handleRemoveMember, handleAddMember, handleChangeRole, handleUpdateTeam };
 };

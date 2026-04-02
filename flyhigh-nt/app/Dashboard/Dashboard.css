@@ -209,6 +209,16 @@
     font-size: 2rem;
 }
 
+.hide-on-mobile {
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .hide-on-mobile {
+        display: none !important;
+    }
+}
+
 @media (max-width: 768px) {
     .user-id-card {
         flex-direction: column;

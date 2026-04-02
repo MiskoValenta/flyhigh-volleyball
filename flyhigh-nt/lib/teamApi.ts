@@ -45,7 +45,12 @@ export const createTeam = async (data: CreateTeamDto): Promise<{ teamId: string 
 };
 
 export const addTeamMember = async (teamId: string, userId: string, role: string | number) => {
-    const res = await fetchWithAuth(`${TEAM_URL}/${teamId}/members`, {
+    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!guidRegex.test(userId)) {
+        throw new Error("Zadané ID není ve správném formátu platného uživatelského ID.");
+    }
+
+    const res = await fetchWithAuth(`/teams/${teamId}/members`, {
         method: 'POST',
         body: JSON.stringify({
             targetId: userId,
@@ -61,7 +66,11 @@ export const addTeamMember = async (teamId: string, userId: string, role: string
     }
 
     const text = await res.text();
-    return text !== '' ? JSON.parse(text) : {};
+    if (text !== '') {
+        return JSON.parse(text);
+    } else {
+        return {};
+    }
 };
 
 export const removeTeamMember = async (teamId: string, userId: string): Promise<void> => {

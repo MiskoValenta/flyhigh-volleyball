@@ -4,12 +4,12 @@ import React, { use, useState, useEffect } from "react";
 import { useTeamDetail } from "@/hooks/Teams/useTeamDetail";
 import { useTeamStats } from "@/hooks/Teams/useTeamStats";
 import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
-import { IoPeopleOutline, IoTrophyOutline, IoCalendarOutline } from 'react-icons/io5';
+import { IoPeopleOutline, IoTrophyOutline, IoCalendarOutline, IoCopyOutline } from 'react-icons/io5';
 import "./TeamDetail.css";
 
 export default function TeamDetailPage({ params }: { params: Promise<{ teamId: string }> }) {
     const { teamId } = use(params);
-    const { team, isLoading, error, handleRemoveMember, handleAddMember, handleChangeRole, handleUpdateTeam } = useTeamDetail(teamId);
+    const { team, currentUserId, isLoading, error, handleRemoveMember, handleAddMember, handleChangeRole, handleUpdateTeam } = useTeamDetail(teamId);
     const { teamMatchesPlayed, teamEventsCount, isLoadingStats } = useTeamStats(teamId);
 
     const [isEditingTeam, setIsEditingTeam] = useState(false);
@@ -19,6 +19,8 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
 
     const [newMemberId, setNewMemberId] = useState("");
     const [newMemberRole, setNewMemberRole] = useState("Player");
+
+    const [copySuccess, setCopySuccess] = useState<boolean>(false);
 
     useEffect(() => {
         if (team !== null) {
@@ -42,6 +44,25 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
 
     if (!team) {
         return <div className="TeamDetailError">Tým nenalezen.</div>;
+    }
+
+    const copyTeamIdToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText(teamId);
+            setCopySuccess(true);
+            setTimeout(() => {
+                setCopySuccess(false);
+            }, 2000);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    let copyButtonText = 'Kopírovat ID';
+    let copyButtonClass = 'BtnSecondary';
+    if (copySuccess) {
+        copyButtonText = 'Zkopírováno!';
+        copyButtonClass = 'BtnSecondary success';
     }
 
     let descriptionDisplay = 'Bez popisku';
@@ -171,13 +192,15 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
         let canManageMember = false;
         let canChangeToOwner = false;
 
-        if (team.myRole === 'Owner') {
-            canManageMember = true;
-            canChangeToOwner = true;
-        } else if (team.myRole === 'Coach') {
-            if (member.role !== 'Owner') {
-                if (member.role !== 'Coach') {
-                    canManageMember = true;
+        if (member.userId !== currentUserId) {
+            if (team.myRole === 'Owner') {
+                canManageMember = true;
+                canChangeToOwner = true;
+            } else if (team.myRole === 'Coach') {
+                if (member.role !== 'Owner') {
+                    if (member.role !== 'Coach') {
+                        canManageMember = true;
+                    }
                 }
             }
         }
@@ -227,6 +250,15 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
                 <div className="TeamHeaderInfo">
                     <h1 className="TeamHeading">{team.teamName} <span>({team.shortName})</span></h1>
                     <p className="TeamDescription">{descriptionDisplay}</p>
+
+                    <div className="TeamIdContainer">
+                        <span className="TeamIdLabel">ID Týmu pro pozvání hráčem:</span>
+                        <code className="TeamIdCode hide-on-mobile">{teamId}</code>
+                        <button className={copyButtonClass} onClick={copyTeamIdToClipboard}>
+                            <IoCopyOutline style={{ marginRight: '0.5rem' }} />
+                            {copyButtonText}
+                        </button>
+                    </div>
                 </div>
                 <div className="TeamHeaderRole">
                     <span>Tvoje role: </span>

@@ -4,12 +4,24 @@ import { TeamEvent, EventResponse, CreateEventDto } from '@/types/event';
 const BASE_URL = '/events';
 
 export const createEvent = async (data: CreateEventDto) => {
+    let finalEventDate: string | null | undefined = data.eventDate;
+
+    if (finalEventDate === "") {
+        finalEventDate = null;
+    } else if (finalEventDate) {
+        finalEventDate = new Date(finalEventDate).toISOString();
+    }
+
+    if (data.teamId === "") {
+        throw new Error("Musíte vybrat tým pro tuto událost.");
+    }
+
     const payload = {
         teamId: data.teamId,
         title: data.title,
         description: data.description || "",
         type: data.type,
-        eventDate: data.eventDate || null,
+        eventDate: finalEventDate,
         location: data.location || "",
         invitedUserIds: data.invitedUserIds || []
     };

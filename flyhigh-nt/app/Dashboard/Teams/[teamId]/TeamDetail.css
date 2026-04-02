@@ -88,6 +88,31 @@
     gap: 2rem;
 }
 
+.TeamIdContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    background: var(--bg-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.TeamIdLabel {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.TeamIdCode {
+    background-color: var(--card-bg-dark);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--accent-color);
+}
+
 @media (max-width: 900px) {
     .TeamContentGrid {
         grid-template-columns: 1fr;
