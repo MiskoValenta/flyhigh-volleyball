@@ -66,25 +66,31 @@ public class MatchService : IMatchService
     await _matchRepository.AddAsync(match, cancellationToken);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-    var awayTeam = await _teamRepository.GetByIdAsync(new TeamId(dto.AwayTeamId), cancellationToken);
-
-    string awayTeamName = "Neznámý tým";
-    if (awayTeam != null)
+    try
     {
-      awayTeamName = awayTeam.TeamName;
+      var awayTeam = await _teamRepository.GetByIdAsync(new TeamId(dto.AwayTeamId), cancellationToken);
+      string awayTeamName = "Neznámý tým";
+      if (awayTeam != null)
+      {
+        awayTeamName = awayTeam.TeamName;
+      }
+
+      var eventDto = new CreateEventDto(
+          dto.HomeTeamId,
+          $"Zápas: vs {awayTeamName}",
+          $"Zápas s týmem {awayTeamName} na hřišti {dto.Location}.",
+          Domain.Entities.Events.EventEnums.EventType.Match,
+          dto.ScheduledAt,
+          dto.Location,
+          new List<Guid>()
+      );
+
+      await _eventService.CreateEventAsync(eventDto, currentUserId, cancellationToken);
     }
+    catch (Exception)
+    {
 
-    var eventDto = new CreateEventDto(
-        dto.HomeTeamId,
-        $"Zápas: vs {awayTeamName}",
-        $"Zápas s týmem {awayTeamName} na hřišti {dto.Location}.",
-        Domain.Entities.Events.EventEnums.EventType.Match,
-        dto.ScheduledAt,
-        dto.Location,
-        new List<Guid>()
-    );
-
-    await _eventService.CreateEventAsync(eventDto, currentUserId, cancellationToken);
+    }
 
     return match.Id.Value;
   }
@@ -96,17 +102,31 @@ public class MatchService : IMatchService
     match.AcceptInvitation();
     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-    var eventDto = new CreateEventDto(
-        match.AwayTeamId.Value,
-        "Přijatý Zápas",
-        $"Hrajeme zápas proti týmu {match.HomeTeamId.Value} v {match.Location}.",
-        Domain.Entities.Events.EventEnums.EventType.Match,
-        match.ScheduledAt,
-        match.Location,
-        new List<Guid>()
-    );
+    try
+    {
+      var homeTeam = await _teamRepository.GetByIdAsync(match.HomeTeamId, cancellationToken);
+      string homeTeamName = "Neznámý tým";
+      if (homeTeam != null)
+      {
+        homeTeamName = homeTeam.TeamName;
+      }
 
-    await _eventService.CreateEventAsync(eventDto, currentUserId, cancellationToken);
+      var eventDto = new CreateEventDto(
+          match.AwayTeamId.Value,
+          "Přijatý Zápas",
+          $"Hrajeme zápas proti týmu {homeTeamName} v {match.Location}.",
+          Domain.Entities.Events.EventEnums.EventType.Match,
+          match.ScheduledAt,
+          match.Location,
+          new List<Guid>()
+      );
+
+      await _eventService.CreateEventAsync(eventDto, currentUserId, cancellationToken);
+    }
+    catch (Exception)
+    {
+
+    }
   }
 
   public async Task<MatchDetailDto> GetMatchByIdAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default)
@@ -130,35 +150,11 @@ public class MatchService : IMatchService
         s.IsFinished,
         s.IsStarted,
         s.Winner.ToString(),
-        s.Positions.Select(p => new MatchPlayerPositionDto(
-            p.TeamMemberId.Value,
-            p.Position.ToString()
-        )).ToList()
+        s.Positions.Select(p => new MatchPlayerPositionDto(p.TeamMemberId.Value, p.Position.ToString())).ToList()
     )).OrderBy(s => s.SetNumber).ToList();
 
-    string homeTeamName = "Neznámý tým";
-    if (homeTeam != null)
-    {
-      homeTeamName = homeTeam.TeamName;
-    }
-
-    string awayTeamName = "Neznámý tým";
-    if (awayTeam != null)
-    {
-      awayTeamName = awayTeam.TeamName;
-    }
-
-    Guid? finalWinnerId = null;
-    if (match.WinnerId != null)
-    {
-      finalWinnerId = match.WinnerId.Value;
-    }
-
-    Guid? finalRefereeId = null;
-    if (match.RefereeId != null)
-    {
-      finalRefereeId = match.RefereeId.Value;
-    }
+    string homeTeamName = homeTeam?.TeamName ?? "Neznámý tým";
+    string awayTeamName = awayTeam?.TeamName ?? "Neznámý tým";
 
     return new MatchDetailDto(
         match.Id.Value,
@@ -172,18 +168,9 @@ public class MatchService : IMatchService
         match.Status.ToString(),
         rosterDtos,
         setDtos,
-        finalWinnerId,
-        finalRefereeId
+        match.WinnerId?.Value,
+        match.RefereeId?.Value
     );
-  }
-
-  public async Task SetRefereeAsync(Guid matchId, Guid refereeId, Guid currentUserId, CancellationToken cancellationToken = default)
-  {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    EnsureIsMatchCreator(match, currentUserId);
-
-    match.SetReferee(new UserId(refereeId));
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
 
   public async Task AddPlayerToRosterAsync(Guid matchId, RosterPlayerDto dto, CancellationToken cancellationToken = default)
@@ -193,11 +180,18 @@ public class MatchService : IMatchService
     await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
 
+  public async Task SetRefereeAsync(Guid matchId, Guid refereeId, Guid currentUserId, CancellationToken cancellationToken = default)
+  {
+    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
+    EnsureIsMatchCreator(match, currentUserId);
+    match.SetReferee(new UserId(refereeId));
+    await _unitOfWork.SaveChangesAsync(cancellationToken);
+  }
+
   public async Task StartMatchAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default)
   {
     var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
     EnsureIsMatchCreator(match, currentUserId);
-
     match.StartMatch(_setRules);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
@@ -206,7 +200,6 @@ public class MatchService : IMatchService
   {
     var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
     EnsureIsMatchCreator(match, currentUserId);
-
     match.StartCurrentSet();
     await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
@@ -215,9 +208,7 @@ public class MatchService : IMatchService
   {
     var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
     EnsureIsMatchCreator(match, currentUserId);
-
     PlayerPosition positionEnum = Enum.Parse<PlayerPosition>(dto.Position, true);
-
     match.AssignPlayerPositionForSet(dto.SetNumber, new TeamMemberId(dto.TeamMemberId), positionEnum);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
@@ -226,7 +217,6 @@ public class MatchService : IMatchService
   {
     var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
     EnsureIsMatchCreator(match, currentUserId);
-
     match.AddPoint(side, _setRules, _matchRules);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
@@ -235,7 +225,6 @@ public class MatchService : IMatchService
   {
     var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
     EnsureIsMatchCreator(match, currentUserId);
-
     match.CancelMatch(dto.Reason);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
@@ -265,24 +254,12 @@ public class MatchService : IMatchService
       var homeTeam = await _teamRepository.GetByIdAsync(m.HomeTeamId, cancellationToken);
       var awayTeam = await _teamRepository.GetByIdAsync(m.AwayTeamId, cancellationToken);
 
-      string homeTeamName = "Neznámý tým";
-      if (homeTeam != null)
-      {
-        homeTeamName = homeTeam.TeamName;
-      }
-
-      string awayTeamName = "Neznámý tým";
-      if (awayTeam != null)
-      {
-        awayTeamName = awayTeam.TeamName;
-      }
-
       result.Add(new MatchResponseDto(
           m.Id.Value,
           m.HomeTeamId.Value,
-          homeTeamName,
+          homeTeam?.TeamName ?? "Neznámý tým",
           m.AwayTeamId.Value,
-          awayTeamName,
+          awayTeam?.TeamName ?? "Neznámý tým",
           m.Location,
           m.ScheduledAt,
           m.Status.ToString()
