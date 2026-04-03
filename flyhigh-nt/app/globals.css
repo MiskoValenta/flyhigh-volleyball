@@ -294,16 +294,22 @@
     margin: 0 0 1.5rem 0;
 }
 
-.glass-card,
-.glass-card-dark {
-    background: var(--glassed-gradient, linear-gradient(180deg, oklch(var(--card) / calc(var(--glass-alpha) * 1.12)), transparent 40%, oklch(var(--card) / var(--glass-alpha))));
-    border: var(--glassed-border, 1px solid hsl(var(--foreground) / var(--glass-border-alpha)));
-    -webkit-backdrop-filter: var(--glassed-webkit-backdrop-filter, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
-    backdrop-filter: var(--glassed-backdrop-filter, blur(var(--glass-blur)) saturate(var(--glass-saturate)));
-    box-shadow: var(--glassed-box-shadow, var(--glass-shadow));
-    color: var(--glassed-color, var(--typo-hero-color));
-    border-radius: 16px;
-    overflow: hidden;
+.glass-card-dark, 
+.glass-card {
+    background: var(--background);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: var(--space-5);
+    transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card-dark:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
 }
 
 .button-primary {
