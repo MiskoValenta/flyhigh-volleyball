@@ -2,18 +2,22 @@ import { useState } from 'react';
 import { createEvent } from '@/lib/eventApi';
 import { CreateEventDto } from '@/types/event';
 
-export function useCreateEvent() {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+export const useCreateEvent = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
 
-    const handleCreateEvent = async (eventData: CreateEventDto) => {
+    const handleCreateEvent = async (data: CreateEventDto) => {
         setIsLoading(true);
         setError('');
         try {
-            const result = await createEvent(eventData);
+            const result = await createEvent(data);
             return result;
         } catch (err: any) {
-            setError(err.message || 'Nepodařilo se vytvořit událost.');
+            if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Nastala neočekávaná chyba při vytváření události.');
+            }
             throw err;
         } finally {
             setIsLoading(false);
@@ -21,4 +25,4 @@ export function useCreateEvent() {
     };
 
     return { handleCreateEvent, isLoading, error };
-}
+};

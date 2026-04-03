@@ -6,7 +6,7 @@ namespace Domain.Entities.Events.EventEnums;
 
 public enum EventType
 {
-  Announcement = 0,
-  Poll = 1,
-  Match = 2
+  Announcement,
+  Poll,
+  Match
 }

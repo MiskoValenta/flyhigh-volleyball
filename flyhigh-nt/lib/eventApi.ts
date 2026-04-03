@@ -16,17 +16,32 @@ export const createEvent = async (data: CreateEventDto) => {
         throw new Error("Musíte vybrat tým pro tuto událost.");
     }
 
+    let finalDescription = data.description;
+    if (!finalDescription) {
+        finalDescription = "";
+    }
+
+    let finalLocation = data.location;
+    if (!finalLocation) {
+        finalLocation = "";
+    }
+
+    let finalInvitedUserIds = data.invitedUserIds;
+    if (!finalInvitedUserIds) {
+        finalInvitedUserIds = [];
+    }
+
     const payload = {
         teamId: data.teamId,
         title: data.title,
-        description: data.description || "",
+        description: finalDescription,
         type: data.type,
         eventDate: finalEventDate,
-        location: data.location || "",
-        invitedUserIds: data.invitedUserIds || []
+        location: finalLocation,
+        invitedUserIds: finalInvitedUserIds
     };
 
-    const res = await fetchWithAuth(`${BASE_URL}`, {
+    const res = await fetchWithAuth(`${BASE_URL}/create`, {
         method: 'POST',
         body: JSON.stringify(payload),
     });
@@ -46,6 +61,7 @@ export const createEvent = async (data: CreateEventDto) => {
 
         throw new Error(errorMessage);
     }
+
     const text = await res.text();
     if (text !== "") {
         return JSON.parse(text);

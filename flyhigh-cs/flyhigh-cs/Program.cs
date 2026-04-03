@@ -6,7 +6,6 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Teams;
 using Application.Interfaces.Users;
 using Application.Services.Events;
-using Application.Services.Matches;
 using Application.Services.Teams;
 using Application.Services.Users;
 using Domain.Entities.Matches.Rules;
@@ -116,7 +115,10 @@ namespace API
                 var token = context.Request.Cookies["accessToken"];
                 if (context.Request.Cookies.ContainsKey("accessToken"))
                 {
-                  context.Token = token;
+                  if (token != null)
+                  {
+                    context.Token = token;
+                  }
                 }
                 return Task.CompletedTask;
               }

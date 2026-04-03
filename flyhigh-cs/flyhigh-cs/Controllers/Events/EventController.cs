@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace API.Controllers.Events;
 
 [ApiController]
-[Route("api/events")]
+[Route("api/[controller]")]
 [Authorize]
 public class EventController : ControllerBase
 {
@@ -31,93 +31,67 @@ public class EventController : ControllerBase
     try
     {
       var eventId = await _eventService.CreateEventAsync(dto, GetCurrentUserId(), ct);
-      return Ok(new { EventId = eventId });
+      return Ok(new { Id = eventId });
     }
-    catch (UnauthorizedAccessException ex) 
-    { 
-      return Forbid(ex.Message); 
-    }
-    catch (Exception ex) 
-    { 
-      return BadRequest(new { message = ex.Message }); 
+    catch (Exception ex)
+    {
+      return BadRequest(new { message = ex.Message });
     }
   }
 
   [HttpGet("team/{teamId}")]
-  public async Task<IActionResult> GetTeamEvents([FromRoute] Guid teamId, CancellationToken ct)
+  public async Task<IActionResult> GetTeamEvents(Guid teamId, CancellationToken ct)
   {
     try
     {
       var events = await _eventService.GetTeamEventsAsync(teamId, GetCurrentUserId(), ct);
       return Ok(events);
     }
-    catch (UnauthorizedAccessException ex) 
-    { 
-      return Forbid(ex.Message); 
-    }
-    catch (Exception ex) 
-    { 
+    catch (Exception ex)
+    {
       return BadRequest(new { message = ex.Message });
     }
   }
 
   [HttpGet("{eventId}")]
-  public async Task<IActionResult> GetEvent([FromRoute] Guid eventId, CancellationToken ct)
+  public async Task<IActionResult> GetEventDetail(Guid eventId, CancellationToken ct)
   {
     try
     {
-      var teamEvent = await _eventService.GetEventByIdAsync(eventId, GetCurrentUserId(), ct);
-      return Ok(teamEvent);
-    }
-    catch (KeyNotFoundException ex) 
-    { 
-      return NotFound(ex.Message); 
-    }
-    catch (UnauthorizedAccessException ex) 
-    { 
-      return Forbid(ex.Message); 
-    }
-    catch (Exception ex) 
-    { 
-      return BadRequest(new { message = ex.Message }); 
-    }
-  }
-
-  [HttpPatch("{eventId}/respond")]
-  [HttpPost("{eventId}/respond")]
-  public async Task<IActionResult> RespondToEvent([FromRoute] Guid eventId, [FromBody] RespondToEventDto dto)
-  {
-    try
-    {
-      var currentUserId = User.GetUserId();
-      await _eventService.RespondToEventAsync(eventId, currentUserId, dto);
-      return Ok(new { Message = "Odpověď byla uložena." });
+      var detail = await _eventService.GetEventDetailAsync(eventId, GetCurrentUserId(), ct);
+      return Ok(detail);
     }
     catch (Exception ex)
     {
-      return BadRequest(new { Message = ex.Message });
+      return NotFound(new { message = ex.Message });
+    }
+  }
+
+  [HttpPost("{eventId}/respond")]
+  public async Task<IActionResult> RespondToEvent(Guid eventId, [FromBody] RespondToEventDto dto, CancellationToken ct)
+  {
+    try
+    {
+      await _eventService.RespondToEventAsync(eventId, GetCurrentUserId(), dto.Response, ct);
+      return Ok(new { message = "Odpověď zaznamenána." });
+    }
+    catch (Exception ex)
+    {
+      return BadRequest(new { message = ex.Message });
     }
   }
 
   [HttpDelete("{eventId}")]
-  public async Task<IActionResult> DeleteEvent([FromRoute] Guid eventId, CancellationToken ct)
+  public async Task<IActionResult> DeleteEvent(Guid eventId, CancellationToken ct)
   {
     try
     {
       await _eventService.DeleteEventAsync(eventId, GetCurrentUserId(), ct);
       return NoContent();
     }
-    catch (UnauthorizedAccessException ex) 
+    catch (Exception ex)
     {
-      return Forbid(ex.Message); 
-    }
-    catch (KeyNotFoundException ex) 
-    {
-      return NotFound(ex.Message); 
-    }
-    catch (Exception ex) 
-    { 
-      return BadRequest(new { message = ex.Message }); 
+      return BadRequest(new { message = ex.Message });
     }
   }
 }
