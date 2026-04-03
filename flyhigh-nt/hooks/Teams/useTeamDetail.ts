@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getTeamById, removeTeamMember, addTeamMember, changeTeamMemberRole, updateTeam } from '@/lib/teamApi';
 import { getCurrentUser } from '@/lib/api';
-import { TeamDetail } from '@/types/team';
+import { TeamDetail, TeamRole } from '@/types/team';
 
 export const useTeamDetail = (teamId: string) => {
     const [team, setTeam] = useState<TeamDetail | null>(null);
@@ -47,10 +47,10 @@ export const useTeamDetail = (teamId: string) => {
         }
     };
 
-    const handleAddMember = async (userId: string, role: string) => {
+    const handleAddMember = async (userId: string, role: TeamRole) => {
         try {
             await addTeamMember(teamId, userId, role);
-            alert('Uživatel byl pozván.');
+            alert('Uživatel byl úspěšně pozván do týmu.');
             await fetchTeam();
         } catch (err: any) {
             if (err.message) {
@@ -61,7 +61,7 @@ export const useTeamDetail = (teamId: string) => {
         }
     };
 
-    const handleChangeRole = async (userId: string, newRole: string) => {
+    const handleChangeRole = async (userId: string, newRole: TeamRole) => {
         try {
             await changeTeamMemberRole(teamId, userId, newRole);
             alert('Role byla úspěšně změněna.');

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Events;
+using Domain.Entities.Events.EventEnums;
 using Domain.Value_Objects.Events;
 using Domain.Value_Objects.Users;
 using Microsoft.EntityFrameworkCore;
@@ -14,28 +15,20 @@ public class EventParticipantConfiguration : IEntityTypeConfiguration<EventParti
   public void Configure(EntityTypeBuilder<EventParticipant> builder)
   {
     builder.HasKey(p => p.Id);
-
     builder.Property(p => p.Id)
-        .HasConversion(
-            id => id.Value,
-            value => new EventParticipantId(value)
-        );
+        .HasConversion(id => id.Value, value => new EventParticipantId(value));
 
     builder.Property(p => p.EventId)
-        .HasConversion(
-            id => id.Value,
-            value => new EventId(value)
-        )
+        .HasConversion(id => id.Value, value => new EventId(value))
         .IsRequired();
 
     builder.Property(p => p.UserId)
-        .HasConversion(
-            id => id.Value,
-            value => new UserId(value)
-        )
+        .HasConversion(id => id.Value, value => new UserId(value))
         .IsRequired();
 
     builder.Property(p => p.Response)
-        .HasConversion<int>();
+        .HasConversion<string>()
+        .HasDefaultValue(EventResponse.Unknown)
+        .IsRequired();
   }
 }

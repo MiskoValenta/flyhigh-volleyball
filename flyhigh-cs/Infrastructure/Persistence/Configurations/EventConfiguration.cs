@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Events;
+using Domain.Entities.Events.EventEnums;
 using Domain.Value_Objects.Events;
 using Domain.Value_Objects.Teams;
 using Domain.Value_Objects.Users;
@@ -15,45 +16,25 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
   public void Configure(EntityTypeBuilder<Event> builder)
   {
     builder.HasKey(e => e.Id);
-
     builder.Property(e => e.Id)
-        .HasConversion(
-            id => id.Value,
-            value => new EventId(value)
-        );
+        .HasConversion(id => id.Value, value => new EventId(value));
 
     builder.Property(e => e.TeamId)
-        .HasConversion(
-            id => id.Value,
-            value => new TeamId(value)
-        )
+        .HasConversion(id => id.Value, value => new TeamId(value))
         .IsRequired();
 
     builder.Property(e => e.CreatorId)
-        .HasConversion(
-            id => id.Value,
-            value => new UserId(value)
-        )
+        .HasConversion(id => id.Value, value => new UserId(value))
         .IsRequired();
 
-    builder.Property(e => e.Title)
-        .IsRequired()
-        .HasMaxLength(200);
-
-    builder.Property(e => e.Description)
-        .HasMaxLength(1000);
+    builder.Property(e => e.Title).IsRequired().HasMaxLength(200);
+    builder.Property(e => e.Description).HasMaxLength(1000);
+    builder.Property(e => e.EventDate);
+    builder.Property(e => e.Location).HasMaxLength(200);
 
     builder.Property(e => e.Type)
-        .HasConversion<int>();
-
-    builder.Property(e => e.EventDate)
-        .IsRequired(false);
-
-    builder.Property(e => e.Location)
-        .HasMaxLength(255)
-        .IsRequired(false);
-
-    builder.Property(e => e.CreatedAt)
+        .HasConversion<string>()
+        .HasDefaultValue(EventType.Announcement)
         .IsRequired();
 
     builder.HasMany(e => e.Participants)

@@ -6,6 +6,6 @@ namespace Domain.Entities.Matches.MatchEnums;
 
 public enum SetSide
 {
-  Home = 0,
-  Away = 1
+  Home,
+  Away
 }

@@ -1,28 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCurrentUser } from '@/lib/api';
-import { getPendingInvites, acceptTeamInvite, declineTeamInvite } from '@/lib/teamApi';
+import { getPendingInvitations, acceptInvitation, declineInvitation } from '@/lib/teamApi';
 import { UserProfile } from '@/types/user';
 import { PendingInvitationDto } from '@/types/team';
 
 export function useDashboard() {
     const [user, setUser] = useState<UserProfile | null>(null);
     const [invitations, setInvitations] = useState<PendingInvitationDto[]>([]);
-    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         setError('');
         try {
-            const [userData, invData] = await Promise.all([
-                getCurrentUser(),
-                getPendingInvites()
-            ]);
-
+            const userData = await getCurrentUser();
             setUser(userData);
-            setInvitations(invData);
+
+            const invitesData = await getPendingInvitations();
+            setInvitations(invitesData);
         } catch (err: any) {
-            setError(err.message || 'Chyba při načítání dat nástěnky.');
+            if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Nepodařilo se načíst data pro nástěnku.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -32,23 +34,39 @@ export function useDashboard() {
         fetchData();
     }, [fetchData]);
 
-    const handleAccept = async (teamId: string) => {
+    const handleAcceptInvitation = async (teamId: string) => {
         try {
-            await acceptTeamInvite(teamId);
-            setInvitations(prev => prev.filter(inv => inv.teamId !== teamId));
+            await acceptInvitation(teamId);
+            await fetchData();
         } catch (err: any) {
-            setError(err.message || 'Chyba při přijímání pozvánky.');
+            if (err.message) {
+                throw new Error(err.message);
+            } else {
+                throw new Error('Nepodařilo se přijmout pozvánku.');
+            }
         }
     };
 
-    const handleDecline = async (teamId: string) => {
+    const handleDeclineInvitation = async (teamId: string) => {
         try {
-            await declineTeamInvite(teamId);
-            setInvitations(prev => prev.filter(inv => inv.teamId !== teamId));
+            await declineInvitation(teamId);
+            await fetchData();
         } catch (err: any) {
-            setError(err.message || 'Chyba při odmítání pozvánky.');
+            if (err.message) {
+                throw new Error(err.message);
+            } else {
+                throw new Error('Nepodařilo se odmítnout pozvánku.');
+            }
         }
     };
 
-    return { user, invitations, error, isLoading, handleAccept, handleDecline, refreshDashboard: fetchData };
+    return {
+        user,
+        invitations,
+        isLoading,
+        error,
+        refreshDashboard: fetchData,
+        handleAcceptInvitation,
+        handleDeclineInvitation
+    };
 }

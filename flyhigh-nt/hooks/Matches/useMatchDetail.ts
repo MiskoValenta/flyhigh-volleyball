@@ -1,72 +1,93 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-    getMatchById,
-    acceptMatch,
-    rejectMatch,
-    addRosterPlayer,
-    cancelMatch,
-    setReferee
-} from '@/lib/matchApi';
-import { Match } from '@/types/match';
+import { getMatchById, acceptMatch, rejectMatch, cancelMatch, addRosterPlayer, setReferee } from '@/lib/matchApi';
+import { MatchDetail, RosterPlayerDto } from '@/types/match';
+import { getCurrentUser } from '@/lib/api';
 
-export function useMatchDetail(matchId: string) {
-    const router = useRouter();
-    const [match, setMatch] = useState<Match | null>(null);
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+export const useMatchDetail = (matchId: string) => {
+    const [match, setMatch] = useState<MatchDetail | null>(null);
+    const [currentUserId, setCurrentUserId] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>('');
 
     const fetchMatch = useCallback(async () => {
-        if (!matchId) return;
         setIsLoading(true);
         setError('');
         try {
             const data = await getMatchById(matchId);
             setMatch(data);
+            const user = await getCurrentUser();
+            setCurrentUserId(user.id);
         } catch (err: any) {
-            setError(err.message || 'Nepodařilo se načíst detail zápasu.');
+            if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Nastala chyba při načítání zápasu.');
+            }
         } finally {
             setIsLoading(false);
         }
     }, [matchId]);
 
     useEffect(() => {
-        fetchMatch();
-    }, [fetchMatch]);
+        if (matchId) {
+            fetchMatch();
+        }
+    }, [matchId, fetchMatch]);
 
-    const handleAccept = async () => {
+    const handleAcceptMatch = async () => {
         try {
             await acceptMatch(matchId);
             await fetchMatch();
         } catch (err: any) {
-            setError(err.message || 'Chyba při přijímání zápasu.');
+            if (err.message) {
+                alert(err.message);
+            } else {
+                alert('Chyba při přijímání zápasu.');
+            }
         }
     };
 
-    const handleReject = async () => {
+    const handleRejectMatch = async () => {
         try {
             await rejectMatch(matchId);
-            router.push('/Dashboard/Matches');
-        } catch (err: any) {
-            setError(err.message || 'Chyba při odmítání zápasu.');
-        }
-    };
-
-    const handleAddRoster = async (teamMemberId: string, teamId: string, jerseyNumber: number) => {
-        try {
-            await addRosterPlayer(matchId, { teamMemberId, teamId, jerseyNumber });
             await fetchMatch();
         } catch (err: any) {
-            setError(err.message || 'Chyba při přidávání na soupisku.');
+            if (err.message) {
+                alert(err.message);
+            } else {
+                alert('Chyba při odmítání zápasu.');
+            }
         }
     };
 
-    const handleCancel = async (reason: string) => {
+    const handleCancelMatch = async (reason: string) => {
         try {
             await cancelMatch(matchId, reason);
             await fetchMatch();
         } catch (err: any) {
-            setError(err.message || 'Chyba při rušení zápasu.');
+            if (err.message) {
+                alert(err.message);
+            } else {
+                alert('Chyba při rušení zápasu.');
+            }
+        }
+    };
+
+    const handleAddRosterPlayer = async (teamMemberId: string, teamId: string, jerseyNumber: number) => {
+        try {
+            const dto: RosterPlayerDto = {
+                teamMemberId: teamMemberId,
+                teamId: teamId,
+                jerseyNumber: jerseyNumber
+            };
+            await addRosterPlayer(matchId, dto);
+            await fetchMatch();
+        } catch (err: any) {
+            if (err.message) {
+                alert(err.message);
+            } else {
+                alert('Chyba při přidávání hráče na soupisku.');
+            }
         }
     };
 
@@ -75,19 +96,24 @@ export function useMatchDetail(matchId: string) {
             await setReferee(matchId, refereeId);
             await fetchMatch();
         } catch (err: any) {
-            setError(err.message || 'Chyba při nastavování rozhodčího.');
+            if (err.message) {
+                alert(err.message);
+            } else {
+                alert('Chyba při nastavování rozhodčího.');
+            }
         }
     };
 
     return {
         match,
-        error,
+        currentUserId,
         isLoading,
+        error,
         refreshMatch: fetchMatch,
-        handleAccept,
-        handleReject,
-        handleAddRoster,
-        handleCancel,
+        handleAcceptMatch,
+        handleRejectMatch,
+        handleCancelMatch,
+        handleAddRosterPlayer,
         handleSetReferee
     };
-}
+};

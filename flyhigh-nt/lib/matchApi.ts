@@ -1,5 +1,5 @@
 import { fetchWithAuth } from './apiClient';
-import { Match, MatchResponseDto } from '@/types/match';
+import { MatchDetail, MatchResponseDto, CreateMatchDto, AssignPositionDto, SetSide, RosterPlayerDto } from '@/types/match';
 
 const MATCH_URL = '/matches';
 
@@ -11,7 +11,7 @@ export const getMyMatches = async (): Promise<MatchResponseDto[]> => {
     return res.json();
 }
 
-export const getMatchById = async (matchId: string): Promise<Match> => {
+export const getMatchById = async (matchId: string): Promise<MatchDetail> => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}`);
     if (!res.ok) {
         throw new Error('Nepodařilo se načíst detail zápasu.');
@@ -19,20 +19,23 @@ export const getMatchById = async (matchId: string): Promise<Match> => {
     return res.json();
 }
 
-export const proposeMatch = async (data: any) => {
+export const proposeMatch = async (data: CreateMatchDto) => {
+    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!guidRegex.test(data.homeTeamId)) {
+        throw new Error("Vyberte platný domácí tým.");
+    }
+    if (!guidRegex.test(data.awayTeamId)) {
+        throw new Error("Vyberte platný hostující tým.");
+    }
+
     let finalDate = data.scheduledAt;
-    if (!finalDate || finalDate === "") {
+    if (finalDate === "") {
         throw new Error("Datum zápasu je povinné.");
     }
     finalDate = new Date(finalDate).toISOString();
 
-    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!guidRegex.test(data.homeTeamId) || !guidRegex.test(data.awayTeamId)) {
-        throw new Error("Vyberte platný domácí a hostující tým.");
-    }
-
     let finalRefereeId = null;
-    if (data.refereeId) {
+    if (data.refereeId !== null) {
         if (data.refereeId !== "") {
             finalRefereeId = data.refereeId;
         }
@@ -94,7 +97,7 @@ export const rejectMatch = async (matchId: string) => {
     }
 }
 
-export const addRosterPlayer = async (matchId: string, data: any) => {
+export const addRosterPlayer = async (matchId: string, data: RosterPlayerDto) => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/roster`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -139,7 +142,7 @@ export const startCurrentSet = async (matchId: string) => {
     }
 }
 
-export const addPoint = async (matchId: string, side: string) => {
+export const addPoint = async (matchId: string, side: SetSide) => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/point/${side}`, { method: 'POST' });
     if (!res.ok) {
         let errorData: any = {};
@@ -153,7 +156,7 @@ export const addPoint = async (matchId: string, side: string) => {
     }
 }
 
-export const assignPosition = async (matchId: string, data: any) => {
+export const assignPosition = async (matchId: string, data: AssignPositionDto) => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/positions`, {
         method: 'POST',
         body: JSON.stringify(data),

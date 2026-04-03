@@ -4,6 +4,7 @@ import React, { use, useState, useEffect } from "react";
 import { useTeamDetail } from "@/hooks/Teams/useTeamDetail";
 import { useTeamStats } from "@/hooks/Teams/useTeamStats";
 import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
+import { TeamRole } from "@/types/team";
 import { IoPeopleOutline, IoTrophyOutline, IoCalendarOutline, IoCopyOutline } from 'react-icons/io5';
 import "./TeamDetail.css";
 
@@ -18,7 +19,7 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
     const [editDescription, setEditDescription] = useState("");
 
     const [newMemberId, setNewMemberId] = useState("");
-    const [newMemberRole, setNewMemberRole] = useState("Player");
+    const [newMemberRole, setNewMemberRole] = useState<TeamRole>(TeamRole.Member);
 
     const [copySuccess, setCopySuccess] = useState<boolean>(false);
 
@@ -93,12 +94,13 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
         e.preventDefault();
         handleAddMember(newMemberId, newMemberRole);
         setNewMemberId("");
+        setNewMemberRole(TeamRole.Member);
     };
 
     let isManager = false;
-    if (team.myRole === 'Owner') {
+    if (team.myRole === TeamRole.Owner) {
         isManager = true;
-    } else if (team.myRole === 'Coach') {
+    } else if (team.myRole === TeamRole.Coach) {
         isManager = true;
     }
 
@@ -170,10 +172,10 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
                             <label>Role</label>
                             <select
                                 value={newMemberRole}
-                                onChange={(e) => setNewMemberRole(e.target.value)}
+                                onChange={(e) => setNewMemberRole(e.target.value as TeamRole)}
                             >
-                                <option value="Coach">Trenér (Coach)</option>
-                                <option value="Player">Hráč (Player)</option>
+                                <option value={TeamRole.Coach}>Trenér</option>
+                                <option value={TeamRole.Member}>Hráč</option>
                             </select>
                         </div>
                         <div className="FormActions">
@@ -193,12 +195,12 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
         let canChangeToOwner = false;
 
         if (member.userId !== currentUserId) {
-            if (team.myRole === 'Owner') {
+            if (team.myRole === TeamRole.Owner) {
                 canManageMember = true;
                 canChangeToOwner = true;
-            } else if (team.myRole === 'Coach') {
-                if (member.role !== 'Owner') {
-                    if (member.role !== 'Coach') {
+            } else if (team.myRole === TeamRole.Coach) {
+                if (member.role !== TeamRole.Owner) {
+                    if (member.role !== TeamRole.Coach) {
                         canManageMember = true;
                     }
                 }
@@ -209,17 +211,17 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
         if (canManageMember) {
             let options = [];
             if (canChangeToOwner) {
-                options.push(<option key="Owner" value="Owner">Majitel</option>);
+                options.push(<option key={TeamRole.Owner} value={TeamRole.Owner}>Majitel</option>);
             }
-            options.push(<option key="Coach" value="Coach">Trenér</option>);
-            options.push(<option key="Player" value="Player">Hráč</option>);
+            options.push(<option key={TeamRole.Coach} value={TeamRole.Coach}>Trenér</option>);
+            options.push(<option key={TeamRole.Member} value={TeamRole.Member}>Hráč</option>);
 
             memberActions = (
                 <div className="MemberActions">
                     <select
                         className="RoleSelect"
-                        value={member.role}
-                        onChange={(e) => handleChangeRole(member.userId, e.target.value)}
+                        value={member.role as string}
+                        onChange={(e) => handleChangeRole(member.userId, e.target.value as TeamRole)}
                     >
                         {options}
                     </select>
@@ -233,11 +235,20 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: s
             );
         }
 
+        let translatedRole = member.role;
+        if (member.role === TeamRole.Owner) {
+            translatedRole = "Majitel";
+        } else if (member.role === TeamRole.Coach) {
+            translatedRole = "Trenér";
+        } else if (member.role === TeamRole.Member) {
+            translatedRole = "Hráč";
+        }
+
         membersList.push(
             <li key={member.userId} className="MemberItem">
                 <div className="MemberInfo">
                     <span className="MemberName">{member.firstName} {member.lastName}</span>
-                    <span className="MemberRole">{member.role}</span>
+                    <span className="MemberRole">{translatedRole}</span>
                 </div>
                 {memberActions}
             </li>

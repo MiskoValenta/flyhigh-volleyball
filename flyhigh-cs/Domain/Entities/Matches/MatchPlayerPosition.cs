@@ -10,35 +10,21 @@ namespace Domain.Entities.Matches;
 
 public class MatchPlayerPosition : Entity<MatchPlayerPositionId>
 {
+  public MatchSetId MatchSetId { get; private set; }
   public TeamMemberId TeamMemberId { get; private set; }
   public PlayerPosition Position { get; private set; }
 
   private MatchPlayerPosition() { }
 
-  private MatchPlayerPosition(
-    MatchPlayerPositionId id, 
-    TeamMemberId teamMemberId, 
-    PlayerPosition position) : base(id)
+  internal MatchPlayerPosition(MatchPlayerPositionId id, MatchSetId matchSetId, TeamMemberId teamMemberId, PlayerPosition position) : base(id)
   {
+    MatchSetId = matchSetId;
     TeamMemberId = teamMemberId;
     Position = position;
-  }
-
-  public static MatchPlayerPosition Create(
-    TeamMemberId teamMemberId, 
-    PlayerPosition position)
-  {
-    var newId = MatchPlayerPositionId.New();
-
-    return new MatchPlayerPosition(
-      newId, 
-      teamMemberId, 
-      position);
   }
 
   internal void UpdatePosition(PlayerPosition newPosition)
   {
     Position = newPosition;
   }
-
 }

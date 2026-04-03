@@ -4,11 +4,11 @@ import { TeamEvent, EventResponse, CreateEventDto } from '@/types/event';
 const BASE_URL = '/events';
 
 export const createEvent = async (data: CreateEventDto) => {
-    let finalEventDate: string | null | undefined = data.eventDate;
+    let finalEventDate: string | null = data.eventDate;
 
     if (finalEventDate === "") {
         finalEventDate = null;
-    } else if (finalEventDate) {
+    } else if (finalEventDate !== null) {
         finalEventDate = new Date(finalEventDate).toISOString();
     }
 
@@ -90,7 +90,7 @@ export const getEventById = async (eventId: string): Promise<TeamEvent> => {
     return res.json();
 }
 
-export const respondToEvent = async (eventId: string, response: EventResponse | string): Promise<void> => {
+export const respondToEvent = async (eventId: string, response: EventResponse): Promise<void> => {
     const res = await fetchWithAuth(`${BASE_URL}/${eventId}/respond`, {
         method: 'POST',
         body: JSON.stringify({ response })

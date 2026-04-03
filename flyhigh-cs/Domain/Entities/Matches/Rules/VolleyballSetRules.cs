@@ -7,10 +7,7 @@ namespace Domain.Entities.Matches.Rules;
 
 public class VolleyballSetRules : ISetRules
 {
-  public bool IsWinningScore(int currentTeamScore, int opponentScore, SetType type)
-  {
-    int pointsToWin = type == SetType.TieBreak ? 15 : 25;
-
-    return currentTeamScore >= pointsToWin && (currentTeamScore - opponentScore) >= 2;
-  }
+  public int PointsToWinStandardSet => 25;
+  public int PointsToWinTieBreak => 15;
+  public int PointDifferenceRequired => 2;
 }
