@@ -19,14 +19,14 @@ public class Event : AuditableEntity<EventId>
   public EventType Type { get; private set; }
   public DateTime? EventDate { get; private set; }
   public string? Location { get; private set; }
-  public DateTime CreatedAt { get; private set; }
 
   private readonly List<EventParticipant> _participants = new();
   public IReadOnlyCollection<EventParticipant> Participants => _participants.AsReadOnly();
 
   private Event() { }
 
-  public Event(EventId id, TeamId teamId, UserId creatorId, string title, string? description, EventType type, DateTime? eventDate, string? location) : base(id)
+  private Event(EventId id, TeamId teamId, UserId creatorId, string title, string? description, EventType type, DateTime? eventDate, string? location)
+      : base(id)
   {
     TeamId = teamId;
     CreatorId = creatorId;
@@ -35,33 +35,47 @@ public class Event : AuditableEntity<EventId>
     Type = type;
     EventDate = eventDate;
     Location = location;
-    CreatedAt = DateTime.UtcNow;
+  }
+
+  public static Event Create(UserId creatorId, TeamId teamId, string title, string? description, EventType type, DateTime? eventDate, string? location)
+  {
+    if (string.IsNullOrWhiteSpace(title))
+    {
+      throw new EventInvalidException("Název události je povinný.");
+    }
+
+    return new Event(new EventId(Guid.NewGuid()), teamId, creatorId, title, description, type, eventDate, location);
   }
 
   public void AddParticipant(UserId userId)
   {
-    if (_participants.Any(p => p.UserId == userId))
+    var exists = false;
+    foreach (var p in _participants)
     {
-      throw new EventInvalidException("Uživatel je již účastníkem této události.");
+      if (p.UserId == userId)
+      {
+        exists = true;
+      }
     }
 
-    var participant = new EventParticipant(new EventParticipantId(Guid.NewGuid()), Id, userId);
-    _participants.Add(participant);
+    if (!exists)
+    {
+      _participants.Add(new EventParticipant(new EventParticipantId(Guid.NewGuid()), Id, userId));
+    }
   }
 
-  public void RespondToEvent(UserId userId, EventResponse response)
+  public void Respond(UserId userId, EventResponse response)
   {
-    if (Type == EventType.Announcement)
-    {
-      throw new EventInvalidException("Na oznámení nelze odpovídat.");
-    }
-
     var participant = _participants.FirstOrDefault(p => p.UserId == userId);
     if (participant == null)
     {
-      throw new EventInvalidException("Uživatel není součástí této události.");
+      var newParticipant = new EventParticipant(new EventParticipantId(Guid.NewGuid()), Id, userId);
+      newParticipant.UpdateResponse(response);
+      _participants.Add(newParticipant);
     }
-
-    participant.UpdateResponse(response);
+    else
+    {
+      participant.UpdateResponse(response);
+    }
   }
 }

@@ -48,10 +48,10 @@ public class MatchService : IMatchService
 
   public async Task<Guid> ProposeMatchAsync(CreateMatchDto dto, Guid currentUserId, CancellationToken cancellationToken = default)
   {
-    UserId refereeId = null;
-    if (dto.RefereeId.HasValue)
+    UserId refereeIdObj = null;
+    if (dto.RefereeId != null)
     {
-      refereeId = new UserId(dto.RefereeId.Value);
+      refereeIdObj = new UserId(dto.RefereeId.Value);
     }
 
     var match = Match.CreateInvitation(
@@ -60,7 +60,7 @@ public class MatchService : IMatchService
         new TeamId(dto.AwayTeamId),
         dto.ScheduledAt,
         dto.Location,
-        refereeId
+        refereeIdObj
     );
 
     await _matchRepository.AddAsync(match, cancellationToken);
@@ -68,14 +68,10 @@ public class MatchService : IMatchService
 
     var awayTeam = await _teamRepository.GetByIdAsync(new TeamId(dto.AwayTeamId), cancellationToken);
 
-    string awayTeamName;
+    string awayTeamName = "Neznámý tým";
     if (awayTeam != null)
     {
       awayTeamName = awayTeam.TeamName;
-    }
-    else
-    {
-      awayTeamName = "Neznámý tým";
     }
 
     var eventDto = new CreateEventDto(
@@ -136,24 +132,16 @@ public class MatchService : IMatchService
         s.Winner.ToString()
     )).OrderBy(s => s.SetNumber).ToList();
 
-    string homeTeamName;
+    string homeTeamName = "Neznámý tým";
     if (homeTeam != null)
     {
       homeTeamName = homeTeam.TeamName;
     }
-    else
-    {
-      homeTeamName = "Neznámý tým";
-    }
 
-    string awayTeamName;
+    string awayTeamName = "Neznámý tým";
     if (awayTeam != null)
     {
       awayTeamName = awayTeam.TeamName;
-    }
-    else
-    {
-      awayTeamName = "Neznámý tým";
     }
 
     Guid? finalWinnerId = null;
@@ -271,24 +259,16 @@ public class MatchService : IMatchService
       var homeTeam = await _teamRepository.GetByIdAsync(m.HomeTeamId, cancellationToken);
       var awayTeam = await _teamRepository.GetByIdAsync(m.AwayTeamId, cancellationToken);
 
-      string homeTeamName;
+      string homeTeamName = "Neznámý tým";
       if (homeTeam != null)
       {
         homeTeamName = homeTeam.TeamName;
       }
-      else
-      {
-        homeTeamName = "Neznámý tým";
-      }
 
-      string awayTeamName;
+      string awayTeamName = "Neznámý tým";
       if (awayTeam != null)
       {
         awayTeamName = awayTeam.TeamName;
-      }
-      else
-      {
-        awayTeamName = "Neznámý tým";
       }
 
       result.Add(new MatchResponseDto(
