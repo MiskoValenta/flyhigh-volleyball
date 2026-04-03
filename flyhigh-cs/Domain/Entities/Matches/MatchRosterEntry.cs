@@ -16,33 +16,11 @@ public class MatchRosterEntry : Entity<MatchRosterEntryId>
 
   private MatchRosterEntry() { }
 
-  private MatchRosterEntry(
-      MatchRosterEntryId id,
-      MatchId matchId,
-      TeamMemberId teamMemberId,
-      TeamId teamId,
-      int jerseyNumber) : base(id)
+  internal MatchRosterEntry(MatchRosterEntryId id, MatchId matchId, TeamMemberId teamMemberId, TeamId teamId, int jerseyNumber) : base(id)
   {
     MatchId = matchId;
     TeamMemberId = teamMemberId;
     TeamId = teamId;
     JerseyNumber = jerseyNumber;
-  }
-
-  public static MatchRosterEntry Create(
-      MatchId matchId,
-      TeamMemberId teamMemberId,
-      TeamId teamId,
-      int jerseyNumber)
-  {
-    var newId = MatchRosterEntryId.New();
-
-    return new MatchRosterEntry(
-        newId,
-        matchId,
-        teamMemberId,
-        teamId,
-        jerseyNumber
-    );
   }
 }

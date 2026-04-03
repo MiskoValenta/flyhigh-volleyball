@@ -1,41 +1,28 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { proposeMatch } from '@/lib/matchApi';
+import { CreateMatchDto } from '@/types/match';
 
-export function useCreateMatch() {
-    const router = useRouter();
-    const [formData, setFormData] = useState({
-        homeTeamId: '',
-        awayTeamId: '',
-        scheduledAt: '',
-        location: '',
-        refereeId: ''
-    });
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+export const useCreateMatch = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleCreateMatch = async (data: CreateMatchDto) => {
         setIsLoading(true);
         setError('');
-
         try {
-            await proposeMatch(formData);
-            router.push('/Dashboard/Matches');
+            const result = await proposeMatch(data);
+            return result;
         } catch (err: any) {
             if (err.message) {
                 setError(err.message);
             } else {
-                setError('Došlo k chybě při komunikaci se serverem.');
+                setError('Nastala neočekávaná chyba při vytváření zápasu.');
             }
+            throw err;
         } finally {
             setIsLoading(false);
         }
     };
 
-    return { formData, error, isLoading, handleChange, handleSubmit };
-}
+    return { handleCreateMatch, isLoading, error };
+};

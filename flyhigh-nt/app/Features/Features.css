@@ -108,42 +108,55 @@
 }
 
 .BottomGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
+    display: flex;
+    justify-content: center;
+    gap: var(--space-6);
     width: 100%;
+    max-width: 900px;
+    margin: var(--space-6) auto 0 auto;
 }
 
 .InfoBarCard {
+    flex: 1;
     text-align: left;
-    padding: var(--space-5);
+    padding: var(--space-6);
     border-radius: var(--radius-lg);
 
     background: var(--background);
     border: var(--glassed-border);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    box-shadow: var(--glassed-box-shadow);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.InfoBarCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    border-color: rgba(56, 189, 248, 0.4);
 }
 
 .InfoBarCard h3 {
     margin: 0 0 var(--space-4) 0;
     font-size: var(--fs-h4);
-    color: var(--primary-foreground);
-    font-weight: 600;
+    color: #38bdf8;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: var(--space-2);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: var(--space-3);
+    text-align: center;
 }
 
 .InfoListVertical {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .InfoItem {
@@ -151,18 +164,31 @@
     align-items: center;
     gap: var(--space-3);
     color: var(--primary-foreground);
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 500;
+    background: rgba(255, 255, 255, 0.03);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.InfoItem:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .InfoIcon {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     color: #38bdf8;
-    min-width: 24px;
+    min-width: 28px;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
 }
 
-.TechText strong {
+.TechText strong,
+.InfoItem span strong {
     color: var(--primary-foreground);
+    font-weight: 700;
 }
 
 @media (max-width: 1024px) {
@@ -213,6 +239,11 @@
 
     .FeatureIconBox {
         margin-bottom: var(--space-2);
+    }
+
+    .InfoItem {
+        width: 100%;
+        justify-content: center;
     }
 }
 

@@ -7,294 +7,286 @@ using Domain.Value_Objects.Teams;
 using Domain.Value_Objects.Users;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Domain.Entities.Matches;
 
 public class Match : AuditableEntity<MatchId>
 {
-  private readonly List<MatchSet> _sets = new();
-  private readonly List<MatchRosterEntry> _roster = new();
-
   public UserId CreatorId { get; private set; }
   public TeamId HomeTeamId { get; private set; }
   public TeamId AwayTeamId { get; private set; }
-  public string Location { get; private set; }
-
   public DateTime ScheduledAt { get; private set; }
-  public UserId? RefereeId { get; private set; }
-  public string? Notes { get; private set; }
+  public string Location { get; private set; }
   public MatchStatus Status { get; private set; }
+  public UserId? RefereeId { get; private set; }
   public TeamId? WinnerId { get; private set; }
 
-  public IReadOnlyCollection<MatchSet> Sets => _sets.AsReadOnly();
+  private readonly List<MatchRosterEntry> _roster = new();
   public IReadOnlyCollection<MatchRosterEntry> Roster => _roster.AsReadOnly();
+
+  private readonly List<MatchSet> _sets = new();
+  public IReadOnlyCollection<MatchSet> Sets => _sets.AsReadOnly();
 
   private Match() { }
 
-  private Match(
-      MatchId id,
-      UserId creatorId,
-      TeamId homeTeamId,
-      TeamId awayTeamId,
-      DateTime scheduledAt,
-      string location,
-      UserId? refereeId) : base(id)
+  private Match(MatchId id, UserId creatorId, TeamId homeTeamId, TeamId awayTeamId, DateTime scheduledAt, string location, MatchStatus status, UserId? refereeId = null)
+      : base(id)
   {
-    if (string.IsNullOrWhiteSpace(location))
-    {
-      throw new ArgumentException("Lokace nesmí být prázdná.", nameof(location));
-    }
-
     CreatorId = creatorId;
     HomeTeamId = homeTeamId;
     AwayTeamId = awayTeamId;
     ScheduledAt = scheduledAt;
     Location = location;
+    Status = status;
     RefereeId = refereeId;
-
-    Status = MatchStatus.Proposed;
   }
 
-  public static Match CreateInvitation(
-      UserId creatorId,
-      TeamId homeTeamId,
-      TeamId awayTeamId,
-      DateTime scheduledAt,
-      string location,
-      UserId? refereeId)
+  public static Match CreateInvitation(UserId creatorId, TeamId homeTeamId, TeamId awayTeamId, DateTime scheduledAt, string location, UserId? refereeId = null)
   {
     if (homeTeamId == awayTeamId)
     {
-      throw new MatchInvalidException("Domácí a hostující tým musí být odlišný.");
+      throw new MatchInvalidException("Tým nemůže hrát sám proti sobě.");
     }
 
-    var newId = MatchId.New();
+    if (scheduledAt <= DateTime.UtcNow)
+    {
+      throw new MatchInvalidException("Zápas musí být naplánován do budoucnosti.");
+    }
 
-    return new Match(
-        newId,
-        creatorId,
-        homeTeamId,
-        awayTeamId,
-        scheduledAt,
-        location,
-        refereeId);
+    return new Match(new MatchId(Guid.NewGuid()), creatorId, homeTeamId, awayTeamId, scheduledAt, location, MatchStatus.Pending, refereeId);
   }
 
   public void AcceptInvitation()
   {
-    if (Status != MatchStatus.Proposed)
+    if (Status != MatchStatus.Pending)
     {
-      throw new MatchInvalidException("Pouze navržený zápas může být přijat.");
+      throw new MatchInvalidException("Pouze navržené zápasy lze přijmout.");
     }
 
     Status = MatchStatus.Accepted;
-    MarkAsModified();
   }
 
   public void RejectInvitation()
   {
-    if (Status != MatchStatus.Proposed)
+    if (Status != MatchStatus.Pending)
     {
-      throw new InvalidOperationException("Pouze navržený zápas může být odmítnut.");
+      throw new MatchInvalidException("Pouze navržené zápasy lze odmítnout.");
     }
 
     Status = MatchStatus.Rejected;
-    MarkAsModified();
   }
 
   public void SetReferee(UserId refereeId)
   {
-    if (Status == MatchStatus.Finished || Status == MatchStatus.Cancelled)
+    if (Status != MatchStatus.Pending)
     {
-      throw new MatchInvalidException("Nelze měnit rozhodčího u ukončeného nebo zrušeného zápasu.");
+      if (Status != MatchStatus.Accepted)
+      {
+        throw new MatchInvalidException("Rozhodčího nelze nastavit, pokud je zápas již spuštěn nebo ukončen.");
+      }
     }
-
     RefereeId = refereeId;
-    MarkAsModified();
   }
 
-  public void AddToRoster(TeamMemberId teamMemberId, TeamId teamId, int jerseyNumber)
+  public void AddToRoster(TeamMemberId memberId, TeamId teamId, int jerseyNumber)
   {
-    if (Status == MatchStatus.Finished || Status == MatchStatus.Cancelled)
+    if (Status != MatchStatus.Accepted)
     {
-      throw new MatchInvalidException("Nelze měnit soupisku u ukončeného zápasu.");
+      throw new MatchInvalidException("Hráče lze přidávat na soupisku pouze po přijetí zápasu.");
     }
 
-    if (teamId != HomeTeamId && teamId != AwayTeamId)
+    if (teamId != HomeTeamId)
     {
-      throw new MatchInvalidException("Tým nehraje v tomto zápase.");
+      if (teamId != AwayTeamId)
+      {
+        throw new MatchInvalidException("Hráč musí patřit k jednomu z týmů v tomto zápase.");
+      }
     }
 
-    if (_roster.Any(x => x.TeamMemberId == teamMemberId))
+    var exists = false;
+    foreach (var r in _roster)
     {
-      throw new MatchInvalidException("Hráč již je zapsaný na soupisce pro tento zápas.");
+      if (r.TeamMemberId == memberId)
+      {
+        exists = true;
+      }
     }
 
-    if (_roster.Any(x => x.TeamId == teamId && x.JerseyNumber == jerseyNumber))
+    if (exists)
     {
-      throw new InvalidOperationException($"Číslo dresu {jerseyNumber} je v tomto týmu už zabrané.");
+      throw new MatchInvalidException("Hráč je již na soupisce.");
     }
 
-    _roster.Add(MatchRosterEntry.Create(
-      Id, teamMemberId,
-      teamId,
-      jerseyNumber));
+    var hasJersey = false;
+    foreach (var r in _roster)
+    {
+      if (r.TeamId == teamId)
+      {
+        if (r.JerseyNumber == jerseyNumber)
+        {
+          hasJersey = true;
+        }
+      }
+    }
 
-    MarkAsModified();
+    if (hasJersey)
+    {
+      throw new MatchInvalidException($"Číslo dresu {jerseyNumber} je již v týmu obsazeno.");
+    }
+
+    _roster.Add(new MatchRosterEntry(new MatchRosterEntryId(Guid.NewGuid()), Id, memberId, teamId, jerseyNumber));
+  }
+
+  public void AssignPlayerPositionForSet(int setNumber, TeamMemberId memberId, PlayerPosition position)
+  {
+    if (Status != MatchStatus.InProgress)
+    {
+      throw new MatchInvalidException("Pozice lze přiřazovat pouze probíhajícímu zápasu.");
+    }
+
+    var set = _sets.FirstOrDefault(s => s.SetNumber == setNumber);
+    if (set == null)
+    {
+      throw new MatchInvalidException("Tento set neexistuje.");
+    }
+
+    if (set.IsFinished)
+    {
+      throw new MatchInvalidException("Nelze měnit pozice v již ukončeném setu.");
+    }
+
+    var onRoster = false;
+    foreach (var r in _roster)
+    {
+      if (r.TeamMemberId == memberId)
+      {
+        onRoster = true;
+      }
+    }
+
+    if (!onRoster)
+    {
+      throw new MatchInvalidException("Hráč není na soupisce tohoto zápasu.");
+    }
+
+    set.AssignPosition(memberId, position);
   }
 
   public void StartMatch(ISetRules setRules)
   {
-    if (Status != MatchStatus.Accepted && Status != MatchStatus.Scheduled)
+    if (Status != MatchStatus.Accepted)
     {
-      throw new MatchInvalidException("Zápas musí být přijatý, aby mohl být zahájen.");
+      throw new MatchInvalidException("Zápas nelze zahájit v aktuálním stavu.");
     }
 
-    ValidateRoster();
     Status = MatchStatus.InProgress;
-
-    _sets.Add(MatchSet.Create(1, SetType.Normal));
-    MarkAsModified();
+    _sets.Add(new MatchSet(new MatchSetId(Guid.NewGuid()), Id, 1, SetType.Standard, setRules.PointsToWinStandardSet));
   }
 
   public void StartCurrentSet()
   {
     if (Status != MatchStatus.InProgress)
     {
-      throw new MatchInvalidException("Zápas není rozehrán.");
+      throw new MatchInvalidException("Nelze odstartovat set, zápas neprobíhá.");
     }
 
-    var currentSet = _sets.OrderBy(s => s.SetNumber).LastOrDefault();
+    var currentSet = _sets.LastOrDefault();
     if (currentSet == null)
     {
-      throw new InvalidOperationException("Neexistuje žádný set.");
+      throw new MatchInvalidException("Nenalezen žádný set ke spuštění.");
+    }
+
+    if (currentSet.IsFinished)
+    {
+      throw new MatchInvalidException("Tento set je již ukončený.");
     }
 
     currentSet.StartSet();
-    MarkAsModified();
-  }
-
-  public void AssignPlayerPositionForSet(int setNumber, TeamMemberId teamMemberId, PlayerPosition position)
-  {
-    if (Status != MatchStatus.InProgress && Status != MatchStatus.Scheduled && Status != MatchStatus.Accepted)
-    {
-      throw new MatchInvalidException("Pozice lze měnit pouze před nebo během zápasu.");
-    }
-
-    var set = _sets.SingleOrDefault(s => s.SetNumber == setNumber);
-    if (set == null)
-    {
-      throw new InvalidOperationException($"Set {setNumber} neexistuje.");
-    }
-
-    if (!_roster.Any(r => r.TeamMemberId == teamMemberId))
-    {
-      throw new MatchInvalidException("Hráč musí být nejprve na soupisce zápasu, než mu bude přidělena pozice.");
-    }
-
-    set.AssignPlayerPosition(teamMemberId, position);
-    MarkAsModified();
   }
 
   public void AddPoint(SetSide side, ISetRules setRules, IMatchRules matchRules)
   {
     if (Status != MatchStatus.InProgress)
     {
-      throw new MatchInvalidException("Zápas aktuálně neprobíhá.");
+      throw new MatchInvalidException("Nelze přidávat body, zápas neprobíhá.");
     }
 
-    var currentSet = _sets.OrderBy(s => s.SetNumber).LastOrDefault();
+    var currentSet = _sets.LastOrDefault();
     if (currentSet == null)
     {
-      throw new InvalidOperationException("Neexistuje žádný set.");
+      throw new MatchInvalidException("Není žádný aktivní set.");
+    }
+
+    if (!currentSet.IsStarted)
+    {
+      throw new MatchInvalidException("Set ještě nebyl odstartován.");
+    }
+
+    if (currentSet.IsFinished)
+    {
+      throw new MatchInvalidException("Nelze přidat bod do ukončeného setu.");
     }
 
     currentSet.AddPoint(side, setRules);
 
     if (currentSet.IsFinished)
     {
-      HandleFinishedSet(setRules, matchRules);
+      CheckMatchWinner(matchRules, setRules);
     }
-
-    MarkAsModified();
   }
 
-  private void HandleFinishedSet(ISetRules setRules, IMatchRules matchRules)
+  private void CheckMatchWinner(IMatchRules matchRules, ISetRules setRules)
   {
-    if (matchRules.IsMatchFinished(_sets))
+    int homeSets = 0;
+    int awaySets = 0;
+
+    foreach (var s in _sets)
+    {
+      if (s.Winner == SetWinner.Home)
+      {
+        homeSets++;
+      }
+      else if (s.Winner == SetWinner.Away)
+      {
+        awaySets++;
+      }
+    }
+
+    if (homeSets == matchRules.SetsToWin)
     {
       Status = MatchStatus.Finished;
-
-      int homeWins = _sets.Count(s => s.Winner == SetWinner.Home);
-      int awayWins = _sets.Count(s => s.Winner == SetWinner.Away);
-
-      if (homeWins > awayWins)
-      {
-        WinnerId = HomeTeamId;
-      }
-      else
-      {
-        WinnerId = AwayTeamId;
-      }
-
-      return;
+      WinnerId = HomeTeamId;
     }
-
-    int currentHomeWins = _sets.Count(s => s.Winner == SetWinner.Home);
-    int currentAwayWins = _sets.Count(s => s.Winner == SetWinner.Away);
-
-    bool isTieBreak = false;
-    if (currentHomeWins == 2 && currentAwayWins == 2)
+    else if (awaySets == matchRules.SetsToWin)
     {
-      isTieBreak = true;
-    }
-
-    SetType nextType;
-    if (isTieBreak)
-    {
-      nextType = SetType.TieBreak;
+      Status = MatchStatus.Finished;
+      WinnerId = AwayTeamId;
     }
     else
     {
-      nextType = SetType.Normal;
-    }
+      int nextSetNumber = _sets.Count + 1;
+      int maxSets = (matchRules.SetsToWin * 2) - 1;
 
-    _sets.Add(MatchSet.Create(
-        _sets.Count + 1,
-        nextType
-    ));
+      SetType nextSetType = SetType.Standard;
+      int pointsToWin = setRules.PointsToWinStandardSet;
+
+      if (nextSetNumber == maxSets)
+      {
+        nextSetType = SetType.TieBreak;
+        pointsToWin = setRules.PointsToWinTieBreak;
+      }
+
+      _sets.Add(new MatchSet(new MatchSetId(Guid.NewGuid()), Id, nextSetNumber, nextSetType, pointsToWin));
+    }
   }
 
-  public void CancelMatch(string cancellationReason)
+  public void CancelMatch(string reason)
   {
-    if (Status == MatchStatus.Finished || Status == MatchStatus.Rejected)
+    if (Status == MatchStatus.Finished)
     {
-      throw new MatchInvalidException("Nelze zrušit zápas, který už je dohraný nebo odmítnutý.");
+      throw new MatchInvalidException("Nelze zrušit již odehraný zápas.");
     }
-
     Status = MatchStatus.Cancelled;
-
-    if (string.IsNullOrWhiteSpace(Notes))
-    {
-      Notes = cancellationReason;
-    }
-    else
-    {
-      Notes = $"{Notes} | Důvod zrušení: {cancellationReason}";
-    }
-
-    MarkAsDeleted();
-  }
-
-  private void ValidateRoster()
-  {
-    int homeCount = _roster.Count(x => x.TeamId == HomeTeamId);
-    int awayCount = _roster.Count(x => x.TeamId == AwayTeamId);
-
-    if (homeCount < 6 || awayCount < 6)
-    {
-      throw new MatchInvalidException("Oba týmy musí mít na soupisce alespoň 6 hráčů před začátkem zápasu.");
-    }
   }
 }

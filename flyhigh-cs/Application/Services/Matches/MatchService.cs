@@ -129,7 +129,11 @@ public class MatchService : IMatchService
         s.AwayScore,
         s.IsFinished,
         s.IsStarted,
-        s.Winner.ToString()
+        s.Winner.ToString(),
+        s.Positions.Select(p => new MatchPlayerPositionDto(
+            p.TeamMemberId.Value,
+            p.Position.ToString()
+        )).ToList()
     )).OrderBy(s => s.SetNumber).ToList();
 
     string homeTeamName = "Neznámý tým";
@@ -212,7 +216,9 @@ public class MatchService : IMatchService
     var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
     EnsureIsMatchCreator(match, currentUserId);
 
-    match.AssignPlayerPositionForSet(dto.SetNumber, new TeamMemberId(dto.TeamMemberId), dto.Position);
+    PlayerPosition positionEnum = Enum.Parse<PlayerPosition>(dto.Position, true);
+
+    match.AssignPlayerPositionForSet(dto.SetNumber, new TeamMemberId(dto.TeamMemberId), positionEnum);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
 

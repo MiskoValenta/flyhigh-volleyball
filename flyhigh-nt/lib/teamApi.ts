@@ -1,5 +1,5 @@
 import { fetchWithAuth } from './apiClient';
-import { TeamResponseDto, TeamDetail, CreateTeamDto, UpdateTeamDto, PendingInvitationDto } from '@/types/team';
+import { TeamResponseDto, TeamDetail, CreateTeamDto, UpdateTeamDto, PendingInvitationDto, TeamRole } from '@/types/team';
 
 const TEAM_URL = '/teams';
 
@@ -55,7 +55,7 @@ export const removeTeamMember = async (teamId: string, userId: string) => {
     }
 };
 
-export const addTeamMember = async (teamId: string, userId: string, role: string) => {
+export const addTeamMember = async (teamId: string, userId: string, role: TeamRole) => {
     const cleanId = userId.trim();
     const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -95,7 +95,7 @@ export const addTeamMember = async (teamId: string, userId: string, role: string
     }
 };
 
-export const changeTeamMemberRole = async (teamId: string, userId: string, newRole: string) => {
+export const changeTeamMemberRole = async (teamId: string, userId: string, newRole: TeamRole) => {
     const res = await fetchWithAuth(`${TEAM_URL}/${teamId}/members/${userId}/role`, {
         method: 'PUT',
         body: JSON.stringify({ newRole }),

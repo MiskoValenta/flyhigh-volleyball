@@ -1,18 +1,18 @@
 export enum EventType {
     Announcement = "Announcement",
     Poll = "Poll",
-    Match = "Match",
+    Match = "Match"
 }
 
 export enum EventResponse {
     Unknown = "Unknown",
     Accepted = "Accepted",
-    Declined = "Declined",
+    Declined = "Declined"
 }
 
 export interface EventParticipantDto {
     userId: string;
-    response: EventResponse | string;
+    response: EventResponse;
 }
 
 export interface TeamEvent {
@@ -20,13 +20,13 @@ export interface TeamEvent {
     teamId: string;
     creatorId: string;
     title: string;
-    description?: string;
-    type: EventType | string;
-    eventDate?: string;
-    location?: string;
+    description: string | null;
+    type: EventType;
+    eventDate: string | null;
+    location: string | null;
     createdAt: string;
-    participants?: EventParticipantDto[];
-    myResponse: EventResponse | string;
+    participants: EventParticipantDto[];
+    myResponse: EventResponse;
     acceptedCount: number;
     declinedCount: number;
 }
@@ -34,13 +34,13 @@ export interface TeamEvent {
 export interface CreateEventDto {
     teamId: string;
     title: string;
-    description?: string;
-    type: EventType | string;
-    eventDate?: string;
-    location?: string;
+    description: string;
+    type: EventType;
+    eventDate: string | null;
+    location: string;
     invitedUserIds: string[];
 }
 
 export interface RespondToEventDto {
-    response: EventResponse | string;
+    response: EventResponse;
 }

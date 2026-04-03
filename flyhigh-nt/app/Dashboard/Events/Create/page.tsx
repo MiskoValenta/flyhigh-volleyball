@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCreateEvent } from "@/hooks/Events/useCreateEvent";
 import { getMyTeams } from "@/lib/teamApi";
 import { Team } from "@/types/team";
-import { CreateEventDto } from "@/types/event";
+import { CreateEventDto, EventType } from "@/types/event";
 import "./CreateEvent.css";
 
 export default function CreateEventPage() {
@@ -18,7 +18,7 @@ export default function CreateEventPage() {
     const [teamId, setTeamId] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [eventType, setEventType] = useState("Training");
+    const [eventType, setEventType] = useState<EventType>(EventType.Announcement);
     const [eventDate, setEventDate] = useState("");
     const [location, setLocation] = useState("");
 
@@ -43,12 +43,17 @@ export default function CreateEventPage() {
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        let finalEventDate: string | null = eventDate;
+        if (eventDate === "") {
+            finalEventDate = null;
+        }
+
         const dto: CreateEventDto = {
             teamId: teamId,
             title: title,
             description: description,
             type: eventType,
-            eventDate: eventDate,
+            eventDate: finalEventDate,
             location: location,
             invitedUserIds: []
         };
@@ -104,12 +109,10 @@ export default function CreateEventPage() {
 
                         <div className="form-group-ce">
                             <label>Typ události</label>
-                            <select value={eventType} onChange={(e) => setEventType(e.target.value)}>
-                                <option value="Training">Trénink</option>
-                                <option value="Match">Zápas</option>
-                                <option value="Tournament">Turnaj</option>
-                                <option value="Meeting">Schůze</option>
-                                <option value="Other">Jiné</option>
+                            <select value={eventType} onChange={(e) => setEventType(e.target.value as EventType)}>
+                                <option value={EventType.Announcement}>Oznámení</option>
+                                <option value={EventType.Poll}>Anketa</option>
+                                <option value={EventType.Match}>Zápas</option>
                             </select>
                         </div>
                     </div>

@@ -6,6 +6,6 @@ namespace Domain.Entities.Matches.MatchEnums;
 
 public enum SetType
 {
-  Normal = 0,
-  TieBreak = 1
+  Standard,
+  TieBreak
 }

@@ -7,5 +7,5 @@ namespace Domain.Entities.Matches.Rules;
 
 public interface IMatchRules
 {
-  bool IsMatchFinished(IReadOnlyCollection<MatchSet> sets);
+  int SetsToWin { get; }
 }

@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Entities.Matches.Exceptions;
 using Domain.Entities.Matches.MatchEnums;
 using Domain.Entities.Matches.Rules;
 using Domain.Value_Objects.Matches;
@@ -9,76 +10,56 @@ using System.Text;
 
 namespace Domain.Entities.Matches;
 
-public class MatchSet : AuditableEntity<MatchSetId>
+public class MatchSet : Entity<MatchSetId>
 {
-  private readonly List<MatchPlayerPosition> _playerPositions = new();
-
+  public MatchId MatchId { get; private set; }
   public int SetNumber { get; private set; }
   public SetType Type { get; private set; }
-
   public int HomeScore { get; private set; }
   public int AwayScore { get; private set; }
-
   public bool IsFinished { get; private set; }
   public bool IsStarted { get; private set; }
   public SetWinner Winner { get; private set; }
 
-  public IReadOnlyCollection<MatchPlayerPosition> PlayerPositions => _playerPositions.AsReadOnly();
+  private readonly List<MatchPlayerPosition> _positions = new();
+  public IReadOnlyCollection<MatchPlayerPosition> Positions => _positions.AsReadOnly();
+
+  private readonly int _targetPoints;
 
   private MatchSet() { }
 
-  private MatchSet(
-      MatchSetId id,
-      int setNumber,
-      SetType type
-  ) : base(id)
+  internal MatchSet(MatchSetId id, MatchId matchId, int setNumber, SetType type, int targetPoints) : base(id)
   {
+    MatchId = matchId;
     SetNumber = setNumber;
     Type = type;
-
     HomeScore = 0;
     AwayScore = 0;
-
     IsFinished = false;
     IsStarted = false;
     Winner = SetWinner.None;
+    _targetPoints = targetPoints;
   }
 
-  public static MatchSet Create(
-    int setNumber,
-    SetType type)
-  {
-    var newId = MatchSetId.New();
-
-    return new MatchSet(
-      newId,
-      setNumber,
-      type);
-  }
-
-  public void StartSet()
+  internal void StartSet()
   {
     if (IsStarted)
     {
-      throw new InvalidOperationException("Tento set už byl zahájen.");
+      throw new MatchInvalidException("Set byl již spuštěn.");
     }
-
-    if (IsFinished)
-    {
-      throw new InvalidOperationException("Tento set už skončil, nelze jej znovu zahájit.");
-    }
-
     IsStarted = true;
-    MarkAsModified();
   }
 
-  public void AddPoint(SetSide side, ISetRules rules)
+  internal void AddPoint(SetSide side, ISetRules rules)
   {
-    EnsureNotFinished();
+    if (IsFinished)
+    {
+      throw new MatchInvalidException("Tento set je již u konce.");
+    }
 
     if (!IsStarted)
     {
-      throw new InvalidOperationException("Nelze přidávat body, dokud není set odstartován. Rozřaďte nejprve pozice a set zahajte.");
+      throw new MatchInvalidException("Set ještě nezačal.");
     }
 
     if (side == SetSide.Home)
@@ -90,54 +71,39 @@ public class MatchSet : AuditableEntity<MatchSetId>
       AwayScore++;
     }
 
-    TryFinish(rules);
-    MarkAsModified();
+    CheckSetWinner(rules);
   }
 
-  public void AssignPlayerPosition(TeamMemberId teamMemberId, PlayerPosition position)
+  internal void AssignPosition(TeamMemberId memberId, PlayerPosition position)
   {
-    EnsureNotFinished();
-
-    var existingPosition = _playerPositions.FirstOrDefault(p => p.TeamMemberId == teamMemberId);
-    if (existingPosition != null)
+    var existingPos = _positions.FirstOrDefault(p => p.TeamMemberId == memberId);
+    if (existingPos != null)
     {
-      existingPosition.UpdatePosition(position);
+      existingPos.UpdatePosition(position);
     }
     else
     {
-      _playerPositions.Add(MatchPlayerPosition.Create(teamMemberId, position));
-    }
-
-    MarkAsModified();
-  }
-
-  private void EnsureNotFinished()
-  {
-    if (IsFinished)
-    {
-      throw new InvalidOperationException("Tento set je již u konce.");
+      _positions.Add(new MatchPlayerPosition(new MatchPlayerPositionId(Guid.NewGuid()), Id, memberId, position));
     }
   }
 
-  private void TryFinish(ISetRules rules)
+  private void CheckSetWinner(ISetRules rules)
   {
-    if (rules.IsWinningScore(HomeScore, AwayScore, Type))
+    if (HomeScore >= _targetPoints)
     {
-      Finish(SetWinner.Home);
-      return;
+      if (HomeScore - AwayScore >= rules.PointDifferenceRequired)
+      {
+        IsFinished = true;
+        Winner = SetWinner.Home;
+      }
     }
-
-    if (rules.IsWinningScore(AwayScore, HomeScore, Type))
+    else if (AwayScore >= _targetPoints)
     {
-      Finish(SetWinner.Away);
-      return;
+      if (AwayScore - HomeScore >= rules.PointDifferenceRequired)
+      {
+        IsFinished = true;
+        Winner = SetWinner.Away;
+      }
     }
-  }
-
-  private void Finish(SetWinner winner)
-  {
-    IsFinished = true;
-    Winner = winner;
-    MarkAsModified();
   }
 }
