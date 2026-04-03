@@ -4,7 +4,7 @@ import React, { use, useState } from "react";
 import { useMatchDetail } from "@/hooks/Matches/useMatchDetail";
 import { useLiveMatch } from "@/hooks/Matches/useLiveMatch";
 import { MatchStatus, PlayerPosition, SetSide, SetWinner, SetType } from "@/types/match";
-import "./LiveMatch.css";
+import "./Live.css";
 
 export default function LiveMatchPage({ params }: { params: Promise<{ matchId: string }> }) {
     const { matchId } = use(params);

@@ -10,13 +10,19 @@ export function useEventDetail(eventId: string) {
     const [error, setError] = useState('');
 
     const fetchEvent = useCallback(async () => {
-        if (!eventId) return;
+        if (!eventId) {
+            return;
+        }
         setIsLoading(true);
         try {
             const data = await getEventById(eventId);
             setEvent(data);
         } catch (err: any) {
-            setError(err.message || 'Nepodařilo se načíst detail události.');
+            if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Nepodařilo se načíst detail události.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -26,12 +32,16 @@ export function useEventDetail(eventId: string) {
         fetchEvent();
     }, [fetchEvent]);
 
-    const handleRespond = async (response: EventResponse | string) => {
+    const handleRespond = async (response: EventResponse) => {
         try {
             await respondToEvent(eventId, response);
             await fetchEvent();
         } catch (err: any) {
-            setError(err.message || 'Nepodařilo se uložit odpověď.');
+            if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Nepodařilo se uložit odpověď.');
+            }
         }
     };
 
@@ -40,7 +50,11 @@ export function useEventDetail(eventId: string) {
             await deleteEvent(eventId);
             router.back();
         } catch (err: any) {
-            setError(err.message || 'Nepodařilo se smazat události.');
+            if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Nepodařilo se smazat události.');
+            }
         }
     };
 

@@ -2,12 +2,12 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useTeamsList } from '@/hooks/Teams/useTeamList';
+import { useTeamList } from '@/hooks/Teams/useTeamList';
 import { Team } from '@/types/team';
 import './Teams.css';
 
 export default function TeamsPage() {
-    const { teams, error, isLoading } = useTeamsList();
+    const { teams, error, isLoading } = useTeamList();
 
     if (isLoading)
         return <div className="teams-empty-state">Načítám tvé týmy...</div>;
