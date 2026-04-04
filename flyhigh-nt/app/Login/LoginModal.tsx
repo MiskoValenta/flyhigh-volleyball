@@ -68,7 +68,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     return (
         <div className="login-overlay">
-            <div className="login-modal glass-card-dark">
+            <div className="login-modal">
                 <button className="login-close-btn" onClick={handleClose} disabled={isLoading}>
                     <IoClose size={24} />
                 </button>
@@ -93,7 +93,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
                 <form className="login-form" onSubmit={handleSubmit}>
                     {view === "register" && (
-                        <div className="login-input-row">
+                        <>
                             <div className="login-input-group">
                                 <label>Jméno</label>
                                 <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required disabled={isLoading} />
@@ -102,7 +102,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                                 <label>Příjmení</label>
                                 <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required disabled={isLoading} />
                             </div>
-                        </div>
+                        </>
                     )}
 
                     <div className="login-input-group">

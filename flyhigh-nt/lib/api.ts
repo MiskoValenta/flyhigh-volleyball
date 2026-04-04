@@ -1,9 +1,13 @@
-import { fetchWithAuth } from './apiClient';
+import { fetchWithAuth, BASE_URL } from './apiClient';
 import { UserProfile } from '@/types/user';
 
 export const loginUser = async (credentials: any) => {
-    const res = await fetchWithAuth(`/auth/login`, {
+    const res = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify(credentials)
     });
 
@@ -15,8 +19,12 @@ export const loginUser = async (credentials: any) => {
 };
 
 export const registerUser = async (userData: any) => {
-    const res = await fetchWithAuth(`/auth/register`, {
+    const res = await fetch(`${BASE_URL}/auth/register`, {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify(userData)
     });
 
