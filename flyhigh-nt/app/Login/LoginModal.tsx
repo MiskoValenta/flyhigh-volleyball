@@ -1,259 +1,146 @@
 "use client";
 
 import React, { useState } from "react";
-import "./LoginModal.css";
 import { IoClose } from "react-icons/io5";
-import { useRouter } from "next/navigation";
-import { loginUser, registerUser, forgotPassword } from "@/lib/api";
-import { LoginModalProps } from "@/types/user";
+import "./LoginModal.css";
+import { useLogin } from "../../hooks/Auth/useLogin";
+import { useRegister } from "../../hooks/Auth/useRegister";
+import { useForgotPassword } from "../../hooks/Auth/useForgotPassword";
+
+interface LoginModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+type ModalView = "login" | "register" | "forgot_password";
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
-    const [isRegister, setIsRegister] = useState(false);
-    const [isForgotPassword, setIsForgotPassword] = useState(false);
+    const [view, setView] = useState<ModalView>("login");
 
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
 
-    const [error, setError] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-
-    const router = useRouter();
+    const { login, isLoading: isLoginLoading, error: loginError, setError: setLoginError } = useLogin();
+    const { register, isLoading: isRegisterLoading, error: registerError, setError: setRegisterError } = useRegister();
+    const { requestPasswordReset, isLoading: isForgotLoading, error: forgotError, setError: setForgotError, isSuccess: forgotSuccess } = useForgotPassword();
 
     if (!isOpen) return null;
 
-    const toggleMode = () => {
-        setIsRegister(!isRegister);
-        setIsForgotPassword(false);
-        setError("");
-        setSuccessMessage("");
+    const isLoading = isLoginLoading || isRegisterLoading || isForgotLoading;
+
+    const handleSwitchView = (newView: ModalView) => {
+        setLoginError(null);
+        setRegisterError(null);
+        setForgotError(null);
+        setView(newView);
     };
 
-    const toggleForgotPassword = () => {
-        setIsForgotPassword(true);
-        setIsRegister(false);
-        setError("");
-        setSuccessMessage("");
+    const handleClose = () => {
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setFirstName("");
+        setLastName("");
+        setView("login");
+        onClose();
     };
 
-    const backToLogin = () => {
-        setIsForgotPassword(false);
-        setIsRegister(false);
-        setError("");
-        setSuccessMessage("");
-    };
-
-    const handleCardClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-    };
-
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError("");
-        setIsLoading(true);
 
-        const safeEmail = email.trim().toLowerCase();
-
-        try {
-            await loginUser({ email: safeEmail, password });
-            router.push("/Dashboard");
-            onClose();
-        } catch (err: any) {
-            setError(err.message || "Chyba při přihlášení. Zkontrolujte údaje.");
-        } finally {
-            setIsLoading(false);
+        if (view === "login") {
+            const success = await login({ email, password });
+            if (success) handleClose();
+        }
+        else if (view === "register") {
+            const success = await register({ firstName, lastName, email, password, confirmPassword });
+            if (success) handleClose();
+        }
+        else if (view === "forgot_password") {
+            await requestPasswordReset({ email });
         }
     };
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError("");
-
-        if (password !== confirmPassword) {
-            setError("Hesla se neshodují");
-            return;
-        }
-
-        setIsLoading(true);
-
-        const safeEmail = email.trim().toLowerCase();
-        const safeFirstName = firstName.trim();
-        const safeLastName = lastName.trim();
-
-        try {
-            await registerUser({
-                firstName: safeFirstName,
-                lastName: safeLastName,
-                email: safeEmail,
-                password
-            });
-            router.push("/Dashboard");
-            onClose();
-        } catch (err: any) {
-            setError(err.message || "Registrace selhala. Tento email už pravděpodobně někdo využívá.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError("");
-        setSuccessMessage("");
-        setIsLoading(true);
-
-        const safeEmail = email.trim().toLowerCase();
-
-        try {
-            await forgotPassword(safeEmail);
-            setSuccessMessage("Pokud e-mail existuje v naší databázi, odeslali jsme na něj nové heslo.");
-            setTimeout(() => {
-                backToLogin();
-            }, 5000);
-        } catch (err: any) {
-            setError(err.message || "Došlo k chybě při obnově hesla.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const getHeadingText = () => {
-        if (isForgotPassword) return "Obnova hesla";
-        if (isRegister) return "Registrace";
-        return "Přihlášení";
-    };
-
-    const getSubText = () => {
-        if (isForgotPassword)
-            return "Zadejte svůj e-mail a my vám zašleme nové dočasné heslo.";
-
-        if (isRegister)
-            return "Vytvořte si účet a spravujte svůj tým efektivně.";
-
-        return "Vítejte zpět! Přihlašte se ke svému účtu.";
-    };
+    const activeError = view === "login" ? loginError : view === "register" ? registerError : forgotError;
 
     return (
-        <div className="LoginOverlay" onClick={onClose}>
-            <div className="LoginCard" onClick={handleCardClick}>
-
-                <button className="CloseButton" onClick={onClose}>
-                    <IoClose />
+        <div className="login-overlay">
+            <div className="login-modal glass-card-dark">
+                <button className="login-close-btn" onClick={handleClose} disabled={isLoading}>
+                    <IoClose size={24} />
                 </button>
 
-                <h2 className="LoginHeading">{getHeadingText()}</h2>
-                <p className="LoginSubText">{getSubText()}</p>
+                <h2 className="login-title">
+                    {view === "login" && "Vítejte zpět"}
+                    {view === "register" && "Vytvořit účet"}
+                    {view === "forgot_password" && "Obnova hesla"}
+                </h2>
 
-                {error && <div className="LoginError">{error}</div>}
+                {activeError && (
+                    <div className="login-error-container">
+                        <span className="login-error-text">{activeError}</span>
+                    </div>
+                )}
 
-                {successMessage && <div className="LoginSuccess">{successMessage}</div>}
+                {view === "forgot_password" && forgotSuccess && (
+                    <div className="login-success-container">
+                        Instrukce byly odeslány na váš e-mail.
+                    </div>
+                )}
 
-                <form
-                    className="LoginForm"
-                    onSubmit={isForgotPassword ? handleForgotPasswordSubmit : (isRegister ? handleRegister : handleLogin)}
-                >
-                    {isRegister && !isForgotPassword && (
+                <form className="login-form" onSubmit={handleSubmit}>
+                    {view === "register" && (
+                        <div className="login-input-row">
+                            <div className="login-input-group">
+                                <label>Jméno</label>
+                                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required disabled={isLoading} />
+                            </div>
+                            <div className="login-input-group">
+                                <label>Příjmení</label>
+                                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required disabled={isLoading} />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="login-input-group">
+                        <label>E-mail</label>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
+                    </div>
+
+                    {view !== "forgot_password" && (
                         <>
-                            <div className="InputGroup">
-                                <input
-                                    type="text"
-                                    placeholder="Křestní jméno"
-                                    className="LoginInput"
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    required
-                                />
+                            <div className="login-input-group">
+                                <label>Heslo</label>
+                                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
                             </div>
-                            <div className="InputGroup">
-                                <input
-                                    type="text"
-                                    placeholder="Příjmení"
-                                    className="LoginInput"
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    required
-                                />
-                            </div>
+                            {view === "register" && (
+                                <div className="login-input-group">
+                                    <label>Potvrdit heslo</label>
+                                    <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={isLoading} />
+                                </div>
+                            )}
                         </>
                     )}
 
-                    <div className="InputGroup">
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            className="LoginInput"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    {!isForgotPassword && (
-                        <div className="InputGroup">
-                            <input
-                                type="password"
-                                placeholder="Heslo"
-                                className="LoginInput"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-                    )}
-
-                    {isRegister && !isForgotPassword && (
-                        <div className="InputGroup">
-                            <input
-                                type="password"
-                                placeholder="Potvrzení hesla"
-                                className="LoginInput"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-                    )}
-
-                    {!isRegister && !isForgotPassword && (
-                        <div className="ForgotPasswordWrapper">
-                            <button type="button" className="ForgotPasswordLink" onClick={toggleForgotPassword}>
-                                Zapomněli jste heslo?
-                            </button>
-                        </div>
-                    )}
-
-                    <button
-                        type="submit"
-                        className="LoginSubmitBtn"
-                        disabled={isLoading}
-                    >
-                        {isLoading
-                            ? (isForgotPassword ? "Odesílám..." : (isRegister ? "Registruji..." : "Přihlašuji..."))
-                            : (isForgotPassword ? "Odeslat nové heslo" : (isRegister ? "Zaregistrovat se" : "Přihlásit se"))
-                        }
+                    <button type="submit" className="login-submit-btn" disabled={isLoading}>
+                        {isLoading ? "Pracuji..." : (view === "login" ? "Přihlásit se" : view === "register" ? "Zaregistrovat se" : "Odeslat")}
                     </button>
                 </form>
 
-                <div className="LoginFooter">
-                    {isForgotPassword ? (
-                        <div className="SwitchMode">
-                            <button type="button" onClick={backToLogin} className="SwitchModeBtn">
-                                ← Zpět na přihlášení
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="SwitchMode">
-                            <span>{isRegister ? "Máte již účet?" : "Nemáte účet?"}</span>
-                            <button type="button" onClick={toggleMode} className="SwitchModeBtn">
-                                {isRegister ? "Přihlaste se" : "Registrujte se"}
-                            </button>
-                        </div>
+                <div className="login-footer-links">
+                    {view === "login" && (
+                        <>
+                            <button type="button" className="login-text-btn" onClick={() => handleSwitchView("forgot_password")}>Zapomenuté heslo?</button>
+                            <button type="button" className="login-text-btn" onClick={() => handleSwitchView("register")}>Ještě nemáte účet? Registrace</button>
+                        </>
+                    )}
+                    {view !== "login" && (
+                        <button type="button" className="login-text-btn" onClick={() => handleSwitchView("login")}>Zpět na přihlášení</button>
                     )}
                 </div>
-
             </div>
         </div>
     );
