@@ -139,6 +139,8 @@ namespace API
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<FlyHighDbContext>();
 
+        var passwordHasher = services.GetRequiredService<IPasswordHasher>();
+
         int retries = 5;
         while (retries > 0)
         {
@@ -146,6 +148,8 @@ namespace API
           {
             context.Database.Migrate();
             Console.WriteLine("Databáze byla úspěšně migrována!");
+            DataSeeder.SeedAsync(context, passwordHasher).GetAwaiter().GetResult();
+
             break;
           }
           catch (Exception ex)
