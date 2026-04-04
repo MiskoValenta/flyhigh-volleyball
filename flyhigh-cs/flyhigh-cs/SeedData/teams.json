@@ -1,0 +1,28 @@
+[
+  {
+    "name": "OA a SOŠL",
+    "abbreviation": "OA",
+    "ownerEmail": "valenta_2026_flyhigh@oaopava.cz",
+    "memberEmails": [
+      "subject1@oaopava.cz",
+      "subject2@oaopava.cz",
+      "subject3@oaopava.cz",
+      "subject4@oaopava.cz",
+      "subject5@oaopava.cz",
+      "subject6@oaopava.cz"
+    ]
+  },
+  {
+    "name": "Slezské Gymnázium",
+    "abbreviation": "SSKGB",
+    "ownerEmail": "m.valenta06@icloud.com",
+    "memberEmails": [
+      "subject7@oaopava.cz",
+      "subject8@oaopava.cz",
+      "subject9@oaopava.cz",
+      "subject10@oaopava.cz",
+      "subject11@oaopava.cz",
+      "subject12@oaopava.cz"
+    ]
+  }
+]
