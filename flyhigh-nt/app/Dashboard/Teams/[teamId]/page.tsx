@@ -1,319 +1,184 @@
-'use client';
+"use client";
 
-import React, { use, useState, useEffect } from "react";
-import { useTeamDetail } from "@/hooks/Teams/useTeamDetail";
-import { useTeamStats } from "@/hooks/Teams/useTeamStats";
-import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
-import { TeamRole } from "@/types/team";
-import { IoPeopleOutline, IoTrophyOutline, IoCalendarOutline, IoCopyOutline } from 'react-icons/io5';
+import React, { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+    IoArrowBack,
+    IoCopyOutline,
+    IoCheckmark,
+    IoTrashOutline,
+    IoPersonAddOutline,
+    IoShieldCheckmarkOutline
+} from "react-icons/io5";
+import { useTeamDetail } from "../../../../hooks/Teams/useTeamDetail";
+import { TeamRole } from "../../../../types/team";
 import "./TeamDetail.css";
 
-export default function TeamDetailPage({ params }: { params: Promise<{ teamId: string }> }) {
-    const { teamId } = use(params);
-    const { team, currentUserId, isLoading, error, handleRemoveMember, handleAddMember, handleChangeRole, handleUpdateTeam } = useTeamDetail(teamId);
-    const { teamMatchesPlayed, teamEventsCount, isLoadingStats } = useTeamStats(teamId);
+export default function TeamDetailPage() {
+    const params = useParams();
+    const router = useRouter();
+    const teamId = params.teamId as string;
+    const { team, isLoading, error, handleAddMember } = useTeamDetail(teamId);
+    const [memberInput, setMemberInput] = useState("");
+    const [isAdding, setIsAdding] = useState(false);
+    const [copied, setCopied] = useState(false);
 
-    const [isEditingTeam, setIsEditingTeam] = useState(false);
-    const [editTeamName, setEditTeamName] = useState("");
-    const [editShortName, setEditShortName] = useState("");
-    const [editDescription, setEditDescription] = useState("");
+    if (isLoading)
+        return <div className="detail-state-message">Načítám detail týmu...</div>;
 
-    const [newMemberId, setNewMemberId] = useState("");
-    const [newMemberRole, setNewMemberRole] = useState<TeamRole>(TeamRole.Member);
+    if (error || !team)
+        return <div className="detail-state-message error">Chyba: {error || "Tým nebyl nalezen"}</div>;
 
-    const [copySuccess, setCopySuccess] = useState<boolean>(false);
+    const isOwner = team.myRole === TeamRole.Owner;
+    const isManager = team.myRole === TeamRole.Owner || team.myRole === TeamRole.Coach;
 
-    useEffect(() => {
-        if (team !== null) {
-            setEditTeamName(team.teamName);
-            setEditShortName(team.shortName);
-            if (team.description) {
-                setEditDescription(team.description);
-            } else {
-                setEditDescription("");
-            }
-        }
-    }, [team]);
+    const handleCopyId = () => {
+        navigator.clipboard.writeText(team.id);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
-    if (isLoading) {
-        return <div className="TeamDetailLoading">Načítám detaily týmu...</div>;
-    }
+    const handleDeleteTeam = () => {
+        alert("Funkce mazání týmu bude implementována v dalším kroku!");
+    };
 
-    if (error) {
-        return <div className="TeamDetailError">{error}</div>;
-    }
-
-    if (!team) {
-        return <div className="TeamDetailError">Tým nenalezen.</div>;
-    }
-
-    const copyTeamIdToClipboard = async () => {
+    const onSubmitAddMember = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!memberInput) return;
+        setIsAdding(true);
         try {
-            await navigator.clipboard.writeText(teamId);
-            setCopySuccess(true);
-            setTimeout(() => {
-                setCopySuccess(false);
-            }, 2000);
-        } catch (err) {
-            console.error(err);
+            await handleAddMember(memberInput, TeamRole.Member);
+
+            setMemberInput("");
+            alert("Uživatel byl úspěšně přidán do týmu.");
+        } catch (err: any) {
+            alert(err.message || "Nepodařilo se přidat člena. Zkontrolujte ID.");
+        } finally {
+            setIsAdding(false);
         }
     };
 
-    let copyButtonText = 'Kopírovat ID';
-    let copyButtonClass = 'BtnSecondary';
-    if (copySuccess) {
-        copyButtonText = 'Zkopírováno!';
-        copyButtonClass = 'BtnSecondary success';
-    }
-
-    let descriptionDisplay = 'Bez popisku';
-    if (team.description) {
-        descriptionDisplay = team.description;
-    }
-
-    let membersCountDisplay = team.members.length.toString();
-    let eventsCountDisplay = teamEventsCount.toString();
-    let matchesCountDisplay = teamMatchesPlayed.toString();
-
-    if (isLoadingStats) {
-        eventsCountDisplay = '...';
-        matchesCountDisplay = '...';
-    }
-
-    const submitEditTeam = (e: React.FormEvent) => {
-        e.preventDefault();
-        handleUpdateTeam({
-            teamName: editTeamName,
-            abbreviation: editShortName,
-            description: editDescription
-        });
-        setIsEditingTeam(false);
-    };
-
-    const submitAddMember = (e: React.FormEvent) => {
-        e.preventDefault();
-        handleAddMember(newMemberId, newMemberRole);
-        setNewMemberId("");
-        setNewMemberRole(TeamRole.Member);
-    };
-
-    let isManager = false;
-    if (team.myRole === TeamRole.Owner) {
-        isManager = true;
-    } else if (team.myRole === TeamRole.Coach) {
-        isManager = true;
-    }
-
-    let teamManagementSection = null;
-    if (isManager) {
-        let editTeamForm = null;
-        if (isEditingTeam) {
-            editTeamForm = (
-                <form className="ManagementForm" onSubmit={submitEditTeam}>
-                    <div className="FormGroup">
-                        <label>Název týmu</label>
-                        <input
-                            type="text"
-                            value={editTeamName}
-                            onChange={(e) => setEditTeamName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="FormGroup">
-                        <label>Zkratka týmu</label>
-                        <input
-                            type="text"
-                            value={editShortName}
-                            onChange={(e) => setEditShortName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="FormGroup">
-                        <label>Popis</label>
-                        <textarea
-                            value={editDescription}
-                            onChange={(e) => setEditDescription(e.target.value)}
-                        />
-                    </div>
-                    <div className="FormActions">
-                        <button type="submit" className="BtnPrimary">Uložit změny</button>
-                        <button type="button" className="BtnSecondary" onClick={() => setIsEditingTeam(false)}>Zrušit</button>
-                    </div>
-                </form>
-            );
-        } else {
-            editTeamForm = (
-                <button className="BtnPrimary" onClick={() => setIsEditingTeam(true)}>
-                    Upravit informace o týmu
-                </button>
-            );
-        }
-
-        teamManagementSection = (
-            <div className="TeamManagementSection">
-                <div className="ManagementCard glass-card-dark">
-                    <h3 className="SectionHeading">Správa týmu</h3>
-                    {editTeamForm}
-                </div>
-                <div className="ManagementCard glass-card-dark">
-                    <h3 className="SectionHeading">Přidat nového člena</h3>
-                    <form className="ManagementForm" onSubmit={submitAddMember}>
-                        <div className="FormGroup">
-                            <label>Uživatelské ID (z Dashboardu uživatele)</label>
-                            <input
-                                type="text"
-                                value={newMemberId}
-                                onChange={(e) => setNewMemberId(e.target.value)}
-                                placeholder="Zadejte ID..."
-                                required
-                            />
-                        </div>
-                        <div className="FormGroup">
-                            <label>Role</label>
-                            <select
-                                value={newMemberRole}
-                                onChange={(e) => setNewMemberRole(e.target.value as TeamRole)}
-                            >
-                                <option value={TeamRole.Coach}>Trenér</option>
-                                <option value={TeamRole.Member}>Hráč</option>
-                            </select>
-                        </div>
-                        <div className="FormActions">
-                            <button type="submit" className="BtnPrimary">Přidat uživatele</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        );
-    }
-
-    let membersList = [];
-    for (let i = 0; i < team.members.length; i++) {
-        const member = team.members[i];
-
-        let canManageMember = false;
-        let canChangeToOwner = false;
-
-        if (member.userId !== currentUserId) {
-            if (team.myRole === TeamRole.Owner) {
-                canManageMember = true;
-                canChangeToOwner = true;
-            } else if (team.myRole === TeamRole.Coach) {
-                if (member.role !== TeamRole.Owner) {
-                    if (member.role !== TeamRole.Coach) {
-                        canManageMember = true;
-                    }
-                }
-            }
-        }
-
-        let memberActions = null;
-        if (canManageMember) {
-            let options = [];
-            if (canChangeToOwner) {
-                options.push(<option key={TeamRole.Owner} value={TeamRole.Owner}>Majitel</option>);
-            }
-            options.push(<option key={TeamRole.Coach} value={TeamRole.Coach}>Trenér</option>);
-            options.push(<option key={TeamRole.Member} value={TeamRole.Member}>Hráč</option>);
-
-            memberActions = (
-                <div className="MemberActions">
-                    <select
-                        className="RoleSelect"
-                        value={member.role as string}
-                        onChange={(e) => handleChangeRole(member.userId, e.target.value as TeamRole)}
-                    >
-                        {options}
-                    </select>
-                    <button
-                        className="RemoveMemberBtn"
-                        onClick={() => handleRemoveMember(member.userId)}
-                    >
-                        Odebrat
-                    </button>
-                </div>
-            );
-        }
-
-        let translatedRole = member.role;
-        if (member.role === TeamRole.Owner) {
-            translatedRole = "Majitel";
-        } else if (member.role === TeamRole.Coach) {
-            translatedRole = "Trenér";
-        } else if (member.role === TeamRole.Member) {
-            translatedRole = "Hráč";
-        }
-
-        membersList.push(
-            <li key={member.userId} className="MemberItem">
-                <div className="MemberInfo">
-                    <span className="MemberName">{member.firstName} {member.lastName}</span>
-                    <span className="MemberRole">{translatedRole}</span>
-                </div>
-                {memberActions}
-            </li>
-        );
-    }
+    const activePlayersCount = team.members ? team.members.filter(m => m.isActive).length : 0;
+    const pendingPlayersCount = team.members ? team.members.filter(m => !m.isActive).length : 0;
 
     return (
-        <div className="TeamDetailContainer">
-            <header className="TeamHeaderCard">
-                <div className="TeamHeaderInfo">
-                    <h1 className="TeamHeading">{team.teamName} <span>({team.shortName})</span></h1>
-                    <p className="TeamDescription">{descriptionDisplay}</p>
+        <div className="detail-page-wrapper">
+            <div className="detail-top-bar">
+                <Link href="/Dashboard/Teams" className="btn-back">
+                    <IoArrowBack size={20} />
+                    <span>Zpět na týmy</span>
+                </Link>
 
-                    <div className="TeamIdContainer">
-                        <span className="TeamIdLabel">ID Týmu pro pozvání hráčem:</span>
-                        <code className="TeamIdCode hide-on-mobile">{teamId}</code>
-                        <button className={copyButtonClass} onClick={copyTeamIdToClipboard}>
-                            <IoCopyOutline style={{ marginRight: '0.5rem' }} />
-                            {copyButtonText}
+                {isOwner && (
+                    <button onClick={handleDeleteTeam} className="btn-delete">
+                        <IoTrashOutline size={18} />
+                        <span>Smazat tým</span>
+                    </button>
+                )}
+            </div>
+
+            <div className="detail-header-card glass-card-dark">
+                <div className="header-card-content">
+                    <div className="header-titles">
+                        <h1 className="detail-title">{team.teamName}</h1>
+                        <span className="detail-abbr">{team.shortName}</span>
+                        <span className={`role-badge role-${team.myRole}`}>
+                            {team.myRole}
+                        </span>
+                    </div>
+
+                    <p className="detail-desc">
+                        {team.description || "Tento tým zatím nemá žádný popis."}
+                    </p>
+
+                    <div className="detail-id-box">
+                        <span className="id-label">ID Týmu:</span>
+                        <span className="id-hash">{team.id}</span>
+                        <button onClick={handleCopyId} className="btn-copy" title="Kopírovat ID">
+                            {copied ? <IoCheckmark style={{ color: '#4ade80' }} /> : <IoCopyOutline />}
                         </button>
                     </div>
                 </div>
-                <div className="TeamHeaderRole">
-                    <span>Tvoje role: </span>
-                    <strong>{team.myRole}</strong>
-                </div>
-            </header>
 
-            <div className="TeamStatsGrid">
-                <div className="TeamStatBox glass-card-dark">
-                    <IoPeopleOutline className="TeamStatIcon" />
-                    <div className="TeamStatContent">
-                        <span className="TeamStatValue">{membersCountDisplay}</span>
-                        <span className="TeamStatLabel">Počet členů</span>
+                <div className="detail-stats-row">
+                    <div className="stat-box">
+                        <span className="stat-value">{activePlayersCount}</span>
+                        <span className="stat-label">Aktivní hráči</span>
                     </div>
-                </div>
-                <div className="TeamStatBox glass-card-dark">
-                    <IoCalendarOutline className="TeamStatIcon" />
-                    <div className="TeamStatContent">
-                        <span className="TeamStatValue">{eventsCountDisplay}</span>
-                        <span className="TeamStatLabel">Počet událostí</span>
+                    <div className="stat-box">
+                        <span className="stat-value">{pendingPlayersCount}</span>
+                        <span className="stat-label">Čekající pozvánky</span>
                     </div>
-                </div>
-                <div className="TeamStatBox glass-card-dark">
-                    <IoTrophyOutline className="TeamStatIcon" />
-                    <div className="TeamStatContent">
-                        <span className="TeamStatValue">{matchesCountDisplay}</span>
-                        <span className="TeamStatLabel">Odehrané zápasy</span>
+                    <div className="stat-box">
+                        <span className="stat-value">0</span>
+                        <span className="stat-label">Událostí</span>
                     </div>
                 </div>
             </div>
 
-            <div className="TeamContentGrid">
-                <section className="MembersSection">
-                    <h2 className="SectionHeading">Členové týmu</h2>
-                    <ul className="MembersList">
-                        {membersList}
-                    </ul>
-                    {teamManagementSection}
-                </section>
+            {isManager && (
+                <div className="management-section glass-card-dark">
+                    <h2 className="section-title">
+                        <IoShieldCheckmarkOutline /> Správa týmu
+                    </h2>
+                    <hr className="section-divider" />
 
-                <section className="EventsSection">
-                    <DashboardEvents teamId={teamId} />
-                </section>
+                    <form onSubmit={onSubmitAddMember} className="add-member-form">
+                        <div className="input-wrapper">
+                            <label>Přidat člena (ID Uživatele)</label>
+                            <div className="input-group">
+                                <IoPersonAddOutline className="input-icon" />
+                                <input
+                                    type="text"
+                                    value={memberInput}
+                                    onChange={(e) => setMemberInput(e.target.value)}
+                                    placeholder="Zadejte ID uživatele..."
+                                    required
+                                    className="input-glass"
+                                />
+                                <button type="submit" disabled={isAdding} className="button-primary">
+                                    {isAdding ? "Pracuji..." : "Přidat člena"}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            <div className="members-section">
+                <h2 className="section-title">Členové týmu</h2>
+                <div className="members-grid">
+                    {team.members && team.members.length > 0 ? (
+                        team.members.map((member) => {
+                            const mRole = member.role || TeamRole.Member;
+
+                            return (
+                                <div key={member.userId} className="member-card glass-card-dark">
+                                    <div className="member-avatar">
+                                        {member.firstName.charAt(0)}{member.lastName.charAt(0)}
+                                    </div>
+                                    <div className="member-info">
+                                        <h4 className="member-name">{member.firstName} {member.lastName}</h4>
+                                        <span className="member-email">{member.email}</span>
+                                        <div className="member-tags">
+                                            <span className={`role-badge role-${mRole}`}>
+                                                {mRole}
+                                            </span>
+                                            {!member.isActive && (
+                                                <span className="status-badge pending">Nepotvrzeno</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <div className="no-members-text">V tomto týmu zatím nejsou žádní další členové.</div>
+                    )}
+                </div>
             </div>
+
         </div>
     );
 }
