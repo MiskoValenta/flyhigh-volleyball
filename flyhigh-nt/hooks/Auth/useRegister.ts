@@ -1,36 +1,36 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { registerUser } from '@/lib/api';
+import { registerUser } from '../../lib/api';
+import { RegisterCredentials } from '../../types/user';
 
-export function useRegister() {
+export const useRegister = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const register = async (credentials: RegisterCredentials) => {
         setIsLoading(true);
-        setError('');
+        setError(null);
+
+        if (credentials.password !== credentials.confirmPassword) {
+            setError("Hesla se neshodují.");
+            setIsLoading(false);
+            return false;
+        }
 
         try {
-            await registerUser({ firstName, lastName, email, password });
+            const { confirmPassword, ...dataToSend } = credentials;
+            await registerUser(dataToSend);
+
             router.push('/Dashboard');
+            return true;
         } catch (err: any) {
-            setError(err.message || 'Chyba při registraci.');
+            setError(err.message || "Registrace selhala. Zkuste to prosím znovu.");
+            return false;
         } finally {
             setIsLoading(false);
         }
     };
 
-    return {
-        firstName, setFirstName,
-        lastName, setLastName,
-        email, setEmail,
-        password, setPassword,
-        error, isLoading, handleSubmit
-    };
-}
+    return { register, isLoading, error, setError };
+};
