@@ -1,67 +1,85 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { useTeamList } from '@/hooks/Teams/useTeamList';
-import { Team } from '@/types/team';
-import './Teams.css';
+import React from "react";
+import Link from "next/link";
+import { IoChevronForward } from "react-icons/io5";
+import { useTeamList } from "../../../hooks/Teams/useTeamList";
+import { TeamRole } from "../../../types/team";
+import "./Teams.css";
 
 export default function TeamsPage() {
-    const { teams, error, isLoading } = useTeamList();
+    const { teams, isLoading, error } = useTeamList();
 
     if (isLoading)
-        return <div className="teams-empty-state">Načítám tvé týmy...</div>;
+        return <div className="teams-state-message">Načítám týmy...</div>;
+    
+    if (error)
+        return <div className="teams-state-message error">Chyba: {error}</div>;
 
     return (
-        <div className="teams-container">
-            <div className="teams-header-row">
+        <div className="teams-page-wrapper">
+            <div className="teams-page-header">
                 <h1 className="dashboard-heading">Moje Týmy</h1>
-                <div className="header-actions">
+                {teams.length > 0 && (
                     <Link href="/Dashboard/CreateTeam" className="button-primary">
-                        + Založit nový tým
+                        + Nový tým
                     </Link>
-                </div>
+                )}
             </div>
 
-            {error && <div className="error-message">{error}</div>}
+            <div className="teams-container">
+                {teams.length > 0 ? (
+                    teams.map((team) => {
+                        const role = team.role || TeamRole.Member;
+                        const playerCount = team.playerCount || 0;
 
-            {teams.length === 0 ? (
-                <div className="teams-empty-state glass-card-dark">
-                    <p>Zatím nejste členem žádného týmu.</p>
-                </div>
-            ) : (
-                <div className="teams-grid">
-                    {teams.map((team: Team) => (
-                        <Link
-                            href={`/Dashboard/Teams/${team.id}`}
-                            key={team.id}
-                            className="team-card glass-card-dark"
-                        >
-                            <div className="team-card-header">
-                                <h2 className="team-name-title">{team.teamName}</h2>
-                                <span className="team-code-pill">{team.shortName}</span>
-                            </div>
-
-                            <div className="team-card-body glass-card-dark">
-                                <div className="team-stat-row">
-                                    <span className="stat-label">Moje role:</span>
-                                    <span className={`role-text role-${team.role?.toLowerCase() || 'player'}`}>
-                                        {team.role || 'Player'}
+                        return (
+                            <Link
+                                key={team.id}
+                                href={`/Dashboard/Teams/${team.id}`}
+                                className="team-card glass-card-dark"
+                            >
+                                <div className="team-header">
+                                    <h3 className="team-name">{team.teamName}</h3>
+                                    <span className="team-abbreviation">
+                                        {team.shortName}
                                     </span>
                                 </div>
-                                <div className="team-stat-row">
-                                    <span className="stat-label">Počet členů:</span>
-                                    <span className="stat-value-text">{(team as any).membersCount || 0}</span>
+
+                                <hr className="team-divider" />
+
+                                <div className="team-info-row">
+                                    <span className="info-label">Moje role:</span>
+                                    <span className={`role-badge role-${role}`}>
+                                        {role}
+                                    </span>
                                 </div>
-                                <div className="team-stat-row">
-                                    <span className="stat-label">Události:</span>
-                                    <span className="stat-value-text">{(team as any).eventsCount || 0}</span>
+
+                                <div className="team-info-row">
+                                    <span className="info-label">Počet hráčů:</span>
+                                    <span className="info-value highlight">{playerCount}</span>
                                 </div>
-                            </div>
+
+                                <div className="team-card-footer">
+                                    <span className="show-more-text">
+                                        Zobrazit detail <IoChevronForward className="show-more-icon" />
+                                    </span>
+                                </div>
+                            </Link>
+                        );
+                    })
+                ) : (
+                    <div className="teams-empty-state glass-card-dark">
+                        <p className="teams-empty-text">Zatím nejste v žádném týmu.</p>
+                        <Link
+                            href="/Dashboard/CreateTeam"
+                            className="button-primary"
+                        >
+                            Vytvořit první tým
                         </Link>
-                    ))}
-                </div>
-            )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
