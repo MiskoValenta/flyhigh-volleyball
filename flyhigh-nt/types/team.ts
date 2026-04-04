@@ -16,6 +16,7 @@ export interface TeamResponseDto {
     shortName: string;
     role: TeamRole | string;
     status: TeamMemberStatus | string;
+    playerCount?: number;
 }
 
 export interface TeamMemberDto {

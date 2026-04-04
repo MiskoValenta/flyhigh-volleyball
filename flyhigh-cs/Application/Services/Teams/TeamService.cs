@@ -10,6 +10,8 @@ using Domain.Value_Objects.Teams;
 using Domain.Value_Objects.Users;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
 using System.Text;
 
 namespace Application.Services.Teams;
@@ -85,13 +87,15 @@ public class TeamService : ITeamService
           {
             roleStr = "Unknown";
           }
+          int playerCount = t.Members.Count(m => m.Status == TeamMemberStatus.Active);
 
           return new TeamResponseDto(
               t.Id.Value,
               t.TeamName,
               t.ShortName,
               roleStr,
-              t.GetMember(userId).Status.ToString()
+              t.GetMember(userId).Status.ToString(),
+              playerCount
           );
         }).ToList();
   }

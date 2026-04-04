@@ -52,7 +52,8 @@ public record TeamResponseDto(
     string TeamName, 
     string ShortName, 
     string Role, 
-    string Status
+    string Status,
+    int PlayerCount
  );
 
 public record UpdateTeamDto(
