@@ -82,6 +82,12 @@ public static class DataSeeder
 
             var team = Team.Create(owner.Id, seedTeam.Name, seedTeam.Abbreviation, "Naseedovaný tým pro testování");
 
+            var zakladatel = team.Members.FirstOrDefault();
+            Console.WriteLine($"\n--- DIAGNOSTIKA ---");
+            Console.WriteLine($"Tým: {team.TeamName}");
+            Console.WriteLine($"Majitel: {owner.Email} má roli: {zakladatel?.Role}");
+            Console.WriteLine($"-------------------\n");
+
             foreach (var memberEmail in seedTeam.MemberEmails)
             {
               var user = allUsers.FirstOrDefault(u => u.Email == memberEmail);
