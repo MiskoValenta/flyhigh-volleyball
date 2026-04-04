@@ -157,9 +157,7 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Position")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("Bench");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("TeamMemberId")
                         .HasColumnType("uuid");
@@ -304,9 +302,7 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("Member");
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()

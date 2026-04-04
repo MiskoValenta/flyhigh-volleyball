@@ -28,7 +28,6 @@ public class MatchPlayerPositionConfiguration : IEntityTypeConfiguration<MatchPl
 
     builder.Property(p => p.Position)
         .HasConversion<string>()
-        .HasDefaultValue(PlayerPosition.Bench)
         .IsRequired();
   }
 }

@@ -169,7 +169,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     TeamId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Role = table.Column<string>(type: "text", nullable: false, defaultValue: "Member"),
+                    Role = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     LeftAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: false, defaultValue: "Pending"),
@@ -198,7 +198,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MatchSetId = table.Column<Guid>(type: "uuid", nullable: false),
                     TeamMemberId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Position = table.Column<string>(type: "text", nullable: false, defaultValue: "Bench")
+                    Position = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

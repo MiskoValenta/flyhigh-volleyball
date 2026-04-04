@@ -26,10 +26,9 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
         .HasConversion(id => id.Value, value => new TeamId(value))
         .IsRequired();
 
-    builder.Property(tm => tm.Role)
-        .HasConversion<string>()
-        .HasDefaultValue(TeamRole.Member)
-        .IsRequired();
+    builder.Property(t => t.Role)
+       .HasConversion<string>()
+       .IsRequired();
 
     builder.Property(tm => tm.Status)
         .HasConversion<string>()
