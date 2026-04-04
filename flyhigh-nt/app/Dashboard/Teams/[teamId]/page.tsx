@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
     IoArrowBack,
@@ -9,7 +9,9 @@ import {
     IoCheckmark,
     IoTrashOutline,
     IoPersonAddOutline,
-    IoShieldCheckmarkOutline
+    IoShieldCheckmarkOutline,
+    IoCalendarOutline,
+    IoTrophyOutline
 } from "react-icons/io5";
 import { useTeamDetail } from "../../../../hooks/Teams/useTeamDetail";
 import { TeamRole } from "../../../../types/team";
@@ -17,9 +19,18 @@ import "./TeamDetail.css";
 
 export default function TeamDetailPage() {
     const params = useParams();
-    const router = useRouter();
     const teamId = params.teamId as string;
-    const { team, isLoading, error, handleAddMember } = useTeamDetail(teamId);
+
+    const {
+        team,
+        currentUserId,
+        isLoading,
+        error,
+        handleAddMember,
+        handleRemoveMember,
+        handleChangeRole
+    } = useTeamDetail(teamId);
+
     const [memberInput, setMemberInput] = useState("");
     const [isAdding, setIsAdding] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -49,13 +60,29 @@ export default function TeamDetailPage() {
         setIsAdding(true);
         try {
             await handleAddMember(memberInput, TeamRole.Member);
-
             setMemberInput("");
-            alert("Uživatel byl úspěšně přidán do týmu.");
+            alert("Uživatel byl úspěšně pozván do týmu.");
         } catch (err: any) {
             alert(err.message || "Nepodařilo se přidat člena. Zkontrolujte ID.");
         } finally {
             setIsAdding(false);
+        }
+    };
+
+    const onRemoveMember = async (userId: string) => {
+        if (!window.confirm("Opravdu chcete tohoto hráče odebrat z týmu?")) return;
+        try {
+            await handleRemoveMember(userId);
+        } catch (err: any) {
+            alert("Chyba při odebírání člena.");
+        }
+    };
+
+    const onRoleChange = async (userId: string, newRole: TeamRole) => {
+        try {
+            await handleChangeRole(userId, newRole);
+        } catch (err: any) {
+            alert("Chyba při změně role.");
         }
     };
 
@@ -70,12 +97,26 @@ export default function TeamDetailPage() {
                     <span>Zpět na týmy</span>
                 </Link>
 
-                {isOwner && (
-                    <button onClick={handleDeleteTeam} className="btn-delete">
-                        <IoTrashOutline size={18} />
-                        <span>Smazat tým</span>
-                    </button>
-                )}
+                <div className="top-bar-actions">
+                    {isManager && (
+                        <>
+                            <Link href={`/Dashboard/Events/Create?teamId=${teamId}`} className="btn-action">
+                                <IoCalendarOutline size={18} />
+                                <span>Nová událost</span>
+                            </Link>
+                            <Link href={`/Dashboard/Matches/Create?teamId=${teamId}`} className="btn-action">
+                                <IoTrophyOutline size={18} />
+                                <span>Nový zápas</span>
+                            </Link>
+                        </>
+                    )}
+                    {isOwner && (
+                        <button onClick={handleDeleteTeam} className="btn-delete">
+                            <IoTrashOutline size={18} />
+                            <span>Smazat tým</span>
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="detail-header-card glass-card-dark">
@@ -120,25 +161,25 @@ export default function TeamDetailPage() {
             {isManager && (
                 <div className="management-section glass-card-dark">
                     <h2 className="section-title">
-                        <IoShieldCheckmarkOutline /> Správa týmu
+                        <IoShieldCheckmarkOutline /> Přidat nového člena
                     </h2>
                     <hr className="section-divider" />
 
                     <form onSubmit={onSubmitAddMember} className="add-member-form">
                         <div className="input-wrapper">
-                            <label>Přidat člena (ID Uživatele)</label>
+                            <label>ID Uživatele</label>
                             <div className="input-group">
                                 <IoPersonAddOutline className="input-icon" />
                                 <input
                                     type="text"
                                     value={memberInput}
                                     onChange={(e) => setMemberInput(e.target.value)}
-                                    placeholder="Zadejte ID uživatele..."
+                                    placeholder="Zadejte unikátní ID uživatele..."
                                     required
                                     className="input-glass"
                                 />
                                 <button type="submit" disabled={isAdding} className="button-primary">
-                                    {isAdding ? "Pracuji..." : "Přidat člena"}
+                                    {isAdding ? "Pracuji..." : "Odeslat pozvánku"}
                                 </button>
                             </div>
                         </div>
@@ -147,29 +188,56 @@ export default function TeamDetailPage() {
             )}
 
             <div className="members-section">
-                <h2 className="section-title">Členové týmu</h2>
+                <h2 className="section-title">Soupiska týmu</h2>
                 <div className="members-grid">
                     {team.members && team.members.length > 0 ? (
                         team.members.map((member) => {
                             const mRole = member.role || TeamRole.Member;
+                            const canEdit = isManager
+                                && member.userId !== currentUserId
+                                && !(mRole === TeamRole.Owner && !isOwner);
 
                             return (
                                 <div key={member.userId} className="member-card glass-card-dark">
-                                    <div className="member-avatar">
-                                        {member.firstName.charAt(0)}{member.lastName.charAt(0)}
-                                    </div>
-                                    <div className="member-info">
-                                        <h4 className="member-name">{member.firstName} {member.lastName}</h4>
-                                        <span className="member-email">{member.email}</span>
-                                        <div className="member-tags">
-                                            <span className={`role-badge role-${mRole}`}>
-                                                {mRole}
-                                            </span>
-                                            {!member.isActive && (
-                                                <span className="status-badge pending">Nepotvrzeno</span>
-                                            )}
+                                    <div className="member-card-main">
+                                        <div className="member-avatar">
+                                            {member.firstName.charAt(0)}{member.lastName.charAt(0)}
+                                        </div>
+                                        <div className="member-info">
+                                            <h4 className="member-name">{member.firstName} {member.lastName}</h4>
+                                            <span className="member-email">{member.email}</span>
+                                            <div className="member-tags">
+                                                <span className={`role-badge role-${mRole}`}>
+                                                    {mRole}
+                                                </span>
+                                                {!member.isActive && (
+                                                    <span className="status-badge pending">Nepotvrzeno</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
+
+                                    {canEdit && (
+                                        <div className="member-actions">
+                                            <select
+                                                className="role-select-glass"
+                                                value={mRole}
+                                                onChange={(e) => onRoleChange(member.userId, e.target.value as TeamRole)}
+                                            >
+                                                <option value={TeamRole.Member}>Member</option>
+                                                <option value={TeamRole.Coach}>Coach</option>
+                                                {isOwner && <option value={TeamRole.Owner}>Owner</option>}
+                                            </select>
+
+                                            <button
+                                                className="btn-icon-danger"
+                                                onClick={() => onRemoveMember(member.userId)}
+                                                title="Odebrat hráče z týmu"
+                                            >
+                                                <IoTrashOutline size={18} />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })
