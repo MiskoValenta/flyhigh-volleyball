@@ -3,8 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { IoChevronForward } from "react-icons/io5";
-import { useTeamList } from "../../../hooks/Teams/useTeamList";
-import { TeamRole } from "../../../types/team";
+import { useTeamList } from "@/hooks/Teams/useTeamList";
+import { TeamRole } from "@/types/team";
 import "./Teams.css";
 
 export default function TeamsPage() {

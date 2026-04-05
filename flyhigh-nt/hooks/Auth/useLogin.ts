@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginUser } from '../../lib/api';
-import { LoginCredentials } from '../../types/user';
+import { loginUser } from '@/lib/api';
+import { LoginCredentials } from '@/types/user';
 
 export const useLogin = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);

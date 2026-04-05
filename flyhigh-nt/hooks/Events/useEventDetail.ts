@@ -1,62 +1,47 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getEventById, respondToEvent, deleteEvent } from '@/lib/eventApi';
-import { TeamEvent, EventResponse } from '@/types/event';
+import { getEventDetail, respondToEvent, deleteEvent } from '@/lib/eventApi';
+import { EventDto, EventResponse } from '@/types/event';
 import { useRouter } from 'next/navigation';
 
-export function useEventDetail(eventId: string) {
+export const useEventDetail = (eventId: string) => {
+    const [event, setEvent] = useState<EventDto | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const [event, setEvent] = useState<TeamEvent | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
 
-    const fetchEvent = useCallback(async () => {
-        if (!eventId) {
-            return;
-        }
+    const fetchDetail = useCallback(async () => {
+        if (!eventId) return;
         setIsLoading(true);
         try {
-            const data = await getEventById(eventId);
+            const data = await getEventDetail(eventId);
             setEvent(data);
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Nepodařilo se načíst detail události.');
-            }
+            setError(err.message);
         } finally {
             setIsLoading(false);
         }
     }, [eventId]);
 
-    useEffect(() => {
-        fetchEvent();
-    }, [fetchEvent]);
+    useEffect(() => { fetchDetail(); }, [fetchDetail]);
 
     const handleRespond = async (response: EventResponse) => {
         try {
-            await respondToEvent(eventId, response);
-            await fetchEvent();
+            await respondToEvent(eventId, { response });
+            fetchDetail();
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Nepodařilo se uložit odpověď.');
-            }
+            alert(err.message);
         }
     };
 
-    const handleDelete = async () => {
+    const handleDelete = async (teamId: string) => {
+        if (!window.confirm("Opravdu chcete smazat tuto událost?")) return;
         try {
             await deleteEvent(eventId);
-            router.back();
+            router.push(`/Dashboard/Teams/${teamId}`);
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Nepodařilo se smazat události.');
-            }
+            alert(err.message);
         }
     };
 
-    return { event, isLoading, error, handleRespond, handleDelete, refreshEvent: fetchEvent };
-}
+    return { event, isLoading, error, handleRespond, handleDelete, refetch: fetchDetail };
+};
