@@ -12,21 +12,21 @@ export enum EventResponse {
 
 export interface EventParticipantDto {
     userId: string;
-    response: EventResponse;
+    response: EventResponse | string;
 }
 
-export interface TeamEvent {
+export interface EventDto {
     id: string;
     teamId: string;
     creatorId: string;
     title: string;
     description: string | null;
-    type: EventType;
+    type: EventType | string;
     eventDate: string | null;
     location: string | null;
     createdAt: string;
     participants: EventParticipantDto[];
-    myResponse: EventResponse;
+    myResponse: EventResponse | string;
     acceptedCount: number;
     declinedCount: number;
 }
@@ -34,13 +34,13 @@ export interface TeamEvent {
 export interface CreateEventDto {
     teamId: string;
     title: string;
-    description: string;
-    type: EventType;
+    description: string | null;
+    type: EventType | string;
     eventDate: string | null;
-    location: string;
+    location: string | null;
     invitedUserIds: string[];
 }
 
 export interface RespondToEventDto {
-    response: EventResponse;
+    response: EventResponse | string;
 }

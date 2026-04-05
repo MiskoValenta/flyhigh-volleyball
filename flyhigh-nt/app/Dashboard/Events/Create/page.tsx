@@ -109,7 +109,11 @@ export default function CreateEventPage() {
 
                         <div className="form-group-ce">
                             <label>Typ události</label>
-                            <select value={eventType} onChange={(e) => setEventType(e.target.value as EventType)}>
+                            <select
+                                value={eventType}
+                                onChange={(e) => setEventType(e.target.value as EventType)}
+                                className="input-glass"
+                            >
                                 <option value={EventType.Announcement}>Oznámení</option>
                                 <option value={EventType.Poll}>Anketa</option>
                                 <option value={EventType.Match}>Zápas</option>

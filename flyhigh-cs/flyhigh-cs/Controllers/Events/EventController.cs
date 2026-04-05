@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace API.Controllers.Events;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/events")]
 [Authorize]
 public class EventController : ControllerBase
 {
@@ -19,18 +19,19 @@ public class EventController : ControllerBase
   {
     _eventService = eventService;
   }
-
   private Guid GetCurrentUserId()
   {
     return User.GetUserId();
   }
 
-  [HttpPost("create")]
+  [HttpPost]
   public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto, CancellationToken ct)
   {
+    var currentUser = GetCurrentUserId();
     try
     {
-      var eventId = await _eventService.CreateEventAsync(dto, GetCurrentUserId(), ct);
+      var eventId = await _eventService.CreateEventAsync(dto, currentUser, ct);
+
       return Ok(new { Id = eventId });
     }
     catch (Exception ex)
@@ -42,12 +43,13 @@ public class EventController : ControllerBase
   [HttpGet("team/{teamId}")]
   public async Task<IActionResult> GetTeamEvents(Guid teamId, CancellationToken ct)
   {
+    var currentUser = GetCurrentUserId();
+
     try
     {
-      var events = await _eventService.GetTeamEventsAsync(teamId, GetCurrentUserId(), ct);
-      return Ok(events);
-    }
-    catch (Exception ex)
+      var result = await _eventService.GetTeamEventsAsync(teamId, currentUser, ct);
+      return Ok(result);
+    }catch (Exception ex)
     {
       return BadRequest(new { message = ex.Message });
     }
@@ -56,12 +58,13 @@ public class EventController : ControllerBase
   [HttpGet("{eventId}")]
   public async Task<IActionResult> GetEventDetail(Guid eventId, CancellationToken ct)
   {
+    var currentUser = GetCurrentUserId();
+
     try
     {
-      var detail = await _eventService.GetEventDetailAsync(eventId, GetCurrentUserId(), ct);
+      var detail = await _eventService.GetEventDetailAsync(eventId, currentUser, ct);
       return Ok(detail);
-    }
-    catch (Exception ex)
+    }catch (Exception ex)
     {
       return NotFound(new { message = ex.Message });
     }
@@ -70,12 +73,13 @@ public class EventController : ControllerBase
   [HttpPost("{eventId}/respond")]
   public async Task<IActionResult> RespondToEvent(Guid eventId, [FromBody] RespondToEventDto dto, CancellationToken ct)
   {
+    var currentUser = GetCurrentUserId();
+
     try
     {
-      await _eventService.RespondToEventAsync(eventId, GetCurrentUserId(), dto.Response, ct);
+      await _eventService.RespondToEventAsync(eventId, currentUser, dto.Response, ct);
       return Ok(new { message = "Odpověď zaznamenána." });
-    }
-    catch (Exception ex)
+    }catch (Exception ex)
     {
       return BadRequest(new { message = ex.Message });
     }
@@ -84,12 +88,14 @@ public class EventController : ControllerBase
   [HttpDelete("{eventId}")]
   public async Task<IActionResult> DeleteEvent(Guid eventId, CancellationToken ct)
   {
+    var currentUser = GetCurrentUserId();
+
     try
     {
-      await _eventService.DeleteEventAsync(eventId, GetCurrentUserId(), ct);
+      await _eventService.DeleteEventAsync(eventId, currentUser, ct);
+
       return NoContent();
-    }
-    catch (Exception ex)
+    }catch (Exception ex)
     {
       return BadRequest(new { message = ex.Message });
     }
