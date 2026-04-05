@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -15,6 +15,9 @@ import {
 } from "react-icons/io5";
 import { useTeamDetail } from "@/hooks/Teams/useTeamDetail";
 import { TeamRole } from "@/types/team";
+import { useTeamEvents } from "@/hooks/Events/useTeamEvents";
+import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
+import { DashboardEventItem } from "@/types/event";
 import "./TeamDetail.css";
 
 export default function TeamDetailPage() {
@@ -24,22 +27,37 @@ export default function TeamDetailPage() {
     const {
         team,
         currentUserId,
-        isLoading,
-        error,
+        isLoading: isTeamLoading,
+        error: teamError,
         handleAddMember,
         handleRemoveMember,
         handleChangeRole
     } = useTeamDetail(teamId);
 
+    const { events: teamEvents, isLoading: isEventsLoading } = useTeamEvents(teamId);
+
     const [memberInput, setMemberInput] = useState("");
     const [isAdding, setIsAdding] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    if (isLoading)
+    const upcomingSortedEvents = useMemo(() => {
+        if (!teamEvents || !team) return [];
+        const now = new Date();
+
+        return teamEvents
+            .filter(e => e.eventDate && new Date(e.eventDate) > now)
+            .sort((a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime())
+            .map(e => ({
+                ...e,
+                teamName: team.teamName
+            } as DashboardEventItem));
+    }, [teamEvents, team]);
+
+    if (isTeamLoading)
         return <div className="detail-state-message">Načítám detail týmu...</div>;
 
-    if (error || !team)
-        return <div className="detail-state-message error">Chyba: {error || "Tým nebyl nalezen"}</div>;
+    if (teamError || !team)
+        return <div className="detail-state-message error">Chyba: {teamError || "Tým nebyl nalezen"}</div>;
 
     const isOwner = team.myRole === TeamRole.Owner;
     const isManager = team.myRole === TeamRole.Owner || team.myRole === TeamRole.Coach;
@@ -152,10 +170,24 @@ export default function TeamDetailPage() {
                         <span className="stat-label">Čekající pozvánky</span>
                     </div>
                     <div className="stat-box">
-                        <span className="stat-value">0</span>
-                        <span className="stat-label">Událostí</span>
+                        <span className="stat-value">
+                            {isEventsLoading ? "..." : upcomingSortedEvents.length}
+                        </span>
+                        <span className="stat-label">Nadcházející události</span>
                     </div>
                 </div>
+            </div>
+
+            <div className="events-section">
+                <h2 className="section-title">
+                    <IoCalendarOutline />
+                    Události týmu
+                </h2>
+                {isEventsLoading ? (
+                    <div className="no-members-text">Načítám události...</div>
+                ) : (
+                    <DashboardEvents events={upcomingSortedEvents} />
+                )}
             </div>
 
             {isManager && (

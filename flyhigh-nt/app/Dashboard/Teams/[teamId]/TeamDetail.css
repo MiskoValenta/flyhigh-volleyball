@@ -199,7 +199,8 @@
 }
 
 .management-section,
-.members-section {
+.members-section,
+.events-section {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;

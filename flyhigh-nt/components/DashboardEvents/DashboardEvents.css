@@ -161,6 +161,32 @@
     color: #ffffff;
 }
 
+.event-team-footer {
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.team-footer-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.team-footer-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #60a5fa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
 @media (max-width: 480px) {
     .dashboard-events-grid {
         grid-template-columns: 1fr;

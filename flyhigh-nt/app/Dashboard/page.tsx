@@ -8,6 +8,7 @@ import { getCurrentUser, getUserStats } from '@/lib/api';
 import { UserProfile } from '@/types/user';
 import { EventDto } from '@/types/event';
 import DashboardEvents from '@/components/DashboardEvents/DashboardEvents';
+import { DashboardEventItem } from '@/types/event'
 import {
     IoCopyOutline,
     IoPeopleOutline,
@@ -24,7 +25,7 @@ export default function DashboardPage() {
     const [upcomingEventsCount, setUpcomingEventsCount] = useState<number>(0);
     const [userTeamIds, setUserTeamIds] = useState<string[]>([]);
 
-    const [dashboardEvents, setDashboardEvents] = useState<EventDto[]>([]);
+    const [dashboardEvents, setDashboardEvents] = useState<DashboardEventItem[]>([]);
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [copySuccess, setCopySuccess] = useState<boolean>(false);
@@ -49,6 +50,9 @@ export default function DashboardPage() {
                 const teamIds = myTeams.map(team => team.id);
                 setUserTeamIds(teamIds);
 
+                // ZMĚNA: Vytvoříme slovník pro rychlé hledání jména týmu podle ID
+                const teamNameMap = new Map(myTeams.map(t => [t.id, t.teamName]));
+
                 if (teamIds.length > 0) {
                     const allEventsPromises = teamIds.map(id => getTeamEvents(id));
                     const allEventsArrays = await Promise.allSettled(allEventsPromises);
@@ -58,6 +62,8 @@ export default function DashboardPage() {
                         .flatMap(res => res.value);
 
                     const now = new Date();
+
+                    // ZMĚNA: Přidání teamName ke každé události
                     const upcomingEvents = combinedEvents.filter(evt => {
                         if (evt.eventDate) {
                             if (new Date(evt.eventDate) > now) {
@@ -68,7 +74,10 @@ export default function DashboardPage() {
                         } else {
                             return false;
                         }
-                    });
+                    }).map(evt => ({
+                        ...evt,
+                        teamName: teamNameMap.get(evt.teamId) || "Neznámý tým"
+                    }));
 
                     setUpcomingEventsCount(upcomingEvents.length);
                     setDashboardEvents(upcomingEvents);
