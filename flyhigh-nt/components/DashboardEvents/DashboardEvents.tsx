@@ -3,11 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import { IoCalendarOutline, IoLocationOutline, IoCheckmarkCircle, IoCloseCircle, IoHelpCircle } from "react-icons/io5";
-import { EventDto, EventType, EventResponse } from "@/types/event";
+import { EventType, EventResponse, DashboardEventItem } from "@/types/event";
 import "./DashboardEvents.css";
 
 interface Props {
-    events: EventDto[];
+    events: DashboardEventItem[];
 }
 
 export default function DashboardEvents({ events }: Props) {
@@ -33,7 +33,7 @@ export default function DashboardEvents({ events }: Props) {
         return (
             <div className="events-empty-state glass-card-dark">
                 <IoCalendarOutline size={40} />
-                <p>Tento tým zatím nemá žádné události.</p>
+                <p>Zatím nemáte žádné události.</p>
             </div>
         );
     }
@@ -47,7 +47,7 @@ export default function DashboardEvents({ events }: Props) {
                     <Link href={`/Dashboard/Events/${event.id}`} key={event.id} className="event-card glass-card-dark">
 
                         <div className="event-header">
-                            <span className={`event-type-badge ${getBadgeClass(event.type)}`}>
+                            <span className={`event-type-badge ${getBadgeClass(event.type as string)}`}>
                                 {event.type}
                             </span>
                             {dateObj && (
@@ -78,11 +78,18 @@ export default function DashboardEvents({ events }: Props) {
                             <div className="my-response-box">
                                 <span className="response-label">Moje odpověď:</span>
                                 <div className="response-status">
-                                    {getResponseIcon(event.myResponse)}
+                                    {getResponseIcon(event.myResponse as string)}
                                     <span className="response-text">{event.myResponse}</span>
                                 </div>
                             </div>
                         </div>
+
+                        {event.teamName && (
+                            <div className="event-team-footer">
+                                <span className="team-footer-label">Tým:</span>
+                                <span className="team-footer-name">{event.teamName}</span>
+                            </div>
+                        )}
                     </Link>
                 );
             })}

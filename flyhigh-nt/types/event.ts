@@ -44,3 +44,7 @@ export interface CreateEventDto {
 export interface RespondToEventDto {
     response: EventResponse;
 }
+
+export interface DashboardEventItem extends EventDto {
+    teamName?: string;
+}
