@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getTeamEvents } from '@/lib/eventApi';
-import { TeamEvent } from '@/types/event';
+import { EventDto } from '@/types/event';
 
-export function useTeamEvents(teamId: string) {
-    const [events, setEvents] = useState<TeamEvent[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
+export const useTeamEvents = (teamId: string) => {
+    const [events, setEvents] = useState<EventDto[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchEvents = useCallback(async () => {
         if (!teamId) return;
@@ -14,15 +14,13 @@ export function useTeamEvents(teamId: string) {
             const data = await getTeamEvents(teamId);
             setEvents(data);
         } catch (err: any) {
-            setError(err.message || 'Nepodařilo se načíst události týmu.');
+            setError(err.message || "Nepodařilo se načíst události.");
         } finally {
             setIsLoading(false);
         }
     }, [teamId]);
 
-    useEffect(() => {
-        fetchEvents();
-    }, [fetchEvents]);
+    useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
-    return { events, isLoading, error, refreshEvents: fetchEvents };
-}
+    return { events, isLoading, error, refetch: fetchEvents };
+};

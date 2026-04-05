@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { forgotPassword } from '../../lib/api';
-import { ForgotPasswordRequest } from '../../types/user';
+import { forgotPassword } from '@/lib/api';
+import { ForgotPasswordRequest } from '@/types/user';
 
 export const useForgotPassword = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);

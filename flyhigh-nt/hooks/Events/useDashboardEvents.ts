@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getTeamEvents } from '@/lib/eventApi';
-import { TeamEvent } from '@/types/event';
+import { EventDto } from '@/types/event';
 
 export function useDashboardEvents(teamId?: string) {
-    const [events, setEvents] = useState<TeamEvent[]>([]);
+    const [events, setEvents] = useState<EventDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 

@@ -6,7 +6,7 @@ import { getMyTeams } from '@/lib/teamApi';
 import { getTeamEvents } from '@/lib/eventApi';
 import { getCurrentUser, getUserStats } from '@/lib/api';
 import { UserProfile } from '@/types/user';
-import { TeamEvent } from '@/types/event';
+import { EventDto } from '@/types/event';
 import DashboardEvents from '@/components/DashboardEvents/DashboardEvents';
 import {
     IoCopyOutline,
@@ -23,6 +23,9 @@ export default function DashboardPage() {
     const [playedMatchesCount, setPlayedMatchesCount] = useState<number>(0);
     const [upcomingEventsCount, setUpcomingEventsCount] = useState<number>(0);
     const [userTeamIds, setUserTeamIds] = useState<string[]>([]);
+
+    const [dashboardEvents, setDashboardEvents] = useState<EventDto[]>([]);
+
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [copySuccess, setCopySuccess] = useState<boolean>(false);
 
@@ -51,7 +54,7 @@ export default function DashboardPage() {
                     const allEventsArrays = await Promise.allSettled(allEventsPromises);
 
                     const combinedEvents = allEventsArrays
-                        .filter((res): res is PromiseFulfilledResult<TeamEvent[]> => res.status === 'fulfilled')
+                        .filter((res): res is PromiseFulfilledResult<EventDto[]> => res.status === 'fulfilled')
                         .flatMap(res => res.value);
 
                     const now = new Date();
@@ -66,7 +69,9 @@ export default function DashboardPage() {
                             return false;
                         }
                     });
+
                     setUpcomingEventsCount(upcomingEvents.length);
+                    setDashboardEvents(upcomingEvents);
                 }
             } catch (error) {
                 console.error(error);
@@ -144,20 +149,13 @@ export default function DashboardPage() {
     }
 
     let eventsSection = null;
-    if (!isLoading) {
-        if (currentUser !== null) {
-            if (currentUser.id) {
-                if (userTeamIds.length > 0) {
-                    eventsSection = (
-                        <div className="dashboard-section events-section">
-                            {userTeamIds.map(teamId => (
-                                <DashboardEvents key={teamId} teamId={teamId} />
-                            ))}
-                        </div>
-                    );
-                }
-            }
-        }
+    if (!isLoading && currentUser?.id && userTeamIds.length > 0) {
+        eventsSection = (
+            <div className="dashboard-section events-section">
+                <h2 className="dashboard-heading">Nadcházející události mých týmů</h2>
+                <DashboardEvents events={dashboardEvents} />
+            </div>
+        );
     }
 
     return (

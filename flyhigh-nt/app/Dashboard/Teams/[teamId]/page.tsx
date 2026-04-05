@@ -13,8 +13,8 @@ import {
     IoCalendarOutline,
     IoTrophyOutline
 } from "react-icons/io5";
-import { useTeamDetail } from "../../../../hooks/Teams/useTeamDetail";
-import { TeamRole } from "../../../../types/team";
+import { useTeamDetail } from "@/hooks/Teams/useTeamDetail";
+import { TeamRole } from "@/types/team";
 import "./TeamDetail.css";
 
 export default function TeamDetailPage() {

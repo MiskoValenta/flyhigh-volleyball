@@ -1,114 +1,76 @@
-import { fetchWithAuth } from './apiClient';
-import { TeamEvent, EventResponse, CreateEventDto } from '@/types/event';
+import { BASE_URL, fetchWithAuth } from './apiClient';
+import { EventDto, CreateEventDto, RespondToEventDto } from '../types/event';
 
-const BASE_URL = '/events';
-
-export const createEvent = async (data: CreateEventDto) => {
-    let finalEventDate: string | null = data.eventDate;
-
-    if (finalEventDate === "") {
-        finalEventDate = null;
-    } else if (finalEventDate !== null) {
-        finalEventDate = new Date(finalEventDate).toISOString();
-    }
-
-    if (data.teamId === "") {
-        throw new Error("Musíte vybrat tým pro tuto událost.");
-    }
-
-    let finalDescription = data.description;
-    if (!finalDescription) {
-        finalDescription = "";
-    }
-
-    let finalLocation = data.location;
-    if (!finalLocation) {
-        finalLocation = "";
-    }
-
-    let finalInvitedUserIds = data.invitedUserIds;
-    if (!finalInvitedUserIds) {
-        finalInvitedUserIds = [];
-    }
-
-    const payload = {
-        teamId: data.teamId,
-        title: data.title,
-        description: finalDescription,
-        type: data.type,
-        eventDate: finalEventDate,
-        location: finalLocation,
-        invitedUserIds: finalInvitedUserIds
-    };
-
-    const res = await fetchWithAuth(`${BASE_URL}/create`, {
+export const createEvent = async (data: CreateEventDto): Promise<{ Id: string }> => {
+    const res = await fetchWithAuth(`${BASE_URL}/events`, {
         method: 'POST',
-        body: JSON.stringify(payload),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(data)
     });
 
     if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) { }
-
-        let errorMessage = 'Nepodařilo se vytvořit událost.';
-        if (errorData.message) {
-            errorMessage = errorData.message;
-        } else if (errorData.errors) {
-            errorMessage = Object.values(errorData.errors).flat().join(' ');
-        }
-
-        throw new Error(errorMessage);
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Nepodařilo se vytvořit událost.');
     }
 
-    const text = await res.text();
-    if (text !== "") {
-        return JSON.parse(text);
-    } else {
-        return {};
-    }
+    return res.json();
 };
 
-export const getTeamEvents = async (teamId: string): Promise<TeamEvent[]> => {
-    const res = await fetchWithAuth(`${BASE_URL}/team/${teamId}`, {
+export const getTeamEvents = async (teamId: string): Promise<EventDto[]> => {
+    const res = await fetchWithAuth(`${BASE_URL}/events/team/${teamId}`, {
         method: 'GET',
+        credentials: 'include'
     });
-    if (!res.ok) {
-        return [];
-    }
-    return res.json();
-}
 
-export const getEventById = async (eventId: string): Promise<TeamEvent> => {
-    const res = await fetchWithAuth(`${BASE_URL}/${eventId}`, {
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Nepodařilo se načíst události týmu.');
+    }
+
+    return res.json();
+};
+
+export const getEventDetail = async (eventId: string): Promise<EventDto> => {
+    const res = await fetchWithAuth(`${BASE_URL}/events/${eventId}`, {
         method: 'GET',
+        credentials: 'include'
     });
-    if (!res.ok) {
-        throw new Error('Nepodařilo se načíst detail události.');
-    }
-    return res.json();
-}
 
-export const respondToEvent = async (eventId: string, response: EventResponse): Promise<void> => {
-    const res = await fetchWithAuth(`${BASE_URL}/${eventId}/respond`, {
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Nepodařilo se načíst detail události.');
+    }
+
+    return res.json();
+};
+
+export const respondToEvent = async (eventId: string, data: RespondToEventDto): Promise<void> => {
+    const res = await fetchWithAuth(`${BASE_URL}/events/${eventId}/respond`, {
         method: 'POST',
-        body: JSON.stringify({ response })
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(data)
     });
+
     if (!res.ok) {
-        let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
-        throw new Error(errorData.message || 'Nepodařilo se uložit odpověď.');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Nepodařilo se odpovědět na událost.');
     }
 };
 
 export const deleteEvent = async (eventId: string): Promise<void> => {
-    const res = await fetchWithAuth(`${BASE_URL}/${eventId}`, {
+    const res = await fetchWithAuth(`${BASE_URL}/events/${eventId}`, {
         method: 'DELETE',
+        credentials: 'include'
     });
+
     if (!res.ok) {
-        let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || 'Nepodařilo se smazat událost.');
     }
 };
