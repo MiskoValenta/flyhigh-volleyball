@@ -1,13 +1,14 @@
-import { BASE_URL, fetchWithAuth } from './apiClient';
+import { fetchWithAuth } from './apiClient';
 import { EventDto, CreateEventDto, RespondToEventDto } from '../types/event';
 
+const EVENT_URL = '/events';
+
 export const createEvent = async (data: CreateEventDto): Promise<{ Id: string }> => {
-    const res = await fetchWithAuth(`${BASE_URL}/events`, {
+    const res = await fetchWithAuth(EVENT_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        credentials: 'include',
         body: JSON.stringify(data)
     });
 
@@ -20,9 +21,8 @@ export const createEvent = async (data: CreateEventDto): Promise<{ Id: string }>
 };
 
 export const getTeamEvents = async (teamId: string): Promise<EventDto[]> => {
-    const res = await fetchWithAuth(`${BASE_URL}/events/team/${teamId}`, {
-        method: 'GET',
-        credentials: 'include'
+    const res = await fetchWithAuth(`${EVENT_URL}/team/${teamId}`, {
+        method: 'GET'
     });
 
     if (!res.ok) {
@@ -34,9 +34,8 @@ export const getTeamEvents = async (teamId: string): Promise<EventDto[]> => {
 };
 
 export const getEventDetail = async (eventId: string): Promise<EventDto> => {
-    const res = await fetchWithAuth(`${BASE_URL}/events/${eventId}`, {
-        method: 'GET',
-        credentials: 'include'
+    const res = await fetchWithAuth(`${EVENT_URL}/${eventId}`, {
+        method: 'GET'
     });
 
     if (!res.ok) {
@@ -48,12 +47,11 @@ export const getEventDetail = async (eventId: string): Promise<EventDto> => {
 };
 
 export const respondToEvent = async (eventId: string, data: RespondToEventDto): Promise<void> => {
-    const res = await fetchWithAuth(`${BASE_URL}/events/${eventId}/respond`, {
+    const res = await fetchWithAuth(`${EVENT_URL}/${eventId}/respond`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        credentials: 'include',
         body: JSON.stringify(data)
     });
 
@@ -64,9 +62,8 @@ export const respondToEvent = async (eventId: string, data: RespondToEventDto): 
 };
 
 export const deleteEvent = async (eventId: string): Promise<void> => {
-    const res = await fetchWithAuth(`${BASE_URL}/events/${eventId}`, {
-        method: 'DELETE',
-        credentials: 'include'
+    const res = await fetchWithAuth(`${EVENT_URL}/${eventId}`, {
+        method: 'DELETE'
     });
 
     if (!res.ok) {
