@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { IoArrowBack, IoCalendarOutline, IoLocationOutline, IoInformationCircleOutline } from "react-icons/io5";
-import { useCreateEvent } from "@/hooks/Events/useCreateEvent";
-import { EventType } from "@/types/event";
+import { useCreateEvent } from "../../../../hooks/Events/useCreateEvent";
+import { EventType } from "../../../../types/event";
 import "./CreateEvent.css";
 
 export default function CreateEventPage() {
@@ -31,7 +31,6 @@ export default function CreateEventPage() {
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         const formattedDate = eventDate ? new Date(eventDate).toISOString() : null;
 
         await handleCreateEvent({
@@ -56,7 +55,7 @@ export default function CreateEventPage() {
                 </Link>
             </div>
 
-            <div className="create-event-card-ce glass-card-dark-ce">
+            <div className="create-event-card-ce glass-card-dark">
                 <h1 className="create-event-title-ce">Vytvořit novou událost</h1>
                 <p className="create-event-desc-ce">
                     Naplánujte zápas, tréninkovou anketu nebo pošlete členům oznámení.
