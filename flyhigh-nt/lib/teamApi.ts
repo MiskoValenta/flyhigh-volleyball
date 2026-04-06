@@ -145,7 +145,7 @@ export const getTeamStats = async (teamId: string): Promise<{ matchesPlayed: num
     return res.json();
 };
 
-export const deleteTeam = async (teamId: string) => {
+export const deleteTeam = async (teamId: string): Promise<void> => {
     const res = await fetchWithAuth(`${TEAM_URL}/${teamId}`, {
         method: 'DELETE',
     });
