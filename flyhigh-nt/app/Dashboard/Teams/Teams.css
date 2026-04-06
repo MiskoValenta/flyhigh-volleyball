@@ -176,6 +176,80 @@
     transform: translateX(6px);
 }
 
+.dashboard-subheading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.pending-section {
+    margin-bottom: 2rem;
+}
+
+.pending-card {
+    border-left: 4px solid #facc15;
+}
+
+.pending-badge {
+    background-color: rgba(234, 179, 8, 0.15);
+    color: #facc15;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    flex-shrink: 0;
+}
+
+.pending-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.btn-accept {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: rgba(74, 222, 128, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    transition: all 0.2s ease;
+}
+
+.btn-accept:hover {
+    background-color: #4ade80;
+    color: #ffffff;
+}
+
+.btn-decline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: rgba(248, 113, 113, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    transition: all 0.2s ease;
+}
+
+.btn-decline:hover {
+    background-color: #f87171;
+    color: #ffffff;
+}
+
 @media (max-width: 480px) {
     .teams-page-wrapper {
         padding: 1rem;
