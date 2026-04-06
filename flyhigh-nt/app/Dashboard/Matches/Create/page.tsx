@@ -1,154 +1,152 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createMatch } from '@/lib/matchApi';
-import { getMyTeams } from '@/lib/teamApi';
-import { Team } from '@/types/team';
-import './CreateMatch.css';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCreateMatch } from "@/hooks/Matches/useCreateMatch";
+import { useTeamList } from "@/hooks/Teams/useTeamList";
+import { CreateMatchDto } from "@/types/match";
+import { TeamResponseDto } from "@/types/team";
+import "./CreateMatch.css";
 
 export default function CreateMatchPage() {
     const router = useRouter();
-    const [managerTeams, setManagerTeams] = useState<Team[]>([]);
-    const [isLoadingTeams, setIsLoadingTeams] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState('');
+    const { handleCreateMatch, isLoading, error } = useCreateMatch();
+    const { teams, isLoading: isLoadingTeams, error: teamsError } = useTeamList();
 
-    const [formData, setFormData] = useState({
-        homeTeamId: '',
-        awayTeamId: '',
-        location: '',
-        scheduledAt: ''
-    });
+    const [homeTeamId, setHomeTeamId] = useState<string>("");
+    const [awayTeamId, setAwayTeamId] = useState<string>("");
+    const [scheduledAt, setScheduledAt] = useState<string>("");
+    const [location, setLocation] = useState<string>("");
+    const [refereeId, setRefereeId] = useState<string>("");
 
     useEffect(() => {
-        const fetchTeams = async () => {
-            try {
-                const teams = await getMyTeams();
-                const filtered = teams.filter(t => t.role === 'Owner' || t.role === 'Coach');
-                setManagerTeams(filtered);
-
-                if (filtered.length > 0) {
-                    setFormData(prev => ({ ...prev, homeTeamId: filtered[0].id }));
-                }
-            } catch (err) {
-                setError('Nepodařilo se načíst seznam vašich týmů.');
-            } finally {
-                setIsLoadingTeams(false);
+        if (teams.length > 0) {
+            if (homeTeamId === "") {
+                setHomeTeamId(teams[0].id);
             }
+        }
+    }, [teams, homeTeamId]);
+
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        let finalRefereeId: string | null = refereeId;
+        if (refereeId === "") {
+            finalRefereeId = null;
+        }
+
+        const dto: CreateMatchDto = {
+            homeTeamId: homeTeamId,
+            awayTeamId: awayTeamId,
+            scheduledAt: scheduledAt,
+            location: location,
+            refereeId: finalRefereeId
         };
 
-        fetchTeams();
-    }, []);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setIsSubmitting(true);
-
         try {
-            const dateIso = new Date(formData.scheduledAt).toISOString();
-
-            await createMatch({
-                homeTeamId: formData.homeTeamId,
-                awayTeamId: formData.awayTeamId,
-                location: formData.location,
-                scheduledAt: dateIso
-            });
-
+            await handleCreateMatch(dto);
             router.push('/Dashboard/Matches');
-        } catch (err: any) {
-            setError(err.message || 'Došlo k chybě při komunikaci se serverem.');
-        } finally {
-            setIsSubmitting(false);
+        } catch (err) {
+            console.error(err);
         }
     };
 
-    if (isLoadingTeams) return <div className="loading-state">Načítám vaše týmy...</div>;
+    let errorDisplay = null;
+    if (error !== "") {
+        errorDisplay = <div className="error-alert">{error}</div>;
+    }
+    if (teamsError !== "") {
+        errorDisplay = <div className="error-alert">{teamsError}</div>;
+    }
+
+    let teamOptions = [];
+    if (isLoadingTeams) {
+        teamOptions.push(<option key="loading" value="">Načítám týmy...</option>);
+    } else {
+        if (teams.length === 0) {
+            teamOptions.push(<option key="empty" value="">Nemáte žádné týmy</option>);
+        } else {
+            for (let i = 0; i < teams.length; i++) {
+                const t: TeamResponseDto = teams[i];
+                teamOptions.push(<option key={t.id} value={t.id}>{t.teamName}</option>);
+            }
+        }
+    }
+
+    let submitButtonText = "Vytvořit zápas";
+    if (isLoading) {
+        submitButtonText = "Vytvářím...";
+    }
 
     return (
-        <div className="dashboard-container create-match-container">
-            <h1 className="dashboard-heading">Založit nový zápas</h1>
-            <p className="dashboard-subtext">Vyberte svůj tým a zadejte informace o zápasu s hostujícím týmem.</p>
+        <div className="creatematch-container">
+            <h1 className="dashboard-heading">Nový zápas</h1>
+            <p className="create-match-subtext">Vyplňte detaily pro navržení nového zápasu.</p>
 
-            {managerTeams.length === 0 ? (
-                <div className="empty-state glass-card">
-                    <p>Nemáte právo zakládat zápasy, protože nejste Vlastníkem nebo Trenérem u žádného týmu.</p>
-                    <button className="btn-primary" onClick={() => router.push('/Dashboard/Teams')}>Zpět na týmy</button>
-                </div>
-            ) : (
-                <form onSubmit={handleSubmit} className="create-match-form glass-card">
-                    {error && <div className="error-message">{error}</div>}
+            {errorDisplay}
 
-                    <div className="form-group">
-                        <label htmlFor="homeTeamId">Váš tým</label>
-                        <select
-                            id="homeTeamId"
-                            name="homeTeamId"
-                            value={formData.homeTeamId}
-                            onChange={handleChange}
-                            required
-                        >
-                            {managerTeams.map(team => (
-                                <option key={team.id} value={team.id}>
-                                    {team.teamName} ({team.shortName})
-                                </option>
-                            ))}
-                        </select>
+            <div className="match-form-container glass-card-dark">
+                <form onSubmit={onSubmit}>
+                    <div className="form-row-cm">
+                        <div className="form-group-cm">
+                            <label>Domácí tým (Váš tým)</label>
+                            <select value={homeTeamId} onChange={(e) => setHomeTeamId(e.target.value)} required>
+                                {teamOptions}
+                            </select>
+                        </div>
+
+                        <div className="form-group-cm">
+                            <label>Hostující tým (ID Týmu soupeře)</label>
+                            <input
+                                type="text"
+                                value={awayTeamId}
+                                onChange={(e) => setAwayTeamId(e.target.value)}
+                                placeholder="Zadejte ID týmu soupeře"
+                                required
+                            />
+                        </div>
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="awayTeamId">ID Hostujícího Týmu</label>
+                    <div className="form-row-cm">
+                        <div className="form-group-cm">
+                            <label>Datum a čas</label>
+                            <input
+                                type="datetime-local"
+                                value={scheduledAt}
+                                onChange={(e) => setScheduledAt(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group-cm">
+                            <label>Místo konání</label>
+                            <input
+                                type="text"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                placeholder="Název haly nebo hřiště"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group-cm">
+                        <label>ID Rozhodčího (Volitelné)</label>
                         <input
                             type="text"
-                            id="awayTeamId"
-                            name="awayTeamId"
-                            value={formData.awayTeamId}
-                            onChange={handleChange}
-                            required
-                            placeholder="Zadejte ID soupeře"
+                            value={refereeId}
+                            onChange={(e) => setRefereeId(e.target.value)}
+                            placeholder="Zadejte ID uživatele rozhodčího"
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="location">Místo konání</label>
-                        <input
-                            type="text"
-                            id="location"
-                            name="location"
-                            value={formData.location}
-                            onChange={handleChange}
-                            required
-                            placeholder="Např. Sportovní hala Opava"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="scheduledAt">Datum a Čas</label>
-                        <input
-                            type="datetime-local"
-                            id="scheduledAt"
-                            name="scheduledAt"
-                            value={formData.scheduledAt}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-actions">
-                        <button type="button" className="btn-secondary" onClick={() => router.push('/Dashboard/Matches')}>
-                            Zrušit
-                        </button>
-                        <button type="submit" className="btn-primary" disabled={isSubmitting}>
-                            {isSubmitting ? 'Vytvářím...' : 'Vytvořit Zápas'}
+                    <div className="form-actions-cm">
+                        <button type="submit" className="button-primary" disabled={isLoading}>
+                            {submitButtonText}
                         </button>
                     </div>
                 </form>
-            )}
+            </div>
         </div>
     );
 }

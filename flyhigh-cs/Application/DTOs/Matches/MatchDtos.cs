@@ -18,8 +18,13 @@ public class AssignPositionDto
 {
   public int SetNumber { get; set; }
   public Guid TeamMemberId { get; set; }
-  public PlayerPosition Position { get; set; }
+  public string Position { get; set; } = string.Empty;
 }
+
+public record MatchPlayerPositionDto(
+    Guid TeamMemberId,
+    string Position
+);
 
 public record MatchDetailDto(
     Guid Id,
@@ -33,7 +38,8 @@ public record MatchDetailDto(
     string Status,
     List<RosterPlayerDto> Roster,
     List<MatchSetDto> Sets,
-    Guid? WinnerId
+    Guid? WinnerId,
+    Guid? RefereeId
 );
 
 public record RosterPlayerDto(
@@ -65,5 +71,6 @@ public record MatchSetDto(
     int AwayScore,
     bool IsFinished,
     bool IsStarted,
-    string Winner
+    string Winner,
+    List<MatchPlayerPositionDto> Positions
 );

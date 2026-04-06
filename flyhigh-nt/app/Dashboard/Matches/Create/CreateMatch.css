@@ -1,53 +1,85 @@
-.create-match-container {
-    max-width: 600px;
+.creatematch-container {
+    max-width: 800px;
     margin: 0 auto;
-    animation: fadeIn 0.4s ease-out;
-}
-
-.create-match-form {
-    padding: 2rem;
-    border-radius: 12px;
-    margin-top: 2rem;
+    padding: 2rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.form-group {
+.create-match-subtext {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
+.match-form-container {
+    padding: 2rem;
+}
+
+.form-row-cm {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group-cm {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.form-group-cm label {
     font-size: 0.95rem;
     color: var(--text-primary);
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
-    padding: 0.75rem 1rem;
+.form-group-cm input,
+.form-group-cm select {
+    padding: 0.8rem;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.2);
-    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
     font-size: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.form-actions {
+.form-actions-cm {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
     margin-top: 1rem;
+}
+
+.button-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.button-primary:hover {
+    background: #2563eb;
+}
+
+.error-alert {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid #ef4444;
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+    .form-row-cm {
+        flex-direction: column;
+        gap: 0;
+    }
 }

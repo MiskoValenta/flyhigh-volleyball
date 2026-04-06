@@ -18,9 +18,14 @@ public class EventRepository : IEventRepository
     _context = context;
   }
 
-  public async Task AddAsync(Event teamEvent, CancellationToken cancellationToken = default)
+  public async Task AddAsync(Event ev, CancellationToken cancellationToken = default)
   {
-    await _context.Set<Event>().AddAsync(teamEvent, cancellationToken);
+    await _context.Set<Event>().AddAsync(ev, cancellationToken);
+  }
+
+  public void Delete(Event ev)
+  {
+    _context.Set<Event>().Remove(ev);
   }
 
   public async Task<Event?> GetByIdAsync(EventId id, CancellationToken cancellationToken = default)
@@ -29,20 +34,13 @@ public class EventRepository : IEventRepository
         .Include(e => e.Participants)
         .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
   }
-  public async Task<IEnumerable<Event>> GetTeamEventsAsync(TeamId teamId, CancellationToken cancellationToken = default)
+
+  public async Task<IEnumerable<Event>> GetEventsByTeamIdAsync(TeamId teamId, CancellationToken cancellationToken = default)
   {
     return await _context.Set<Event>()
         .Include(e => e.Participants)
         .Where(e => e.TeamId == teamId)
+        .OrderBy(e => e.EventDate)
         .ToListAsync(cancellationToken);
-  }
-
-  public void Remove(Event teamEvent)
-  {
-    _context.Set<Event>().Remove(teamEvent);
-  }
-  public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-  {
-    await _context.SaveChangesAsync(cancellationToken);
   }
 }

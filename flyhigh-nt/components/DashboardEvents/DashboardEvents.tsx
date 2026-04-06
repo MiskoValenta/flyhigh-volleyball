@@ -1,173 +1,99 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { getTeamEvents, respondToEvent, deleteEvent } from '@/lib/eventApi';
-import { TeamEvent, EventResponse, EventType } from '@/types/event';
-import { IoLocationOutline, IoClose } from "react-icons/io5";
-import './DashboardEvents.css';
+import React from "react";
+import Link from "next/link";
+import { IoCalendarOutline, IoLocationOutline, IoCheckmarkCircle, IoCloseCircle, IoHelpCircle } from "react-icons/io5";
+import { EventType, EventResponse, DashboardEventItem } from "@/types/event";
+import "./DashboardEvents.css";
 
-interface DashboardEventsProps {
-    teamIds: string[];
-    currentUserId?: string;
+interface Props {
+    events: DashboardEventItem[];
 }
 
-export default function DashboardEvents({ teamIds, currentUserId }: DashboardEventsProps) {
-    const [events, setEvents] = useState<TeamEvent[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+export default function DashboardEvents({ events }: Props) {
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            if (!teamIds || teamIds.length === 0) {
-                setLoading(false);
-                return;
-            }
-            try {
-                const allEventsPromises = teamIds.map(id => getTeamEvents(id));
-                const allEventsArrays = await Promise.all(allEventsPromises);
-
-                const combined = allEventsArrays.flat().sort((a: TeamEvent, b: TeamEvent) => {
-                    const dateA = a.eventDate ? new Date(a.eventDate).getTime() : 0;
-                    const dateB = b.eventDate ? new Date(b.eventDate).getTime() : 0;
-                    return dateA - dateB;
-                });
-
-                setEvents(combined);
-            } catch (err: any) {
-                setError('Nepodařilo se načíst události.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchEvents();
-    }, [teamIds]);
-
-    const handleRespond = async (eventId: string, response: EventResponse | string) => {
-        try {
-            await respondToEvent(eventId, response);
-            setEvents(prev => prev.map(ev => {
-                if (ev.id === eventId) {
-                    let newAccepted = ev.acceptedCount || 0;
-                    let newDeclined = ev.declinedCount || 0;
-
-                    if (ev.myResponse === EventResponse.Accepted) newAccepted--;
-                    if (ev.myResponse === EventResponse.Declined) newDeclined--;
-
-                    if (response === EventResponse.Accepted) newAccepted++;
-                    if (response === EventResponse.Declined) newDeclined++;
-
-                    return {
-                        ...ev,
-                        myResponse: response,
-                        acceptedCount: newAccepted,
-                        declinedCount: newDeclined
-                    };
-                }
-                return ev;
-            }));
-        } catch (err: any) {
-            alert(err.message || 'Odpověď se nepodařilo uložit.');
+    const getBadgeClass = (type: string) => {
+        switch (type) {
+            case EventType.Match: return "badge-match";
+            case EventType.Poll: return "badge-poll";
+            case EventType.Announcement: return "badge-announcement";
+            default: return "badge-announcement";
         }
     };
 
-    const handleDelete = async (eventId: string) => {
-        if (!confirm('Opravdu chcete tuto událost nenávratně smazat?')) return;
-        try {
-            await deleteEvent(eventId);
-            setEvents(prev => prev.filter(ev => ev.id !== eventId));
-        } catch (err: any) {
-            alert(err.message || 'Událost se nepodařilo smazat.');
+    const getResponseIcon = (response: string) => {
+        switch (response) {
+            case EventResponse.Accepted: return <IoCheckmarkCircle className="resp-icon text-green" />;
+            case EventResponse.Declined: return <IoCloseCircle className="resp-icon text-red" />;
+            default: return <IoHelpCircle className="resp-icon text-yellow" />;
         }
     };
 
-    if (loading) return <div className="events-status-box">Načítám události...</div>;
-    if (error) return <div className="events-status-box error">{error}</div>;
-    if (events.length === 0) return <div className="events-status-box">Zatím nebyly naplánovány žádné události.</div>;
+    if (events.length === 0) {
+        return (
+            <div className="events-empty-state glass-card-dark">
+                <IoCalendarOutline size={40} />
+                <p>Zatím nemáte žádné nadcházející události.</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="dashboard-events-container">
-            {events.map((ev) => {
-                let typeLabel = "Oznámení";
-                let typeClass = "badge-announcement";
-
-                if (ev.type === EventType.Match || ev.type === 'Match') {
-                    typeLabel = "Zápas"; typeClass = "badge-match";
-                } else if (ev.type === EventType.Poll || ev.type === 'Poll') {
-                    typeLabel = "Anketa"; typeClass = "badge-poll";
-                }
-
-                const isVoted = ev.myResponse === EventResponse.Accepted || ev.myResponse === EventResponse.Declined;
-                const isCreator = currentUserId && (ev.creatorId === currentUserId || (ev as any).CreatorId === currentUserId);
-
-                const isAnnouncement = ev.type === EventType.Announcement || ev.type === 'Announcement';
-                const canVote = !isAnnouncement;
+        <div className="dashboard-events-grid">
+            {events.map((event) => {
+                const dateObj = event.eventDate ? new Date(event.eventDate) : null;
 
                 return (
-                    <div key={ev.id} className="glass-card event-card">
-                        <div className="event-card-header">
-                            <div className="event-title-row">
-                                <h3 className="event-title">{ev.title}</h3>
-                                <span className={`event-badge ${typeClass}`}>
-                                    {typeLabel}
+                    <Link href={`/Dashboard/Events/${event.id}`} key={event.id} className="event-card glass-card-dark">
+
+                        <div className="event-header">
+                            <span className={`event-type-badge ${getBadgeClass(event.type as string)}`}>
+                                {event.type}
+                            </span>
+                            {dateObj && (
+                                <span className="event-date">
+                                    {dateObj.toLocaleDateString("cs-CZ", { day: 'numeric', month: 'short' })} v {dateObj.toLocaleTimeString("cs-CZ", { hour: '2-digit', minute: '2-digit' })}
                                 </span>
-                            </div>
-
-                            <div className="event-header-right">
-                                {ev.eventDate && (
-                                    <div className="event-date">
-                                        {new Date(ev.eventDate).toLocaleString('cs-CZ', {
-                                            day: '2-digit', month: '2-digit', year: 'numeric',
-                                            hour: '2-digit', minute: '2-digit'
-                                        })}
-                                    </div>
-                                )}
-
-                                {isCreator && (
-                                    <button
-                                        className="btn-delete-event"
-                                        onClick={() => handleDelete(ev.id)}
-                                        title="Smazat událost"
-                                    >
-                                        <IoClose />
-                                    </button>
-                                )}
-                            </div>
+                            )}
                         </div>
 
-                        {ev.description && <p className="event-description">{ev.description}</p>}
-                        {ev.location && <div className="event-location"><IoLocationOutline className="icon-left" /> {ev.location}</div>}
-
-                        {canVote && (
-                            <div className="event-footer">
-                                <div className="event-actions">
-                                    <button
-                                        className={`btn-event btn-accept ${ev.myResponse === EventResponse.Accepted ? 'active' : ''}`}
-                                        onClick={() => handleRespond(ev.id, EventResponse.Accepted)}
-                                    >
-                                        Ano
-                                    </button>
-                                    <button
-                                        className={`btn-event btn-decline ${ev.myResponse === EventResponse.Declined ? 'active' : ''}`}
-                                        onClick={() => handleRespond(ev.id, EventResponse.Declined)}
-                                    >
-                                        Ne
-                                    </button>
+                        <div className="event-body">
+                            <h3 className="event-title">{event.title}</h3>
+                            {event.location && (
+                                <div className="event-location">
+                                    <IoLocationOutline />
+                                    <span>{event.location}</span>
                                 </div>
+                            )}
+                        </div>
 
-                                {isVoted && (
-                                    <div className="event-votes">
-                                        <div className="vote-count vote-yes">
-                                            <span className="vote-dot yes"></span> {ev.acceptedCount || 0} Ano
-                                        </div>
-                                        <div className="vote-count vote-no">
-                                            <span className="vote-dot no"></span> {ev.declinedCount || 0} Ne
+                        {event.type !== EventType.Announcement && (
+                            <>
+                                <hr className="event-divider" />
+                                <div className="event-footer">
+                                    <div className="event-stats">
+                                        <span className="stat-green">{event.acceptedCount} Zúčastní se</span>
+                                        <span className="stat-red">{event.declinedCount} Nezúčastní</span>
+                                    </div>
+
+                                    <div className="my-response-box">
+                                        <span className="response-label">Moje odpověď:</span>
+                                        <div className="response-status">
+                                            {getResponseIcon(event.myResponse as string)}
+                                            <span className="response-text">{event.myResponse}</span>
                                         </div>
                                     </div>
-                                )}
+                                </div>
+                            </>
+                        )}
+
+                        {event.teamName && (
+                            <div className={`event-team-footer ${event.type === EventType.Announcement ? 'announcement-footer' : ''}`}>
+                                <span className="team-footer-label">Tým:</span>
+                                <span className="team-footer-name">{event.teamName}</span>
                             </div>
                         )}
-                    </div>
+                    </Link>
                 );
             })}
         </div>

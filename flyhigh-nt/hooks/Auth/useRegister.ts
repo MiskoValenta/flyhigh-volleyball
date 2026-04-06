@@ -1,40 +1,36 @@
 import { useState } from 'react';
-import { registerUser } from '@/lib/apiClient';
+import { useRouter } from 'next/navigation';
+import { registerUser } from '@/lib/api';
+import { RegisterCredentials } from '@/types/user';
 
-export function useRegister() {
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: ''
-    });
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+export const useRegister = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const register = async (credentials: RegisterCredentials) => {
         setIsLoading(true);
-        setError('');
-        setSuccess('');
+        setError(null);
+
+        if (credentials.password !== credentials.confirmPassword) {
+            setError("Hesla se neshodují.");
+            setIsLoading(false);
+            return false;
+        }
 
         try {
-            await registerUser(formData);
-            setSuccess('Registrace proběhla úspěšně. Nyní se můžete přihlásit.');
+            const { confirmPassword, ...dataToSend } = credentials;
+            await registerUser(dataToSend);
+
+            router.push('/Dashboard');
+            return true;
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Chyba při registraci.');
-            }
+            setError(err.message || "Registrace selhala. Zkuste to prosím znovu.");
+            return false;
         } finally {
             setIsLoading(false);
         }
     };
 
-    return { formData, error, success, isLoading, handleChange, handleSubmit };
-}
+    return { register, isLoading, error, setError };
+};

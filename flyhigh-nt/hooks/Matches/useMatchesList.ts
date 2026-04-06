@@ -1,28 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getMyMatches } from '@/lib/matchApi';
+import { MatchResponseDto } from '@/types/match';
 
-export function useMatchesList() {
-    const [matches, setMatches] = useState<any[]>([]);
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+export const useMatchesList = () => {
+    const [matches, setMatches] = useState<MatchResponseDto[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>('');
 
-    useEffect(() => {
-        const fetchMatches = async () => {
-            try {
-                const data = await getMyMatches();
-                setMatches(data);
-            } catch (err: any) {
-                if (err.message) {
-                    setError(err.message);
-                } else {
-                    setError('Chyba při načítání zápasů.');
-                }
-            } finally {
-                setIsLoading(false);
+    const fetchMatches = useCallback(async () => {
+        setIsLoading(true);
+        setError('');
+        try {
+            const data = await getMyMatches();
+            setMatches(data);
+        } catch (err: any) {
+            if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Nepodařilo se načíst seznam zápasů.');
             }
-        };
-        fetchMatches();
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
 
-    return { matches, error, isLoading };
-}
+    useEffect(() => {
+        fetchMatches();
+    }, [fetchMatches]);
+
+    return { matches, isLoading, error, refreshMatches: fetchMatches };
+};

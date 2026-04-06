@@ -1,74 +1,83 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from "next/image";
-import Logo from "@/public/ballin.svg";
-import { usePathname, useRouter } from 'next/navigation';
-import { IoMenu, IoClose, IoHomeOutline, IoPeopleOutline, IoBasketballOutline, IoLogOutOutline, IoPersonOutline } from "react-icons/io5";
-import { logout } from '@/lib/api';
+import Image from 'next/image';
+import { useRouter, usePathname } from 'next/navigation';
+import { logoutUser } from '@/lib/api';
+import { UserProfile, SidebarProps } from '@/types/user';
+import Logo from '@/public/ballin.svg';
+import { IoHomeOutline, IoPeopleOutline, IoCalendarOutline, IoPersonOutline, IoLogOutOutline, IoMenu } from 'react-icons/io5';
 import './SidebarDashboard.css';
 
-export default function SidebarDashboard() {
-    const pathname = usePathname();
+
+export default function SidebarDashboard({ user }: SidebarProps) {
     const router = useRouter();
+    const pathname = usePathname();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
-            await logout();
-        } catch (error) {
-            console.error("Logout failed:", error);
-        } finally {
+            await logoutUser();
             router.push('/');
+        } catch (error) {
+
         }
     };
 
-    const toggleMobileMenu = () => setIsMobileOpen(!isMobileOpen);
+    const isActive = (path: string) => pathname === path ? 'active' : '';
+    const closeMobile = () => setIsMobileOpen(false);
 
     return (
         <>
             <div className="mobile-sidebar-toggle">
                 <div className="mobile-logo-container">
-                    <Image src={Logo} alt="Fly High Logo" className="mobile-logo-icon dark:invert dark:hue-rotate-180" />
-                    <span className="mobile-logo-text">FlyHigh</span>
+                    <Image src={Logo} alt="Logo" className="mobile-logo-icon dark:invert dark:hue-rotate-180" />
+                    <span className="mobile-logo-text">Fly High</span>
                 </div>
-                <button onClick={toggleMobileMenu} className="mobile-toggle-btn">
-                    {isMobileOpen ? <IoClose className="mobile-toggle-icon" /> : <IoMenu className="mobile-toggle-icon" />}
+                <button className="mobile-toggle-btn" onClick={() => setIsMobileOpen(true)}>
+                    <IoMenu className="mobile-toggle-icon" />
                 </button>
             </div>
 
+            {isMobileOpen && (
+                <div className="sidebar-overlay" onClick={closeMobile}></div>
+            )}
+
             <aside className={`sidebar-dashboard ${isMobileOpen ? 'open' : ''}`}>
                 <div className="sidebar-dashboard-logo">
-                    <Link href="/Dashboard" onClick={() => setIsMobileOpen(false)} className="logo-link">
-                        <Image src={Logo} alt="Fly High Logo" className="sidebar-logo-icon dark:invert dark:hue-rotate-180" />
-                        <span className="sidebar-logo-text">FlyHigh</span>
+                    <Link href="/Dashboard" className="logo-link" onClick={closeMobile}>
+                        <Image src={Logo} alt="Logo" className="sidebar-logo-icon dark:invert dark:hue-rotate-180" />
+                        <span className="sidebar-logo-text">Fly High</span>
                     </Link>
                 </div>
 
                 <nav className="sidebar-dashboard-nav">
-                    <Link href="/Dashboard" className={pathname === '/Dashboard' ? 'active' : ''} onClick={() => setIsMobileOpen(false)}>
-                        <IoHomeOutline className="sidebar-icon" /> Přehled
+                    <Link href="/Dashboard" className={isActive('/Dashboard')} onClick={closeMobile}>
+                        <IoHomeOutline className="sidebar-icon" />
+                        Nástěnka
                     </Link>
-                    <Link href="/Dashboard/Teams" className={pathname.startsWith('/Dashboard/Teams') ? 'active' : ''} onClick={() => setIsMobileOpen(false)}>
-                        <IoPeopleOutline className="sidebar-icon" /> Týmy
+                    <Link href="/Dashboard/Teams" className={isActive('/Dashboard/Teams')} onClick={closeMobile}>
+                        <IoPeopleOutline className="sidebar-icon" />
+                        Moje Týmy
                     </Link>
-                    <Link href="/Dashboard/Matches" className={pathname.startsWith('/Dashboard/Matches') ? 'active' : ''} onClick={() => setIsMobileOpen(false)}>
-                        <IoBasketballOutline className="sidebar-icon" /> Zápasy
+                    <Link href="/Dashboard/Matches" className={isActive('/Dashboard/Matches')} onClick={closeMobile}>
+                        <IoCalendarOutline className="sidebar-icon" />
+                        Zápasy
                     </Link>
-                    <Link href="/Dashboard/Profile" className={pathname.startsWith('/Dashboard/Profile') ? 'active' : ''} onClick={() => setIsMobileOpen(false)}>
-                        <IoPersonOutline className="sidebar-icon" /> Profil
+                    <Link href="/Dashboard/Profile" className={isActive('/Dashboard/Profile')} onClick={closeMobile}>
+                        <IoPersonOutline className="sidebar-icon" />
+                        Profil
                     </Link>
                 </nav>
 
                 <div className="sidebar-dashboard-footer">
                     <button onClick={handleLogout} className="logout-btn">
-                        <IoLogOutOutline className="sidebar-icon" /> Odhlásit se
+                        <IoLogOutOutline className="sidebar-icon" />
+                        Odhlásit se
                     </button>
                 </div>
             </aside>
-
-            {isMobileOpen && <div className="sidebar-overlay" onClick={() => setIsMobileOpen(false)}></div>}
         </>
     );
 }

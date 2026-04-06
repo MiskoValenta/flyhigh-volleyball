@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Matches;
+using Domain.Entities.Matches.MatchEnums;
 using Domain.Value_Objects.Matches;
 using Domain.Value_Objects.Teams;
 using Domain.Value_Objects.Users;
@@ -59,10 +60,9 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
         .IsRequired();
 
     builder.Property(m => m.Status)
+        .HasConversion<string>()
+        .HasDefaultValue(MatchStatus.Pending)
         .IsRequired();
-
-    builder.Property(m => m.Notes)
-        .HasMaxLength(1000);
 
     builder.Property(m => m.WinnerId)
         .HasConversion(

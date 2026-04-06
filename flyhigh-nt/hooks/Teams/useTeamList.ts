@@ -1,28 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getMyTeams } from '@/lib/teamApi';
+import { TeamResponseDto, TeamMemberStatus } from '@/types/team';
 
-export function useTeamsList() {
-    const [teams, setTeams] = useState<any[]>([]);
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+export const useTeamList = () => {
+    const [teams, setTeams] = useState<TeamResponseDto[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>('');
 
-    useEffect(() => {
-        const fetchTeams = async () => {
-            try {
-                const data = await getMyTeams();
-                setTeams(data);
-            } catch (err: any) {
-                if (err.message) {
-                    setError(err.message);
-                } else {
-                    setError('Chyba při načítání týmů.');
+    const fetchTeams = useCallback(async () => {
+        setIsLoading(true);
+        setError('');
+        try {
+            const data = await getMyTeams();
+
+            const activeTeams: TeamResponseDto[] = [];
+
+            for (let i = 0; i < data.length; i++) {
+                const currentTeam = data[i];
+
+                if (currentTeam.status === TeamMemberStatus.Active) {
+                    activeTeams.push(currentTeam);
+                } else if (currentTeam.status === "Active") {
+                    activeTeams.push(currentTeam);
                 }
-            } finally {
-                setIsLoading(false);
             }
-        };
-        fetchTeams();
+
+            setTeams(activeTeams);
+        } catch (err: any) {
+            if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Nepodařilo se načíst seznam týmů.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
 
-    return { teams, error, isLoading };
-}
+    useEffect(() => {
+        fetchTeams();
+    }, [fetchTeams]);
+
+    return { teams, isLoading, error, refreshTeams: fetchTeams };
+};

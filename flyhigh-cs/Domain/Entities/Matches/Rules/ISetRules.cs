@@ -7,5 +7,7 @@ namespace Domain.Entities.Matches.Rules;
 
 public interface ISetRules
 {
-  bool IsWinningScore(int currentTeamScore, int opponentScore, SetType type);
+  int PointsToWinStandardSet { get; }
+  int PointsToWinTieBreak { get; }
+  int PointDifferenceRequired { get; }
 }

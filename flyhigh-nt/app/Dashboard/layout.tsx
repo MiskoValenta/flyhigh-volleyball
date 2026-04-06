@@ -1,46 +1,23 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
 import SidebarDashboard from "@/components/SidebarDashboard/SidebarDashboard";
-import { fetchWithAuth } from "@/lib/apiClient";
+import { useProfile } from "@/hooks/Profile/useProfile";
 import "./DashboardLayout.css";
-import { getCurrentUser } from "@/lib/api";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const router = useRouter();
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                await getCurrentUser();
-                setIsAuthenticated(true);
-            } catch (error) {
-                console.error("Auth check failed:", error);
-                router.push("/");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        checkAuth();
-    }, [router]);
+    const { user, isLoading } = useProfile();
 
     if (isLoading) {
-        return <div className="dashboard-loading-screen">Načítám prostředí...</div>;
+        return <div className="dashboard-loading-screen">Načítání...</div>;
     }
-
-    if (!isAuthenticated)
-        return null;
 
     return (
         <div className="dashboard-layout-container">
-            <SidebarDashboard />
-            <div className="dashboard-content-area">
+            <SidebarDashboard user={user} />
+            <main className="dashboard-main-content">
                 {children}
-            </div>
+            </main>
         </div>
     );
 }

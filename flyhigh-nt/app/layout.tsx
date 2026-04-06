@@ -2,12 +2,9 @@ import type { Metadata } from "next";
 import { Poppins, Rock_Salt } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
-import { Navbar } from "@/components/Navbar/Navbar";
-import { Footer } from "@/components/Footer/Footer";
 import Background from "@/components/ui/Background";
 import "next"
 import ClientLayoutWrapper from "./ClientLayoutWrapper";
-import "./globals.css";
 
 
 const poppins = Poppins({

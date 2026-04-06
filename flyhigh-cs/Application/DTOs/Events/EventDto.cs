@@ -29,10 +29,10 @@ public record EventParticipantDto(
 public record CreateEventDto(
     Guid TeamId,
     string Title,
-    string Description,
+    string? Description,
     EventType Type,
     DateTime? EventDate,
-    string Location,
+    string? Location,
     List<Guid> InvitedUserIds
 );
 

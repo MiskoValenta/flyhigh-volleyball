@@ -1,32 +1,28 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginUser } from '@/lib/apiClient';
+import { loginUser } from '@/lib/api';
+import { LoginCredentials } from '@/types/user';
 
-export function useLogin() {
+export const useLogin = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const login = async (credentials: LoginCredentials) => {
         setIsLoading(true);
-        setError('');
+        setError(null);
 
         try {
-            await loginUser({ email, password });
+            await loginUser(credentials);
             router.push('/Dashboard');
+            return true;
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Chyba při přihlášení.');
-            }
+            setError(err.message || "Špatné přihlašovací údaje.");
+            return false;
         } finally {
             setIsLoading(false);
         }
     };
 
-    return { email, setEmail, password, setPassword, error, isLoading, handleSubmit };
-}
+    return { login, isLoading, error, setError };
+};

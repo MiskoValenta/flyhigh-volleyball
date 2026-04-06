@@ -6,7 +6,6 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Teams;
 using Application.Interfaces.Users;
 using Application.Services.Events;
-using Application.Services.Matches;
 using Application.Services.Teams;
 using Application.Services.Users;
 using Domain.Entities.Matches.Rules;
@@ -40,31 +39,31 @@ namespace API
 
       builder.Services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<FlyHighDbContext>());
 
+      var MyCorsPolicy = "_myCorsPolicy";
+
       builder.Services.AddCors(options =>
       {
-        options.AddPolicy("FrontendPolicy", policy =>
-        {
-          if (builder.Environment.IsDevelopment())
-          {
-            policy.WithOrigins(
-                    "http://localhost:3000",
-                    "http://192.168.56.1:3000",
-                    "https://flyhigh-volleyball.cz",
-                    "https://www.flyhigh-volleyball.cz")
+        options.AddPolicy(name: MyCorsPolicy,
+            policy =>
+            {
+              if (builder.Environment.IsDevelopment())
+              {
+                policy.WithOrigins("http://localhost:3000")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
-          }
-          else
-          {
-            policy.WithOrigins(
+              }
+              else
+              {
+                policy.WithOrigins(
                     "https://flyhigh-volleyball.cz",
-                    "https://www.flyhigh-volleyball.cz")
+                    "https://www.flyhigh-volleyball.cz"
+                  )
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
-          }
-        });
+              }
+            });
       });
 
       builder.Services.AddSingleton<ISetRules, VolleyballSetRules>();
@@ -116,7 +115,10 @@ namespace API
                 var token = context.Request.Cookies["accessToken"];
                 if (context.Request.Cookies.ContainsKey("accessToken"))
                 {
-                  context.Token = token;
+                  if (token != null)
+                  {
+                    context.Token = token;
+                  }
                 }
                 return Task.CompletedTask;
               }
@@ -137,6 +139,8 @@ namespace API
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<FlyHighDbContext>();
 
+        var passwordHasher = services.GetRequiredService<IPasswordHasher>();
+
         int retries = 5;
         while (retries > 0)
         {
@@ -144,6 +148,8 @@ namespace API
           {
             context.Database.Migrate();
             Console.WriteLine("Databáze byla úspěšně migrována!");
+            DataSeeder.SeedAsync(context, passwordHasher).GetAwaiter().GetResult();
+
             break;
           }
           catch (Exception ex)
@@ -163,7 +169,7 @@ namespace API
         }
       }
 
-      app.UseCors("FrontendPolicy");
+      app.UseCors(MyCorsPolicy);
       app.UseAuthentication();
       app.UseAuthorization();
       app.MapControllers();

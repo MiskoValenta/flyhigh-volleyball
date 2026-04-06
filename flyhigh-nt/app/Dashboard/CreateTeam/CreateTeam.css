@@ -1,68 +1,65 @@
 .create-team-container {
-    max-width: 700px;
+    max-width: 600px;
     margin: 0 auto;
+    padding: 2rem;
+    width: 100%;
 }
 
 .create-team-form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    margin-top: var(--space-4);
+    gap: 1.5rem;
+    padding: 2.5rem;
+    margin-top: 1.5rem;
 }
 
-.form-group {
+/* Custom třídy pro tento formulář */
+.form-group-ct {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: 0.5rem;
 }
 
-.form-group label {
-    font-size: var(--small);
+.form-group-ct label {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
     font-weight: 600;
-    color: var(--typo-heading-color);
 }
 
-.form-group input,
-.form-group textarea {
-    background: rgba(255, 255, 255, 0.05);
+.form-group-ct input,
+.form-group-ct textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-md);
-    padding: var(--space-3);
-    color: var(--foreground);
-    font-size: var(--body);
-    font-family: inherit;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.form-group-ct input:focus,
+.form-group-ct textarea:focus {
     outline: none;
-    border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.08);
+    border-color: #38bdf8;
 }
 
-.error-message {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #ef4444;
-    padding: var(--space-3);
-    border-radius: var(--radius-md);
-    font-size: var(--small);
-}
-
-.form-actions {
+.form-actions-ct {
+    margin-top: 1rem;
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-3);
-    margin-top: var(--space-2);
 }
 
-@media (max-width: 640px) {
-    .form-actions {
-        flex-direction: column;
+@media (max-width: 480px) {
+    .create-team-container {
+        padding: 1rem;
     }
 
-    .form-actions button {
+    .create-team-form {
+        padding: 1.5rem;
+    }
+
+    .form-actions-ct button {
         width: 100%;
     }
 }

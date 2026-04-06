@@ -12,18 +12,19 @@ export enum TeamMemberStatus {
 
 export interface TeamResponseDto {
     id: string;
-    TeamName: string;
-    ShortName: string;
-    role: TeamRole;
-    status: TeamMemberStatus;
+    teamName: string;
+    shortName: string;
+    role: TeamRole | string;
+    status: TeamMemberStatus | string;
+    playerCount?: number;
 }
 
-export interface TeamMember {
+export interface TeamMemberDto {
     userId: string;
     email: string;
     firstName: string;
     lastName: string;
-    role: string | number;
+    role: TeamRole | string;
     isActive: boolean;
 }
 
@@ -31,26 +32,30 @@ export interface TeamDetail {
     id: string;
     teamName: string;
     shortName: string;
-    description?: string;
-    currentUserRole: string;
-    members: TeamMember[];
+    description: string | null;
+    myRole: TeamRole | string;
+    members: TeamMemberDto[];
+}
+
+export interface PendingInvitationDto {
+    teamId: string;
+    teamName: string;
+    role: TeamRole | string;
+    createdAt: string;
 }
 
 export interface Team {
     id: string;
     teamName: string;
     shortName: string;
-    role?: string;
-    status?: string;
-    joinCode?: string;
-    createdAt?: string | Date;
+    role: TeamRole | string;
+    status: TeamMemberStatus | string;
 }
 
 export interface CreateTeamDto {
     teamName: string;
     shortName: string;
-    description?: string;
-
+    description: string;
 }
 
 export interface UpdateTeamDto {

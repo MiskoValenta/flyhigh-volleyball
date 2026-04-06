@@ -1,45 +1,50 @@
 export enum EventType {
     Announcement = "Announcement",
     Poll = "Poll",
-    Match = "Match",
+    Match = "Match"
 }
 
 export enum EventResponse {
     Unknown = "Unknown",
     Accepted = "Accepted",
-    Declined = "Declined",
+    Declined = "Declined"
 }
 
-export interface EventParticipant {
+export interface EventParticipantDto {
     userId: string;
     response: EventResponse;
 }
 
-export interface TeamEvent {
+export interface EventDto {
     id: string;
     teamId: string;
-    creatorId?: string;
+    creatorId: string;
     title: string;
-    description?: string;
-    type: EventType | string;
-    eventDate?: string;
-    location?: string;
-    createdAt?: string;
-    myResponse: EventResponse | string;
-    acceptedCount?: number;
-    declinedCount?: number;
+    description: string | null;
+    type: EventType;
+    eventDate: string | null;
+    location: string | null;
+    createdAt: string;
+    participants: EventParticipantDto[];
+    myResponse: EventResponse;
+    acceptedCount: number;
+    declinedCount: number;
 }
 
-export interface CreateEventRequest {
+export interface CreateEventDto {
     teamId: string;
     title: string;
-    description?: string;
+    description: string | null;
     type: EventType;
-    eventDate?: string;
-    location?: string;
+    eventDate: string | null;
+    location: string | null;
     invitedUserIds: string[];
 }
 
-export interface RespondToEventRequest {
+export interface RespondToEventDto {
     response: EventResponse;
+}
+
+export interface DashboardEventItem extends EventDto {
+    teamName?: string;
 }

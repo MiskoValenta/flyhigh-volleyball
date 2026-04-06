@@ -3,12 +3,15 @@ using Application.DTOs.Teams;
 using Application.Interfaces.Teams;
 using Domain.Entities.Teams;
 using Domain.Entities.Teams.TeamEnums;
+using Domain.Repositories.Matches;
 using Domain.Repositories.Teams;
 using Domain.Repositories.Users;
 using Domain.Value_Objects.Teams;
 using Domain.Value_Objects.Users;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
 using System.Text;
 
 namespace Application.Services.Teams;
@@ -19,17 +22,20 @@ public class TeamService : ITeamService
   private readonly IUserRepository _userRepository;
   private readonly ITeamAuthorizationService _auth;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly IMatchRepository _matchRepository;
 
   public TeamService(
       ITeamRepository teamRepository,
       IUserRepository userRepository,
       ITeamAuthorizationService auth,
-      IUnitOfWork unitOfWork)
+      IUnitOfWork unitOfWork,
+      IMatchRepository matchRepository)
   {
     _teamRepository = teamRepository;
     _userRepository = userRepository;
     _auth = auth;
     _unitOfWork = unitOfWork;
+    _matchRepository = matchRepository;
   }
 
   public async Task<Guid> CreateTeamAsync(CreateTeamDto dto, Guid currentUserId)
@@ -81,13 +87,15 @@ public class TeamService : ITeamService
           {
             roleStr = "Unknown";
           }
+          int playerCount = t.Members.Count(m => m.Status == TeamMemberStatus.Active);
 
           return new TeamResponseDto(
               t.Id.Value,
               t.TeamName,
               t.ShortName,
               roleStr,
-              t.GetMember(userId).Status.ToString()
+              t.GetMember(userId).Status.ToString(),
+              playerCount
           );
         }).ToList();
   }
@@ -334,5 +342,10 @@ public class TeamService : ITeamService
 
     await _teamRepository.UpdateAsync(team, cancellationToken);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
+  }
+
+  public async Task<int> GetPlayedMatchesCountAsync(Guid teamId, CancellationToken cancellationToken = default)
+  {
+    return await _matchRepository.GetPlayedMatchesCountByTeamAsync(new TeamId(teamId), cancellationToken);
   }
 }

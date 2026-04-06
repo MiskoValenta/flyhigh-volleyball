@@ -44,7 +44,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Location")
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
@@ -57,8 +58,11 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Announcement");
 
                     b.Property<bool>("isDeleted")
                         .HasColumnType("boolean");
@@ -76,8 +80,11 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("EventId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Response")
-                        .HasColumnType("integer");
+                    b.Property<string>("Response")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Unknown");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -117,18 +124,17 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
                     b.Property<Guid?>("RefereeId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("ScheduledAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Pending");
 
                     b.Property<Guid?>("WinnerId")
                         .HasColumnType("uuid");
@@ -146,11 +152,12 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("MatchSetId")
+                    b.Property<Guid>("MatchSetId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Position")
-                        .HasColumnType("integer");
+                    b.Property<string>("Position")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("TeamMemberId")
                         .HasColumnType("uuid");
@@ -159,7 +166,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("MatchSetId");
 
-                    b.ToTable("MatchPlayerPositions", (string)null);
+                    b.ToTable("MatchPlayerPositions");
                 });
 
             modelBuilder.Entity("Domain.Entities.Matches.MatchRosterEntry", b =>
@@ -194,41 +201,38 @@ namespace Infrastructure.Migrations
                     b.Property<int>("AwayScore")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<int>("HomeScore")
                         .HasColumnType("integer");
 
                     b.Property<bool>("IsFinished")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid?>("MatchId")
-                        .HasColumnType("uuid");
+                    b.Property<bool>("IsStarted")
+                        .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<Guid>("MatchId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("SetNumber")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Standard");
 
-                    b.Property<int>("Winner")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
+                    b.Property<string>("Winner")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("None");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MatchId");
 
-                    b.ToTable("MatchSets", (string)null);
+                    b.ToTable("MatchSets");
                 });
 
             modelBuilder.Entity("Domain.Entities.Teams.Team", b =>
@@ -302,7 +306,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Pending");
 
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uuid");
@@ -317,7 +323,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("TeamMembers", (string)null);
+                    b.ToTable("TeamMembers");
                 });
 
             modelBuilder.Entity("Domain.Entities.Users.User", b =>
@@ -355,7 +361,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("timestamp with time zone");
@@ -383,9 +390,10 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Matches.MatchPlayerPosition", b =>
                 {
                     b.HasOne("Domain.Entities.Matches.MatchSet", null)
-                        .WithMany("PlayerPositions")
+                        .WithMany("Positions")
                         .HasForeignKey("MatchSetId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.Matches.MatchRosterEntry", b =>
@@ -402,7 +410,8 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Matches.Match", null)
                         .WithMany("Sets")
                         .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.Teams.TeamMember", b =>
@@ -428,7 +437,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Matches.MatchSet", b =>
                 {
-                    b.Navigation("PlayerPositions");
+                    b.Navigation("Positions");
                 });
 
             modelBuilder.Entity("Domain.Entities.Teams.Team", b =>

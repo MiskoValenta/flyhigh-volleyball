@@ -1,42 +1,27 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { eventApi } from '@/lib/eventApi';
+import { createEvent } from '@/lib/eventApi';
+import { CreateEventDto } from '@/types/event';
 
-export function useCreateEvent() {
+export const useCreateEvent = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const [formData, setFormData] = useState({
-        teamId: '',
-        title: '',
-        description: '',
-        type: 0,
-        eventDate: '',
-        location: ''
-    });
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleCreateEvent = async (data: CreateEventDto) => {
         setIsLoading(true);
-        setError('');
-
+        setError(null);
         try {
-            await eventApi.createEvent(formData);
-            router.push('/Dashboard');
+            await createEvent(data);
+            router.push(`/Dashboard/Teams/${data.teamId}`);
+            return true;
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Došlo k chybě při komunikaci se serverem.');
-            }
+            setError(err.message || "Chyba při vytváření události.");
+            return false;
         } finally {
             setIsLoading(false);
         }
     };
 
-    return { formData, error, isLoading, handleChange, handleSubmit };
-}
+    return { handleCreateEvent, isLoading, error };
+};

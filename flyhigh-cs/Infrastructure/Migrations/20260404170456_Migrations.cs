@@ -20,9 +20,9 @@ namespace Infrastructure.Migrations
                     CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false, defaultValue: "Announcement"),
                     EventDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Location = table.Column<string>(type: "text", nullable: true),
+                    Location = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     isDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -41,11 +41,10 @@ namespace Infrastructure.Migrations
                     CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
                     HomeTeamId = table.Column<Guid>(type: "uuid", nullable: false),
                     AwayTeamId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Location = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     ScheduledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Location = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false, defaultValue: "Pending"),
                     RefereeId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
                     WinnerId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -85,7 +84,7 @@ namespace Infrastructure.Migrations
                     LastName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     PasswordHash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    RefreshToken = table.Column<string>(type: "text", nullable: true),
+                    RefreshToken = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -104,7 +103,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     EventId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Response = table.Column<int>(type: "integer", nullable: false)
+                    Response = table.Column<string>(type: "text", nullable: false, defaultValue: "Unknown")
                 },
                 constraints: table =>
                 {
@@ -143,17 +142,14 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MatchId = table.Column<Guid>(type: "uuid", nullable: false),
                     SetNumber = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false, defaultValue: "Standard"),
                     HomeScore = table.Column<int>(type: "integer", nullable: false),
                     AwayScore = table.Column<int>(type: "integer", nullable: false),
                     IsFinished = table.Column<bool>(type: "boolean", nullable: false),
-                    Winner = table.Column<int>(type: "integer", nullable: false),
-                    MatchId = table.Column<Guid>(type: "uuid", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    IsStarted = table.Column<bool>(type: "boolean", nullable: false),
+                    Winner = table.Column<string>(type: "text", nullable: false, defaultValue: "None")
                 },
                 constraints: table =>
                 {
@@ -176,7 +172,7 @@ namespace Infrastructure.Migrations
                     Role = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     LeftAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false, defaultValue: "Pending"),
                     InvitedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     JoinedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -200,9 +196,9 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MatchSetId = table.Column<Guid>(type: "uuid", nullable: false),
                     TeamMemberId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Position = table.Column<int>(type: "integer", nullable: false),
-                    MatchSetId = table.Column<Guid>(type: "uuid", nullable: true)
+                    Position = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Application.DTOs.Users;
 using Application.Interfaces.Users;
+using Domain.Repositories.Matches;
 using Domain.Repositories.Users;
 using Domain.Value_Objects.Users;
 using System;
@@ -14,12 +15,14 @@ public class UserService : IUserService
   private readonly IUserRepository _userRepository;
   private readonly IPasswordHasher _passwordHasher;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly IMatchRepository _matchRepository;
 
-  public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork)
+  public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork, IMatchRepository matchRepository)
   {
     _userRepository = userRepository;
     _passwordHasher = passwordHasher;
     _unitOfWork = unitOfWork;
+    _matchRepository = matchRepository;
   }
 
   public async Task UpdateProfileAsync(Guid userId, UpdateProfileDto dto, CancellationToken cancellationToken = default)
@@ -63,5 +66,9 @@ public class UserService : IUserService
 
     await _userRepository.UpdateAsync(user, cancellationToken);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
+  }
+  public async Task<int> GetPlayedMatchesCountAsync(Guid userId, CancellationToken cancellationToken = default)
+  {
+    return await _matchRepository.GetPlayedMatchesCountByUserAsync(new UserId(userId), cancellationToken);
   }
 }

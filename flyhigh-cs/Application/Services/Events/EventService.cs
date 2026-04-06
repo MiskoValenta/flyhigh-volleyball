@@ -1,7 +1,9 @@
 ﻿using Application.Common.Interfaces;
 using Application.DTOs.Events;
 using Application.Interfaces.Events;
+using Application.Interfaces.Teams;
 using Domain.Entities.Events;
+using Domain.Entities.Events.EventEnums;
 using Domain.Repositories.Events;
 using Domain.Repositories.Teams;
 using Domain.Value_Objects.Events;
@@ -18,35 +20,31 @@ public class EventService : IEventService
   private readonly IEventRepository _eventRepository;
   private readonly ITeamRepository _teamRepository;
   private readonly IUnitOfWork _unitOfWork;
+  private readonly ITeamAuthorizationService _authService;
 
-  public EventService(IEventRepository eventRepository, ITeamRepository teamRepository, IUnitOfWork unitOfWork)
+  public EventService(
+      IEventRepository eventRepository,
+      ITeamRepository teamRepository,
+      IUnitOfWork unitOfWork,
+      ITeamAuthorizationService authService)
   {
     _eventRepository = eventRepository;
     _teamRepository = teamRepository;
     _unitOfWork = unitOfWork;
+    _authService = authService;
   }
 
   public async Task<Guid> CreateEventAsync(CreateEventDto dto, Guid currentUserId, CancellationToken cancellationToken = default)
   {
-    var teamId = new TeamId(dto.TeamId);
-    var creatorUserId = new UserId(currentUserId);
-
-    var team = await _teamRepository.GetByIdAsync(teamId, cancellationToken);
-    if (team == null)
+    bool isAuthorized = await _authService.HasRoleInTeamAsync(currentUserId, dto.TeamId, Domain.Entities.Teams.TeamEnums.TeamRole.Owner, Domain.Entities.Teams.TeamEnums.TeamRole.Coach);
+    if (!isAuthorized)
     {
-      throw new KeyNotFoundException("Tým nebyl nalezen.");
+      throw new UnauthorizedAccessException("Nemáte oprávnění vytvářet události v tomto týmu.");
     }
 
-    var member = team.Members.FirstOrDefault(m => m.UserId == creatorUserId);
-    if (member == null || (member.Role != Domain.Entities.Teams.TeamEnums.TeamRole.Owner && member.Role != Domain.Entities.Teams.TeamEnums.TeamRole.Coach))
-    {
-      throw new UnauthorizedAccessException("Nemáte právo vytvořit událost v tomto týmu.");
-    }
-
-    var newEvent = new Event(
-        new EventId(Guid.NewGuid()),
-        teamId,
-        creatorUserId,
+    var newEvent = Event.Create(
+        new UserId(currentUserId),
+        new TeamId(dto.TeamId),
         dto.Title,
         dto.Description,
         dto.Type,
@@ -54,18 +52,11 @@ public class EventService : IEventService
         dto.Location
     );
 
-    if (dto.InvitedUserIds != null && dto.InvitedUserIds.Any())
+    if (dto.InvitedUserIds != null)
     {
-      foreach (var userId in dto.InvitedUserIds)
+      foreach (var invitedUserId in dto.InvitedUserIds)
       {
-        newEvent.AddParticipant(new UserId(userId));
-      }
-    }
-    else
-    {
-      foreach (var teamMember in team.Members)
-      {
-        newEvent.AddParticipant(teamMember.UserId);
+        newEvent.AddParticipant(new UserId(invitedUserId));
       }
     }
 
@@ -75,189 +66,120 @@ public class EventService : IEventService
     return newEvent.Id.Value;
   }
 
-  public async Task RespondToEventAsync(Guid eventId, Guid currentUserId, RespondToEventDto dto, CancellationToken cancellationToken = default)
-  {
-    var teamEvent = await _eventRepository.GetByIdAsync(new EventId(eventId), cancellationToken);
-    if (teamEvent == null)
-    {
-      throw new KeyNotFoundException("Událost nebyla nalezena.");
-    }
-
-    var team = await _teamRepository.GetByIdAsync(teamEvent.TeamId, cancellationToken);
-    var member = team?.Members.FirstOrDefault(m => m.UserId == new UserId(currentUserId));
-
-    if (member == null || !member.IsActive || member.Status != Domain.Entities.Teams.TeamEnums.TeamMemberStatus.Active)
-    {
-      throw new UnauthorizedAccessException("Pouze aktivní členové týmu mohou odpovídat na události.");
-    }
-
-    var participantExists = teamEvent.Participants.Any(p => p.UserId == new UserId(currentUserId));
-    if (!participantExists)
-    {
-      teamEvent.AddParticipant(new UserId(currentUserId));
-    }
-
-    teamEvent.RespondToEvent(new UserId(currentUserId), dto.Response);
-
-    await _eventRepository.SaveChangesAsync(cancellationToken);
-  }
-
   public async Task<IEnumerable<EventDto>> GetTeamEventsAsync(Guid teamId, Guid currentUserId, CancellationToken cancellationToken = default)
   {
-    var events = await _eventRepository.GetTeamEventsAsync(new TeamId(teamId), cancellationToken);
-    var userId = new UserId(currentUserId);
+    var events = await _eventRepository.GetEventsByTeamIdAsync(new TeamId(teamId), cancellationToken);
 
-    return events.Select(e => {
-      string myResponse;
-      var participant = e.Participants.FirstOrDefault(p => p.UserId == userId);
-      if (participant != null)
+    var dtos = new List<EventDto>();
+    foreach (var e in events)
+    {
+      var participantDtos = new List<EventParticipantDto>();
+      foreach (var p in e.Participants)
       {
-        myResponse = participant.Response.ToString();
-      }
-      else
-      {
-        myResponse = "Unknown";
+        participantDtos.Add(new EventParticipantDto(p.UserId.Value, p.Response));
       }
 
-      int acceptedCount = e.Participants.Count(p => p.Response == Domain.Entities.Events.EventEnums.EventResponse.Accepted);
-      int declinedCount = e.Participants.Count(p => p.Response == Domain.Entities.Events.EventEnums.EventResponse.Declined);
-
-      var participantsList = e.Participants.Select(p => new EventParticipantDto(
-          p.UserId.Value,
-          p.Response
-      )).ToList();
-
-      string descriptionStr;
-      if (e.Description != null)
+      string myResponse = "Unknown";
+      var me = e.Participants.FirstOrDefault(p => p.UserId.Value == currentUserId);
+      if (me != null)
       {
-        descriptionStr = e.Description;
-      }
-      else
-      {
-        descriptionStr = string.Empty;
+        myResponse = me.Response.ToString();
       }
 
-      string locationStr;
-      if (e.Location != null)
-      {
-        locationStr = e.Location;
-      }
-      else
-      {
-        locationStr = string.Empty;
-      }
+      int accepted = e.Participants.Count(p => p.Response == EventResponse.Accepted);
+      int declined = e.Participants.Count(p => p.Response == EventResponse.Declined);
 
-      return new EventDto(
+      dtos.Add(new EventDto(
           e.Id.Value,
           e.TeamId.Value,
           e.CreatorId.Value,
           e.Title,
-          descriptionStr,
+          e.Description,
           e.Type,
           e.EventDate,
-          locationStr,
+          e.Location,
           e.CreatedAt,
-          participantsList,
+          participantDtos,
           myResponse,
-          acceptedCount,
-          declinedCount
-      );
-    });
+          accepted,
+          declined
+      ));
+    }
+
+    return dtos.OrderBy(e => e.EventDate).ToList();
   }
 
-  public async Task<EventDto> GetEventByIdAsync(Guid eventId, Guid currentUserId, CancellationToken cancellationToken = default)
+  public async Task<EventDto> GetEventDetailAsync(Guid eventId, Guid currentUserId, CancellationToken cancellationToken = default)
   {
-    var eId = new EventId(eventId);
-    var uId = new UserId(currentUserId);
-
-    var teamEvent = await _eventRepository.GetByIdAsync(eId, cancellationToken);
-    if (teamEvent == null)
+    var e = await _eventRepository.GetByIdAsync(new EventId(eventId), cancellationToken);
+    if (e == null)
     {
-      throw new KeyNotFoundException("Událost nebyla nalezena.");
+      throw new KeyNotFoundException("Událost nenalezena.");
     }
 
-    var team = await _teamRepository.GetByIdAsync(teamEvent.TeamId, cancellationToken);
-    if (team == null || !team.Members.Any(m => m.UserId == uId))
+    var participantDtos = new List<EventParticipantDto>();
+    foreach (var p in e.Participants)
     {
-      throw new UnauthorizedAccessException("Nejste členem tohoto týmu.");
+      participantDtos.Add(new EventParticipantDto(p.UserId.Value, p.Response));
     }
 
-    string myResponse;
-    var participant = teamEvent.Participants.FirstOrDefault(p => p.UserId == uId);
-    if (participant != null)
+    string myResponse = "Unknown";
+    var me = e.Participants.FirstOrDefault(p => p.UserId.Value == currentUserId);
+    if (me != null)
     {
-      myResponse = participant.Response.ToString();
-    }
-    else
-    {
-      myResponse = "Unknown";
+      myResponse = me.Response.ToString();
     }
 
-    int acceptedCount = teamEvent.Participants.Count(p => p.Response == Domain.Entities.Events.EventEnums.EventResponse.Accepted);
-    int declinedCount = teamEvent.Participants.Count(p => p.Response == Domain.Entities.Events.EventEnums.EventResponse.Declined);
-
-    var participantsList = teamEvent.Participants.Select(p => new EventParticipantDto(
-        p.UserId.Value,
-        p.Response
-    )).ToList();
-
-    string descriptionStr;
-    if (teamEvent.Description != null)
-    {
-      descriptionStr = teamEvent.Description;
-    }
-    else
-    {
-      descriptionStr = string.Empty;
-    }
-
-    string locationStr;
-    if (teamEvent.Location != null)
-    {
-      locationStr = teamEvent.Location;
-    }
-    else
-    {
-      locationStr = string.Empty;
-    }
+    int accepted = e.Participants.Count(p => p.Response == EventResponse.Accepted);
+    int declined = e.Participants.Count(p => p.Response == EventResponse.Declined);
 
     return new EventDto(
-        teamEvent.Id.Value,
-        teamEvent.TeamId.Value,
-        teamEvent.CreatorId.Value,
-        teamEvent.Title,
-        descriptionStr,
-        teamEvent.Type,
-        teamEvent.EventDate,
-        locationStr,
-        teamEvent.CreatedAt,
-        participantsList,
+        e.Id.Value,
+        e.TeamId.Value,
+        e.CreatorId.Value,
+        e.Title,
+        e.Description,
+        e.Type,
+        e.EventDate,
+        e.Location,
+        e.CreatedAt,
+        participantDtos,
         myResponse,
-        acceptedCount,
-        declinedCount
+        accepted,
+        declined
     );
+  }
+
+  public async Task RespondToEventAsync(Guid eventId, Guid currentUserId, EventResponse response, CancellationToken cancellationToken = default)
+  {
+    var ev = await _eventRepository.GetByIdAsync(new EventId(eventId), cancellationToken);
+    if (ev == null)
+    {
+      throw new KeyNotFoundException("Událost nenalezena.");
+    }
+
+    ev.Respond(new UserId(currentUserId), response);
+    await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
 
   public async Task DeleteEventAsync(Guid eventId, Guid currentUserId, CancellationToken cancellationToken = default)
   {
-    var eId = new EventId(eventId);
-    var userId = new UserId(currentUserId);
-
-    var teamEvent = await _eventRepository.GetByIdAsync(eId, cancellationToken);
-    if (teamEvent == null)
+    var ev = await _eventRepository.GetByIdAsync(new EventId(eventId), cancellationToken);
+    if (ev == null)
     {
-      throw new KeyNotFoundException("Událost nebyla nalezena.");
+      throw new KeyNotFoundException("Událost nenalezena.");
     }
 
-    var team = await _teamRepository.GetByIdAsync(teamEvent.TeamId, cancellationToken);
-    var member = team?.Members.FirstOrDefault(m => m.UserId == userId);
-
-    if (member == null || (member.Role != Domain.Entities.Teams.TeamEnums.TeamRole.Owner && member.Role != Domain.Entities.Teams.TeamEnums.TeamRole.Coach && teamEvent.CreatorId != userId))
+    bool isAuthorized = await _authService.HasRoleInTeamAsync(currentUserId, ev.TeamId.Value, Domain.Entities.Teams.TeamEnums.TeamRole.Owner, Domain.Entities.Teams.TeamEnums.TeamRole.Coach);
+    if (!isAuthorized)
     {
-      throw new UnauthorizedAccessException("Nemáte právo smazat tuto událost.");
+      if (ev.CreatorId.Value != currentUserId)
+      {
+        throw new UnauthorizedAccessException("Nemáte oprávnění smazat tuto událost.");
+      }
     }
 
-    _eventRepository.Remove(teamEvent);
+    _eventRepository.Delete(ev);
     await _unitOfWork.SaveChangesAsync(cancellationToken);
   }
 }

@@ -1,77 +1,84 @@
 import { useState } from 'react';
-import { startMatch, startCurrentSet, addPoint, assignPosition } from '@/lib/matchApi';
+import { startMatch, startCurrentSet, assignPosition, addPoint } from '@/lib/matchApi';
+import { AssignPositionDto, SetSide, PlayerPosition } from '@/types/match';
 
-export function useLiveMatch(matchId: string) {
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+export const useLiveMatch = (matchId: string, refreshMatch: () => void) => {
+    const [isLiveLoading, setIsLiveLoading] = useState<boolean>(false);
 
     const handleStartMatch = async () => {
-        setIsLoading(true);
-        setError('');
+        setIsLiveLoading(true);
         try {
             await startMatch(matchId);
-            window.location.reload();
+            refreshMatch();
         } catch (err: any) {
             if (err.message) {
-                setError(err.message);
+                alert(err.message);
             } else {
-                setError('Chyba při zahájení zápasu.');
+                alert('Chyba při zahajování zápasu.');
             }
         } finally {
-            setIsLoading(false);
+            setIsLiveLoading(false);
         }
     };
 
-    const handleStartSet = async () => {
-        setIsLoading(true);
-        setError('');
+    const handleStartCurrentSet = async () => {
+        setIsLiveLoading(true);
         try {
             await startCurrentSet(matchId);
-            window.location.reload();
+            refreshMatch();
         } catch (err: any) {
             if (err.message) {
-                setError(err.message);
+                alert(err.message);
             } else {
-                setError('Chyba při zahájení setu.');
+                alert('Chyba při odstartování setu.');
             }
         } finally {
-            setIsLoading(false);
+            setIsLiveLoading(false);
         }
     };
 
-    const handleAddPoint = async (side: string) => {
-        setIsLoading(true);
-        setError('');
+    const handleAssignPosition = async (setNumber: number, teamMemberId: string, position: PlayerPosition) => {
+        setIsLiveLoading(true);
+        try {
+            const dto: AssignPositionDto = {
+                setNumber: setNumber,
+                teamMemberId: teamMemberId,
+                position: position
+            };
+            await assignPosition(matchId, dto);
+            refreshMatch();
+        } catch (err: any) {
+            if (err.message) {
+                alert(err.message);
+            } else {
+                alert('Chyba při přiřazování pozice.');
+            }
+        } finally {
+            setIsLiveLoading(false);
+        }
+    };
+
+    const handleAddPoint = async (side: SetSide) => {
+        setIsLiveLoading(true);
         try {
             await addPoint(matchId, side);
-            window.location.reload();
+            refreshMatch();
         } catch (err: any) {
             if (err.message) {
-                setError(err.message);
+                alert(err.message);
             } else {
-                setError('Chyba při přidávání bodu.');
+                alert('Chyba při přidávání bodu.');
             }
         } finally {
-            setIsLoading(false);
+            setIsLiveLoading(false);
         }
     };
 
-    const handleAssignPosition = async (setNumber: number, teamMemberId: string, position: number) => {
-        setIsLoading(true);
-        setError('');
-        try {
-            await assignPosition(matchId, { setNumber, teamMemberId, position });
-            window.location.reload();
-        } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError('Chyba při přidělování pozice.');
-            }
-        } finally {
-            setIsLoading(false);
-        }
+    return {
+        isLiveLoading,
+        handleStartMatch,
+        handleStartCurrentSet,
+        handleAssignPosition,
+        handleAddPoint
     };
-
-    return { error, isLoading, handleStartMatch, handleStartSet, handleAddPoint, handleAssignPosition };
-}
+};

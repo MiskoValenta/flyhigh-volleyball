@@ -1,7 +1,10 @@
 ﻿using Domain.Entities.Matches;
+using Domain.Entities.Matches.MatchEnums;
+using Domain.Entities.Teams;
 using Domain.Repositories.Matches;
 using Domain.Value_Objects.Matches;
 using Domain.Value_Objects.Teams;
+using Domain.Value_Objects.Users;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,5 +46,19 @@ public class MatchRepository : IMatchRepository
         .Where(m => teamIds.Contains(m.HomeTeamId) || teamIds.Contains(m.AwayTeamId))
         .OrderBy(m => m.ScheduledAt)
         .ToListAsync(cancellationToken);
+  }
+
+  public async Task<int> GetPlayedMatchesCountByTeamAsync(TeamId teamId, CancellationToken cancellationToken = default)
+  {
+    return await _context.Set<Match>()
+        .CountAsync(m => (m.HomeTeamId == teamId || m.AwayTeamId == teamId) && m.Status == MatchStatus.Finished, cancellationToken);
+  }
+
+  public async Task<int> GetPlayedMatchesCountByUserAsync(UserId userId, CancellationToken cancellationToken = default)
+  {
+    return await _context.Set<Match>()
+        .CountAsync(m => m.Status == MatchStatus.Finished &&
+                         _context.Set<TeamMember>().Any(tm => tm.UserId == userId && m.Roster.Any(r => r.TeamMemberId == tm.Id)),
+                    cancellationToken);
   }
 }

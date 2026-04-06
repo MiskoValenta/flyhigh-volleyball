@@ -10,8 +10,7 @@ namespace Domain.Repositories.Events;
 public interface IEventRepository
 {
   Task<Event?> GetByIdAsync(EventId id, CancellationToken cancellationToken = default);
-  Task<IEnumerable<Event>> GetTeamEventsAsync(TeamId teamId, CancellationToken cancellationToken = default);
-  Task AddAsync(Event teamEvent, CancellationToken cancellationToken = default);
-  void Remove(Event teamEvent);
-  Task SaveChangesAsync(CancellationToken cancellationToken = default);
+  Task AddAsync(Event ev, CancellationToken cancellationToken = default);
+  void Delete(Event ev);
+  Task<IEnumerable<Event>> GetEventsByTeamIdAsync(TeamId teamId, CancellationToken cancellationToken = default);
 }
