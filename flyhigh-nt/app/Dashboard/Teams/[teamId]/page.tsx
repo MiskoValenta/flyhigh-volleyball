@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
     IoArrowBack,
@@ -11,21 +11,17 @@ import {
     IoPersonAddOutline,
     IoShieldCheckmarkOutline,
     IoCalendarOutline,
-    IoTrophyOutline,
-    IoCheckmarkCircleOutline,
-    IoCloseCircleOutline
+    IoTrophyOutline
 } from "react-icons/io5";
 import { useTeamDetail } from "@/hooks/Teams/useTeamDetail";
 import { TeamRole } from "@/types/team";
 import { useTeamEvents } from "@/hooks/Events/useTeamEvents";
 import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
 import { DashboardEventItem } from "@/types/event";
-import { acceptInvitation, declineInvitation } from "@/lib/teamApi";
 import "./TeamDetail.css";
 
 export default function TeamDetailPage() {
     const params = useParams();
-    const router = useRouter();
     const teamId = params.teamId as string;
 
     const {
@@ -47,34 +43,24 @@ export default function TeamDetailPage() {
     const upcomingSortedEvents = useMemo(() => {
         if (!teamEvents || !team) return [];
         const now = new Date();
+
         return teamEvents
             .filter(e => e.eventDate && new Date(e.eventDate) > now)
             .sort((a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime())
-            .map(e => ({ ...e, teamName: team.teamName } as DashboardEventItem));
+            .map(e => ({
+                ...e,
+                teamName: team.teamName
+            } as DashboardEventItem));
     }, [teamEvents, team]);
 
-    if (isTeamLoading) return <div className="detail-state-message">Načítám detail týmu...</div>;
-    if (teamError || !team) return <div className="detail-state-message error">Chyba: {teamError || "Tým nebyl nalezen"}</div>;
+    if (isTeamLoading)
+        return <div className="detail-state-message">Načítám detail týmu...</div>;
 
-    const currentUserMember = team.members?.find(m => m.userId === currentUserId);
-    const isPending = currentUserMember ? !currentUserMember.isActive : false;
+    if (teamError || !team)
+        return <div className="detail-state-message error">Chyba: {teamError || "Tým nebyl nalezen"}</div>;
 
     const isOwner = team.myRole === TeamRole.Owner;
     const isManager = team.myRole === TeamRole.Owner || team.myRole === TeamRole.Coach;
-
-    const handleRespond = async (accept: boolean) => {
-        try {
-            if (accept) {
-                await acceptInvitation(team.id);
-                window.location.reload();
-            } else {
-                await declineInvitation(team.id);
-                router.push("/Dashboard/Teams");
-            }
-        } catch (err: any) {
-            alert(err.message || "Nepodařilo se zpracovat pozvánku.");
-        }
-    };
 
     const handleCopyId = () => {
         navigator.clipboard.writeText(team.id);
@@ -103,11 +89,19 @@ export default function TeamDetailPage() {
 
     const onRemoveMember = async (userId: string) => {
         if (!window.confirm("Opravdu chcete tohoto hráče odebrat z týmu?")) return;
-        try { await handleRemoveMember(userId); } catch (err: any) { alert("Chyba při odebírání člena."); }
+        try {
+            await handleRemoveMember(userId);
+        } catch (err: any) {
+            alert("Chyba při odebírání člena.");
+        }
     };
 
     const onRoleChange = async (userId: string, newRole: TeamRole) => {
-        try { await handleChangeRole(userId, newRole); } catch (err: any) { alert("Chyba při změně role."); }
+        try {
+            await handleChangeRole(userId, newRole);
+        } catch (err: any) {
+            alert("Chyba při změně role.");
+        }
     };
 
     const activePlayersCount = team.members ? team.members.filter(m => m.isActive).length : 0;
@@ -121,25 +115,26 @@ export default function TeamDetailPage() {
                     <span>Zpět na týmy</span>
                 </Link>
 
-                {!isPending && (
-                    <div className="top-bar-actions">
-                        {isManager && (
-                            <>
-                                <Link href={`/Dashboard/Events/Create?teamId=${teamId}`} className="btn-action">
-                                    <IoCalendarOutline size={18} /><span>Nová událost</span>
-                                </Link>
-                                <Link href={`/Dashboard/Matches/Create?teamId=${teamId}`} className="btn-action">
-                                    <IoTrophyOutline size={18} /><span>Nový zápas</span>
-                                </Link>
-                            </>
-                        )}
-                        {isOwner && (
-                            <button onClick={handleDeleteTeam} className="btn-delete">
-                                <IoTrashOutline size={18} /><span>Smazat tým</span>
-                            </button>
-                        )}
-                    </div>
-                )}
+                <div className="top-bar-actions">
+                    {isManager && (
+                        <>
+                            <Link href={`/Dashboard/Events/Create?teamId=${teamId}`} className="btn-action">
+                                <IoCalendarOutline size={18} />
+                                <span>Nová událost</span>
+                            </Link>
+                            <Link href={`/Dashboard/Matches/Create?teamId=${teamId}`} className="btn-action">
+                                <IoTrophyOutline size={18} />
+                                <span>Nový zápas</span>
+                            </Link>
+                        </>
+                    )}
+                    {isOwner && (
+                        <button onClick={handleDeleteTeam} className="btn-delete">
+                            <IoTrashOutline size={18} />
+                            <span>Smazat tým</span>
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="detail-header-card glass-card-dark">
@@ -147,8 +142,8 @@ export default function TeamDetailPage() {
                     <div className="header-titles">
                         <h1 className="detail-title">{team.teamName}</h1>
                         <span className="detail-abbr">{team.shortName}</span>
-                        <span className={`role-badge ${isPending ? 'role-Pending' : `role-${team.myRole}`}`}>
-                            {isPending ? 'Pozvánka' : team.myRole}
+                        <span className={`role-badge role-${team.myRole}`}>
+                            {team.myRole}
                         </span>
                     </div>
 
@@ -176,71 +171,52 @@ export default function TeamDetailPage() {
                     </div>
                     <div className="stat-box">
                         <span className="stat-value">
-                            {isPending ? "?" : (isEventsLoading ? "..." : upcomingSortedEvents.length)}
+                            {isEventsLoading ? "..." : upcomingSortedEvents.length}
                         </span>
                         <span className="stat-label">Nadcházející události</span>
                     </div>
                 </div>
             </div>
 
-            {isPending && (
-                <div className="invitation-banner glass-card-dark">
-                    <div className="invitation-text">
-                        <h3><IoShieldCheckmarkOutline /> Pozvánka do týmu</h3>
-                        <p>Pro zobrazení událostí a plný přístup musíte pozvánku do týmu potvrdit.</p>
-                    </div>
-                    <div className="invitation-actions">
-                        <button onClick={() => handleRespond(true)} className="btn-invite accept">
-                            <IoCheckmarkCircleOutline size={20} /> Přijmout pozvánku
-                        </button>
-                        <button onClick={() => handleRespond(false)} className="btn-invite decline">
-                            <IoCloseCircleOutline size={20} /> Odmítnout
-                        </button>
-                    </div>
-                </div>
-            )}
+            <div className="events-section">
+                <h2 className="section-title">
+                    <IoCalendarOutline />
+                    Události týmu
+                </h2>
+                {isEventsLoading ? (
+                    <div className="no-members-text">Načítám události...</div>
+                ) : (
+                    <DashboardEvents events={upcomingSortedEvents} />
+                )}
+            </div>
 
-            {!isPending && (
-                <>
-                    <div className="events-section">
-                        <h2 className="section-title">
-                            <IoCalendarOutline /> Události týmu
-                        </h2>
-                        {isEventsLoading ? (
-                            <div className="no-members-text">Načítám události...</div>
-                        ) : (
-                            <DashboardEvents events={upcomingSortedEvents} />
-                        )}
-                    </div>
+            {isManager && (
+                <div className="management-section glass-card-dark">
+                    <h2 className="section-title">
+                        <IoShieldCheckmarkOutline /> Přidat nového člena
+                    </h2>
+                    <hr className="section-divider" />
 
-                    {isManager && (
-                        <div className="management-section glass-card-dark">
-                            <h2 className="section-title">
-                                <IoShieldCheckmarkOutline /> Přidat nového člena
-                            </h2>
-                            <hr className="section-divider" />
-                            <form onSubmit={onSubmitAddMember} className="add-member-form">
-                                <div className="input-wrapper">
-                                    <label>ID Uživatele</label>
-                                    <div className="input-group">
-                                        <IoPersonAddOutline className="input-icon" />
-                                        <input
-                                            type="text"
-                                            value={memberInput}
-                                            onChange={(e) => setMemberInput(e.target.value)}
-                                            placeholder="Zadejte unikátní ID uživatele..."
-                                            required
-                                            className="input-glass"
-                                        />
-                                        <button type="submit" disabled={isAdding} className="button-primary">
-                                            {isAdding ? "Pracuji..." : "Odeslat pozvánku"}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                    <form onSubmit={onSubmitAddMember} className="add-member-form">
+                        <div className="input-wrapper">
+                            <label>ID Uživatele</label>
+                            <div className="input-group">
+                                <IoPersonAddOutline className="input-icon" />
+                                <input
+                                    type="text"
+                                    value={memberInput}
+                                    onChange={(e) => setMemberInput(e.target.value)}
+                                    placeholder="Zadejte unikátní ID uživatele..."
+                                    required
+                                    className="input-glass"
+                                />
+                                <button type="submit" disabled={isAdding} className="button-primary">
+                                    {isAdding ? "Pracuji..." : "Odeslat pozvánku"}
+                                </button>
+                            </div>
                         </div>
-                    )}
-                </>
+                    </form>
+                </div>
             )}
 
             <div className="members-section">
@@ -249,7 +225,7 @@ export default function TeamDetailPage() {
                     {team.members && team.members.length > 0 ? (
                         team.members.map((member) => {
                             const mRole = member.role || TeamRole.Member;
-                            const canEdit = !isPending && isManager
+                            const canEdit = isManager
                                 && member.userId !== currentUserId
                                 && !(mRole === TeamRole.Owner && !isOwner);
 
