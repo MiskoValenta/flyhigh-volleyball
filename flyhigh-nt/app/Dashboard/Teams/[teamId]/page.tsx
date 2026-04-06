@@ -15,6 +15,7 @@ import {
     IoClose
 } from "react-icons/io5";
 import { useTeamDetail } from "@/hooks/Teams/useTeamDetail";
+import { useDeleteTeam } from "@/hooks/Teams/useDeleteTeam";
 import { TeamRole } from "@/types/team";
 import { useTeamEvents } from "@/hooks/Events/useTeamEvents";
 import DashboardEvents from "@/components/DashboardEvents/DashboardEvents";
@@ -38,6 +39,7 @@ export default function TeamDetailPage() {
     } = useTeamDetail(teamId);
 
     const { events: teamEvents, isLoading: isEventsLoading } = useTeamEvents(teamId);
+    const { removeTeam, isDeleting } = useDeleteTeam();
 
     const [memberInput, setMemberInput] = useState("");
     const [isAdding, setIsAdding] = useState(false);
@@ -125,8 +127,16 @@ export default function TeamDetailPage() {
         }, 2000);
     };
 
-    const handleDeleteTeam = () => {
-        alert("Funkce mazání týmu bude implementována v dalším kroku!");
+    const handleDeleteTeam = async () => {
+        if (window.confirm("Opravdu chcete tento tým trvale smazat? Tuto akci nelze vrátit.")) {
+            const success = await removeTeam(team.id);
+            if (success) {
+                alert("Tým byl úspěšně smazán.");
+                router.push("/Dashboard/Teams");
+            } else {
+                alert("Nepodařilo se smazat tým.");
+            }
+        }
     };
 
     const onSubmitAddMember = async (e: React.FormEvent) => {
@@ -215,10 +225,15 @@ export default function TeamDetailPage() {
 
     let ownerDeleteBtn = null;
     if (isOwner && !isPending) {
+        let deleteBtnText = "Smazat tým";
+        if (isDeleting) {
+            deleteBtnText = "Mažu...";
+        }
+
         ownerDeleteBtn = (
-            <button onClick={handleDeleteTeam} className="btn-delete">
+            <button onClick={handleDeleteTeam} className="btn-delete" disabled={isDeleting}>
                 <IoTrashOutline size={18} />
-                <span>Smazat tým</span>
+                <span>{deleteBtnText}</span>
             </button>
         );
     }
