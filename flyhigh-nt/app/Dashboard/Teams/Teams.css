@@ -176,6 +176,69 @@
     transform: translateX(6px);
 }
 
+.teams-section-title.pending {
+    color: #facc15;
+}
+
+.team-card.pending-card {
+    border-left: 4px solid #facc15;
+}
+
+.role-Pending {
+    background-color: rgba(250, 204, 21, 0.15);
+    color: #facc15;
+    border: 1px solid rgba(250, 204, 21, 0.4);
+}
+
+.invite-actions-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.btn-invite {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-family: inherit;
+}
+
+.btn-invite:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-invite.accept:hover:not(:disabled) {
+    background: rgba(74, 222, 128, 0.15);
+    border-color: #4ade80;
+    color: #4ade80;
+}
+
+.btn-invite.decline:hover:not(:disabled) {
+    background: rgba(248, 113, 113, 0.15);
+    border-color: #f87171;
+    color: #f87171;
+}
+
+@media (max-width: 600px) {
+    .invite-actions-row {
+        flex-direction: column;
+    }
+}
+
 @media (max-width: 480px) {
     .teams-page-wrapper {
         padding: 1rem;

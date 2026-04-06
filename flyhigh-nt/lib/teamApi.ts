@@ -144,3 +144,18 @@ export const getTeamStats = async (teamId: string): Promise<{ matchesPlayed: num
     }
     return res.json();
 };
+
+export const deleteTeam = async (teamId: string) => {
+    const res = await fetchWithAuth(`${TEAM_URL}/${teamId}`, {
+        method: 'DELETE',
+    });
+
+    if (!res.ok) {
+        let errorData: any = {};
+        try { errorData = await res.json(); } catch (e) { }
+
+        throw new Error(
+            errorData.message || 'Nepodařilo se smazat tým.'
+        );
+    }
+};

@@ -170,6 +170,11 @@
     align-items: center;
 }
 
+.event-team-footer.announcement-footer {
+    margin-top: 0.5rem;
+    padding-top: 0.85rem;
+}
+
 .team-footer-label {
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.4);

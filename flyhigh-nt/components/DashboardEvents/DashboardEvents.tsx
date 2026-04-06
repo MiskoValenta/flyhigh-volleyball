@@ -33,7 +33,7 @@ export default function DashboardEvents({ events }: Props) {
         return (
             <div className="events-empty-state glass-card-dark">
                 <IoCalendarOutline size={40} />
-                <p>Zatím nemáte žádné události.</p>
+                <p>Zatím nemáte žádné nadcházející události.</p>
             </div>
         );
     }
@@ -67,25 +67,28 @@ export default function DashboardEvents({ events }: Props) {
                             )}
                         </div>
 
-                        <hr className="event-divider" />
+                        {event.type !== EventType.Announcement && (
+                            <>
+                                <hr className="event-divider" />
+                                <div className="event-footer">
+                                    <div className="event-stats">
+                                        <span className="stat-green">{event.acceptedCount} Zúčastní se</span>
+                                        <span className="stat-red">{event.declinedCount} Nezúčastní</span>
+                                    </div>
 
-                        <div className="event-footer">
-                            <div className="event-stats">
-                                <span className="stat-green">{event.acceptedCount} Zúčastní se</span>
-                                <span className="stat-red">{event.declinedCount} Nezúčastní</span>
-                            </div>
-
-                            <div className="my-response-box">
-                                <span className="response-label">Moje odpověď:</span>
-                                <div className="response-status">
-                                    {getResponseIcon(event.myResponse as string)}
-                                    <span className="response-text">{event.myResponse}</span>
+                                    <div className="my-response-box">
+                                        <span className="response-label">Moje odpověď:</span>
+                                        <div className="response-status">
+                                            {getResponseIcon(event.myResponse as string)}
+                                            <span className="response-text">{event.myResponse}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            </>
+                        )}
 
                         {event.teamName && (
-                            <div className="event-team-footer">
+                            <div className={`event-team-footer ${event.type === EventType.Announcement ? 'announcement-footer' : ''}`}>
                                 <span className="team-footer-label">Tým:</span>
                                 <span className="team-footer-name">{event.teamName}</span>
                             </div>

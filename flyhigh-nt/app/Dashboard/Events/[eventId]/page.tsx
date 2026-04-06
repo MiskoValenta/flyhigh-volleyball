@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import {
     IoArrowBack,
     IoCalendarOutline,
@@ -19,21 +18,19 @@ import { EventResponse, EventType } from "@/types/event";
 import "./EventDetail.css";
 
 export default function EventDetailPage() {
-    const router = useRouter();
     const params = useParams();
     const eventId = params.eventId as string;
+    const router = useRouter();
 
     const { event, isLoading: eventLoading, handleRespond } = useEventDetail(eventId);
     const { team, isLoading: teamLoading } = useTeamDetail(event?.teamId || "");
 
-    if (eventLoading || teamLoading)
-        return <div className="ed-state-message">Načítám detaily události...</div>;
-
-    if (!event)
-        return <div className="ed-state-message error">Událost nebyla nalezena.</div>;
+    if (eventLoading || teamLoading) return <div className="ed-state-message">Načítám detaily události...</div>;
+    if (!event) return <div className="ed-state-message error">Událost nebyla nalezena.</div>;
 
     const creator = team?.members.find(m => m.userId === event.creatorId);
     const creatorName = creator ? `${creator.firstName} ${creator.lastName}` : "Neznámý tvůrce";
+
     const acceptedParticipants = team?.members.filter(member =>
         event.participants.some(p => p.userId === member.userId && p.response === EventResponse.Accepted)
     ) || [];
@@ -46,8 +43,9 @@ export default function EventDetailPage() {
 
     return (
         <div className="event-detail-wrapper-ed">
+
             <div className="ed-top-bar">
-                <button onClick={() => router.back()} className="ed-btn-back" style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: 0 }}>
+                <button onClick={() => router.back()} className="ed-btn-back">
                     <IoArrowBack size={20} />
                     <span>Zpět</span>
                 </button>
@@ -107,67 +105,69 @@ export default function EventDetailPage() {
                 )}
             </div>
 
-            <div className="ed-voting-card glass-card-dark">
-                <div className="ed-my-response-header">
-                    <span className="ed-response-label">Vaše aktuální odpověď:</span>
-                    <span className={`ed-current-status status-${event.myResponse}`}>
-                        {event.myResponse === EventResponse.Unknown ? "Zatím jste neodpověděli" : event.myResponse}
-                    </span>
-                </div>
+            {event.type !== EventType.Announcement && (
+                <>
+                    <div className="ed-voting-card glass-card-dark">
+                        <div className="ed-my-response-header">
+                            <span className="ed-response-label">Vaše aktuální odpověď:</span>
+                            <span className={`ed-current-status status-${event.myResponse}`}>
+                                {event.myResponse === EventResponse.Unknown ? "Zatím jste neodpověděli" : event.myResponse}
+                            </span>
+                        </div>
 
-                <div className="ed-voting-actions">
-                    <button
-                        onClick={() => handleRespond(EventResponse.Accepted)}
-                        className={`ed-vote-btn accept ${event.myResponse === EventResponse.Accepted ? 'active' : ''}`}
-                    >
-                        <IoCheckmarkCircleOutline size={22} />
-                        Hraju / Jdu
-                    </button>
-                    <button
-                        onClick={() => handleRespond(EventResponse.Declined)}
-                        className={`ed-vote-btn decline ${event.myResponse === EventResponse.Declined ? 'active' : ''}`}
-                    >
-                        <IoCloseCircleOutline size={22} />
-                        Nemůžu
-                    </button>
-                </div>
-            </div>
-
-            <div className="ed-participants-container">
-
-                <div className="ed-list-section glass-card-dark">
-                    <h2 className="ed-section-title green">
-                        <IoCheckmarkCircleOutline /> Zúčastní se ({acceptedParticipants.length})
-                    </h2>
-                    <div className="ed-members-list">
-                        {acceptedParticipants.length > 0 ? acceptedParticipants.map(member => (
-                            <div key={member.userId} className="ed-member-row">
-                                <span className="ed-member-name">{member.firstName} {member.lastName}</span>
-                                <span className={`role-badge role-${member.role}`}>{member.role}</span>
-                            </div>
-                        )) : (
-                            <p className="ed-empty-text">Zatím nikdo nepotvrdil účast.</p>
-                        )}
+                        <div className="ed-voting-actions">
+                            <button
+                                onClick={() => handleRespond(EventResponse.Accepted)}
+                                className={`ed-vote-btn accept ${event.myResponse === EventResponse.Accepted ? 'active' : ''}`}
+                            >
+                                <IoCheckmarkCircleOutline size={22} />
+                                Hraju / Jdu
+                            </button>
+                            <button
+                                onClick={() => handleRespond(EventResponse.Declined)}
+                                className={`ed-vote-btn decline ${event.myResponse === EventResponse.Declined ? 'active' : ''}`}
+                            >
+                                <IoCloseCircleOutline size={22} />
+                                Nemůžu
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div className="ed-list-section glass-card-dark">
-                    <h2 className="ed-section-title red">
-                        <IoCloseCircleOutline /> Omluvili se ({declinedParticipants.length})
-                    </h2>
-                    <div className="ed-members-list">
-                        {declinedParticipants.length > 0 ? declinedParticipants.map(member => (
-                            <div key={member.userId} className="ed-member-row">
-                                <span className="ed-member-name">{member.firstName} {member.lastName}</span>
-                                <span className={`role-badge role-${member.role}`}>{member.role}</span>
+                    <div className="ed-participants-container">
+                        <div className="ed-list-section glass-card-dark">
+                            <h2 className="ed-section-title green">
+                                <IoCheckmarkCircleOutline /> Zúčastní se ({acceptedParticipants.length})
+                            </h2>
+                            <div className="ed-members-list">
+                                {acceptedParticipants.length > 0 ? acceptedParticipants.map(member => (
+                                    <div key={member.userId} className="ed-member-row">
+                                        <span className="ed-member-name">{member.firstName} {member.lastName}</span>
+                                        <span className={`role-badge role-${member.role}`}>{member.role}</span>
+                                    </div>
+                                )) : (
+                                    <p className="ed-empty-text">Zatím nikdo nepotvrdil účast.</p>
+                                )}
                             </div>
-                        )) : (
-                            <p className="ed-empty-text">Zatím se nikdo neomluvil.</p>
-                        )}
-                    </div>
-                </div>
+                        </div>
 
-            </div>
+                        <div className="ed-list-section glass-card-dark">
+                            <h2 className="ed-section-title red">
+                                <IoCloseCircleOutline /> Omluvili se ({declinedParticipants.length})
+                            </h2>
+                            <div className="ed-members-list">
+                                {declinedParticipants.length > 0 ? declinedParticipants.map(member => (
+                                    <div key={member.userId} className="ed-member-row">
+                                        <span className="ed-member-name">{member.firstName} {member.lastName}</span>
+                                        <span className={`role-badge role-${member.role}`}>{member.role}</span>
+                                    </div>
+                                )) : (
+                                    <p className="ed-empty-text">Zatím se nikdo neomluvil.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
 
         </div>
     );
