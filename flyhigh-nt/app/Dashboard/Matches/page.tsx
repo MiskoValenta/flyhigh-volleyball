@@ -1,14 +1,31 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { IoChevronForward } from "react-icons/io5";
 import { useMatchesList } from "@/hooks/Matches/useMatchesList";
 import { acceptMatch, rejectMatch } from "@/lib/matchApi";
+import { getMyTeams } from "@/lib/teamApi";
 import "./Matches.css";
 
 export default function MatchesPage() {
     const { activeMatches, pendingMatches, isLoading, error, refetch, profile } = useMatchesList();
+    const [myTeamIds, setMyTeamIds] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchMyTeamIds = async () => {
+            try {
+                const teams = await getMyTeams();
+                const ids = [];
+                for (let i = 0; i < teams.length; i++) {
+                    ids.push(teams[i].id);
+                }
+                setMyTeamIds(ids);
+            } catch (err) {
+            }
+        };
+        fetchMyTeamIds();
+    }, []);
 
     const handleAccept = async (matchId: string) => {
         try {
@@ -42,16 +59,15 @@ export default function MatchesPage() {
         for (let i = 0; i < pendingMatches.length; i++) {
             const match = pendingMatches[i];
 
-            let actionsContent = null;
-            let isCreator = false;
-
-            if (profile) {
-                if (profile.id === match.creatorId) {
-                    isCreator = true;
+            let isHomeTeamMember = false;
+            for (let j = 0; j < myTeamIds.length; j++) {
+                if (myTeamIds[j] === match.homeTeamId) {
+                    isHomeTeamMember = true;
                 }
             }
 
-            if (isCreator) {
+            let actionsContent = null;
+            if (isHomeTeamMember) {
                 actionsContent = <p className="pending-waiting-text">Čeká se na přijetí soupeřem...</p>;
             } else {
                 actionsContent = (
@@ -110,11 +126,16 @@ export default function MatchesPage() {
                 }
             }
 
-            let opponentName = match.awayTeamName;
-            if (profile) {
-                if (profile.id !== match.creatorId) {
-                    opponentName = match.homeTeamName;
+            let isHomeTeamMember = false;
+            for (let j = 0; j < myTeamIds.length; j++) {
+                if (myTeamIds[j] === match.homeTeamId) {
+                    isHomeTeamMember = true;
                 }
+            }
+
+            let opponentName = match.awayTeamName;
+            if (isHomeTeamMember === false) {
+                opponentName = match.homeTeamName;
             }
 
             let matchLocation = "Neuvedeno";

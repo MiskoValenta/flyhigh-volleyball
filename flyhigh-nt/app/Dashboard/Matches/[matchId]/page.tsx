@@ -32,14 +32,12 @@ export default function MatchDetailPage() {
                     const hTeam = await getTeamById(match.homeTeamId);
                     setHomeTeamInfo(hTeam);
                 } catch (e) {
-                    
                 }
 
                 try {
                     const aTeam = await getTeamById(match.awayTeamId);
                     setAwayTeamInfo(aTeam);
                 } catch (e) {
-                    
                 }
             }
         };
@@ -64,9 +62,11 @@ export default function MatchDetailPage() {
         const jerseyNum = parseInt(homeJerseyInput);
         let isTaken = false;
 
-        for (let i = 0; i < match.homeRoster.length; i++) {
-            if (match.homeRoster[i].jerseyNumber === jerseyNum) {
-                isTaken = true;
+        if (match.homeRoster) {
+            for (let i = 0; i < match.homeRoster.length; i++) {
+                if (match.homeRoster[i].jerseyNumber === jerseyNum) {
+                    isTaken = true;
+                }
             }
         }
 
@@ -89,9 +89,11 @@ export default function MatchDetailPage() {
         const jerseyNum = parseInt(awayJerseyInput);
         let isTaken = false;
 
-        for (let i = 0; i < match.awayRoster.length; i++) {
-            if (match.awayRoster[i].jerseyNumber === jerseyNum) {
-                isTaken = true;
+        if (match.awayRoster) {
+            for (let i = 0; i < match.awayRoster.length; i++) {
+                if (match.awayRoster[i].jerseyNumber === jerseyNum) {
+                    isTaken = true;
+                }
             }
         }
 
@@ -142,25 +144,29 @@ export default function MatchDetailPage() {
     }
 
     let homeRosterList = [];
-    for (let i = 0; i < match.homeRoster.length; i++) {
-        const player = match.homeRoster[i];
-        homeRosterList.push(
-            <div key={player.id} className="roster-item-md">
-                <span className="jersey-md">#{player.jerseyNumber}</span>
-                <span className="player-name-md">{player.playerId}</span>
-            </div>
-        );
+    if (match.homeRoster) {
+        for (let i = 0; i < match.homeRoster.length; i++) {
+            const player = match.homeRoster[i];
+            homeRosterList.push(
+                <div key={player.id} className="roster-item-md">
+                    <span className="jersey-md">#{player.jerseyNumber}</span>
+                    <span className="player-name-md">{player.playerId}</span>
+                </div>
+            );
+        }
     }
 
     let awayRosterList = [];
-    for (let i = 0; i < match.awayRoster.length; i++) {
-        const player = match.awayRoster[i];
-        awayRosterList.push(
-            <div key={player.id} className="roster-item-md">
-                <span className="jersey-md">#{player.jerseyNumber}</span>
-                <span className="player-name-md">{player.playerId}</span>
-            </div>
-        );
+    if (match.awayRoster) {
+        for (let i = 0; i < match.awayRoster.length; i++) {
+            const player = match.awayRoster[i];
+            awayRosterList.push(
+                <div key={player.id} className="roster-item-md">
+                    <span className="jersey-md">#{player.jerseyNumber}</span>
+                    <span className="player-name-md">{player.playerId}</span>
+                </div>
+            );
+        }
     }
 
     let refereeSection = null;
