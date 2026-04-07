@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
     getMatchById,
     acceptMatch,
@@ -15,6 +15,9 @@ export const useMatchDetail = (matchId: string) => {
     const [error, setError] = useState<string>("");
 
     const fetchMatch = useCallback(async () => {
+        if (!matchId) {
+            return;
+        }
         if (matchId === "") {
             return;
         }
@@ -34,6 +37,10 @@ export const useMatchDetail = (matchId: string) => {
         }
         setIsLoading(false);
     }, [matchId]);
+
+    useEffect(() => {
+        fetchMatch();
+    }, [fetchMatch]);
 
     const handleAccept = async () => {
         try {

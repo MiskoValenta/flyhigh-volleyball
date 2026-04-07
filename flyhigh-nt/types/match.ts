@@ -60,7 +60,7 @@ export interface MatchDto {
     sets: MatchSetDto[];
     homeRoster: MatchRosterEntryDto[];
     awayRoster: MatchRosterEntryDto[];
-};
+}
 
 export interface MatchSetDto {
     id: string;
@@ -72,7 +72,7 @@ export interface MatchSetDto {
     isFinished: boolean;
     winner: SetWinner;
     playerPositions: MatchPlayerPositionDto[];
-};
+}
 
 export interface MatchRosterEntryDto {
     id: string;
@@ -81,7 +81,7 @@ export interface MatchRosterEntryDto {
     playerId: string;
     jerseyNumber: number;
     playerName: string;
-};
+}
 
 export interface MatchPlayerPositionDto {
     id: string;
@@ -90,7 +90,7 @@ export interface MatchPlayerPositionDto {
     position: PlayerPosition;
     side: SetSide;
     playerName: string;
-};
+}
 
 export interface CreateMatchDto {
     homeTeamId: string;
@@ -98,4 +98,12 @@ export interface CreateMatchDto {
     scheduledDate: string | null;
     location: string | null;
     refereeId: string | null;
-};
+}
+
+export interface MatchEnhanced extends MatchDto {
+    homeTeamName: string;
+    homeTeamAbbr: string;
+    awayTeamName: string;
+    awayTeamAbbr: string;
+    creatorName: string;
+}
