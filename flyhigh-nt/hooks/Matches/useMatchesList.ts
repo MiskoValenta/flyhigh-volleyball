@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { getMyMatches } from "@/lib/matchApi";
 import { getTeamById } from "@/lib/teamApi";
 import { fetchWithAuth } from "@/lib/apiClient";
-import { MatchEnhanced, MatchStatus } from "@/types/match";
+import { MatchStatus, MatchEnhanced } from "@/types/match";
 import { useProfile } from "@/hooks/Profile/useProfile";
 
 export const useMatchesList = () => {
@@ -51,17 +51,19 @@ export const useMatchesList = () => {
                 }
 
                 let cName = match.creatorId;
-                try {
-                    const creatorRes = await fetchWithAuth(`/api/Users/${match.creatorId}`);
-                    if (creatorRes.ok) {
-                        const creatorUser = await creatorRes.json();
-                        if (creatorUser) {
-                            if (creatorUser.firstName) {
-                                cName = creatorUser.firstName + " " + creatorUser.lastName;
+                if (match.creatorId) {
+                    try {
+                        const creatorRes = await fetchWithAuth(`/Users/${match.creatorId}`);
+                        if (creatorRes.ok) {
+                            const creatorUser = await creatorRes.json();
+                            if (creatorUser) {
+                                if (creatorUser.firstName) {
+                                    cName = creatorUser.firstName + " " + creatorUser.lastName;
+                                }
                             }
                         }
+                    } catch (e) {
                     }
-                } catch (e) {
                 }
 
                 const enhancedMatch: MatchEnhanced = {
