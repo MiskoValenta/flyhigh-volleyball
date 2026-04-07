@@ -1,9 +1,9 @@
-import { fetchWithAuth } from './apiClient';
-import { MatchDetail, MatchResponseDto, CreateMatchDto, AssignPositionDto, SetSide, RosterPlayerDto } from '@/types/match';
+import { fetchWithAuth } from "./apiClient";
+import { CreateMatchDto, MatchDto, PlayerPosition, SetSide, RosterPlayerDto, AssignPositionDto } from "@/types/match";
 
 const MATCH_URL = '/matches';
 
-export const getMyMatches = async (): Promise<MatchResponseDto[]> => {
+export const getMyMatches = async (): Promise<MatchDto[]> => {
     const res = await fetchWithAuth(`${MATCH_URL}`);
     if (!res.ok) {
         throw new Error('Nepodařilo se načíst zápasy.');
@@ -11,7 +11,7 @@ export const getMyMatches = async (): Promise<MatchResponseDto[]> => {
     return res.json();
 }
 
-export const getMatchById = async (matchId: string): Promise<MatchDetail> => {
+export const getMatchById = async (matchId: string): Promise<MatchDto> => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}`);
     if (!res.ok) {
         throw new Error('Nepodařilo se načíst detail zápasu.');
@@ -21,15 +21,20 @@ export const getMatchById = async (matchId: string): Promise<MatchDetail> => {
 
 export const proposeMatch = async (data: CreateMatchDto) => {
     const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
     if (!guidRegex.test(data.homeTeamId)) {
         throw new Error("Vyberte platný domácí tým.");
     }
+
     if (!guidRegex.test(data.awayTeamId)) {
         throw new Error("Vyberte platný hostující tým.");
     }
 
-    let finalDate = data.scheduledAt;
+    let finalDate = data.scheduledDate;
     if (finalDate === "") {
+        throw new Error("Datum zápasu je povinné.");
+    }
+    if (finalDate === null) {
         throw new Error("Datum zápasu je povinné.");
     }
     finalDate = new Date(finalDate).toISOString();
@@ -56,14 +61,19 @@ export const proposeMatch = async (data: CreateMatchDto) => {
 
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
-        } else if (errorData.errors) {
-            throw new Error(Object.values(errorData.errors).flat().join(' '));
         } else {
-            throw new Error('Nepodařilo se vytvořit zápas.');
+            if (errorData.errors) {
+                throw new Error(Object.values(errorData.errors).flat().join(' '));
+            } else {
+                throw new Error('Nepodařilo se vytvořit zápas.');
+            }
         }
     }
     return res.json();
@@ -71,9 +81,13 @@ export const proposeMatch = async (data: CreateMatchDto) => {
 
 export const acceptMatch = async (matchId: string) => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/accept`, { method: 'POST' });
+
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
@@ -85,9 +99,13 @@ export const acceptMatch = async (matchId: string) => {
 
 export const rejectMatch = async (matchId: string) => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/reject`, { method: 'POST' });
+
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
@@ -102,9 +120,13 @@ export const addRosterPlayer = async (matchId: string, data: RosterPlayerDto) =>
         method: 'POST',
         body: JSON.stringify(data),
     });
+
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
@@ -116,9 +138,13 @@ export const addRosterPlayer = async (matchId: string, data: RosterPlayerDto) =>
 
 export const startMatch = async (matchId: string) => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/start`, { method: 'POST' });
+
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
@@ -130,9 +156,13 @@ export const startMatch = async (matchId: string) => {
 
 export const startCurrentSet = async (matchId: string) => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/sets/start`, { method: 'POST' });
+
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
@@ -144,9 +174,13 @@ export const startCurrentSet = async (matchId: string) => {
 
 export const addPoint = async (matchId: string, side: SetSide) => {
     const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/point/${side}`, { method: 'POST' });
+
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
@@ -161,9 +195,13 @@ export const assignPosition = async (matchId: string, data: AssignPositionDto) =
         method: 'POST',
         body: JSON.stringify(data),
     });
+
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
@@ -180,7 +218,10 @@ export const setReferee = async (matchId: string, refereeId: string) => {
 
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);
@@ -198,7 +239,10 @@ export const cancelMatch = async (matchId: string, reason: string) => {
 
     if (!res.ok) {
         let errorData: any = {};
-        try { errorData = await res.json(); } catch (e) { }
+        try {
+            errorData = await res.json();
+        } catch (e) {
+        }
 
         if (errorData.message) {
             throw new Error(errorData.message);

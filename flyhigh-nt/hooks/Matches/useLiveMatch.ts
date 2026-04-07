@@ -1,84 +1,86 @@
-import { useState } from 'react';
-import { startMatch, startCurrentSet, assignPosition, addPoint } from '@/lib/matchApi';
-import { AssignPositionDto, SetSide, PlayerPosition } from '@/types/match';
+import { useState } from "react";
+import {
+    startMatch,
+    startCurrentSet,
+    addPoint,
+    assignPosition
+} from "@/lib/matchApi";
+import { SetSide, AssignPositionDto } from "@/types/match";
 
-export const useLiveMatch = (matchId: string, refreshMatch: () => void) => {
+export const useLiveMatch = (matchId: string, onUpdateCallback: () => void) => {
     const [isLiveLoading, setIsLiveLoading] = useState<boolean>(false);
+    const [liveError, setLiveError] = useState<string>("");
 
     const handleStartMatch = async () => {
         setIsLiveLoading(true);
+        setLiveError("");
         try {
             await startMatch(matchId);
-            refreshMatch();
+            onUpdateCallback();
         } catch (err: any) {
             if (err.message) {
-                alert(err.message);
+                setLiveError(err.message);
             } else {
-                alert('Chyba při zahajování zápasu.');
+                setLiveError("Nepodařilo se odstartovat zápas.");
             }
-        } finally {
-            setIsLiveLoading(false);
         }
+        setIsLiveLoading(false);
     };
 
-    const handleStartCurrentSet = async () => {
+    const handleStartSet = async () => {
         setIsLiveLoading(true);
+        setLiveError("");
         try {
             await startCurrentSet(matchId);
-            refreshMatch();
+            onUpdateCallback();
         } catch (err: any) {
             if (err.message) {
-                alert(err.message);
+                setLiveError(err.message);
             } else {
-                alert('Chyba při odstartování setu.');
+                setLiveError("Nepodařilo se odstartovat set.");
             }
-        } finally {
-            setIsLiveLoading(false);
         }
-    };
-
-    const handleAssignPosition = async (setNumber: number, teamMemberId: string, position: PlayerPosition) => {
-        setIsLiveLoading(true);
-        try {
-            const dto: AssignPositionDto = {
-                setNumber: setNumber,
-                teamMemberId: teamMemberId,
-                position: position
-            };
-            await assignPosition(matchId, dto);
-            refreshMatch();
-        } catch (err: any) {
-            if (err.message) {
-                alert(err.message);
-            } else {
-                alert('Chyba při přiřazování pozice.');
-            }
-        } finally {
-            setIsLiveLoading(false);
-        }
+        setIsLiveLoading(false);
     };
 
     const handleAddPoint = async (side: SetSide) => {
         setIsLiveLoading(true);
+        setLiveError("");
         try {
             await addPoint(matchId, side);
-            refreshMatch();
+            onUpdateCallback();
         } catch (err: any) {
             if (err.message) {
-                alert(err.message);
+                setLiveError(err.message);
             } else {
-                alert('Chyba při přidávání bodu.');
+                setLiveError("Nepodařilo se přidat bod.");
             }
-        } finally {
-            setIsLiveLoading(false);
         }
+        setIsLiveLoading(false);
+    };
+
+    const handleAssignPosition = async (data: AssignPositionDto) => {
+        setIsLiveLoading(true);
+        setLiveError("");
+        try {
+            await assignPosition(matchId, data);
+            onUpdateCallback();
+        } catch (err: any) {
+            if (err.message) {
+                setLiveError(err.message);
+            } else {
+                setLiveError("Nepodařilo se přiřadit pozici.");
+            }
+        }
+        setIsLiveLoading(false);
     };
 
     return {
         isLiveLoading,
+        liveError,
         handleStartMatch,
-        handleStartCurrentSet,
-        handleAssignPosition,
-        handleAddPoint
+        handleStartSet,
+        handleAddPoint,
+        handleAssignPosition
     };
 };

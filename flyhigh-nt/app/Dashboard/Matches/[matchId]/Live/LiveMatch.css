@@ -1,0 +1,202 @@
+.live-wrapper-live {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.live-msg-live {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.5rem;
+    color: #cbd5e1;
+}
+
+.error-live {
+    color: #ef4444;
+}
+
+.live-top-bar-live {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.btn-leave-live {
+    color: #94a3b8;
+    text-decoration: none;
+    border: 1px solid #475569;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+}
+
+.btn-leave-live:hover {
+    color: white;
+    background-color: #334155;
+}
+
+.pulse-indicator-live {
+    background-color: #ef4444;
+    color: white;
+    font-weight: 900;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.scoreboard-live {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 3rem;
+    border-radius: 16px;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+}
+
+.team-col-live {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.team-name-live {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
+.set-score-live {
+    color: #3b82f6;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.big-point-live {
+    font-size: 8rem;
+    font-weight: 900;
+    line-height: 1;
+    color: white;
+}
+
+.divider-live {
+    font-size: 5rem;
+    font-weight: 900;
+    color: #475569;
+}
+
+.center-panel-live {
+    text-align: center;
+    padding: 3rem;
+    border-radius: 12px;
+}
+
+.btn-huge-live {
+    background-color: #10b981;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: none;
+    padding: 1.5rem 3rem;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 1.5rem;
+}
+
+.position-box-live {
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.pos-form-live {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.input-live {
+    padding: 0.8rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid #334155;
+    color: white;
+    border-radius: 6px;
+    flex: 1;
+}
+
+.btn-save-pos-live {
+    padding: 0.8rem 1.5rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.scoring-box-live {
+    display: flex;
+    gap: 2rem;
+}
+
+.btn-point-live {
+    flex: 1;
+    padding: 3rem 1rem;
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.btn-point-live:active {
+    transform: scale(0.95);
+}
+
+.home-btn-live {
+    background-color: #3b82f6;
+}
+
+.away-btn-live {
+    background-color: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .pos-form-live {
+        flex-direction: column;
+    }
+
+    .scoring-box-live {
+        flex-direction: column;
+    }
+
+    .big-point-live {
+        font-size: 5rem;
+    }
+
+    .scoreboard-live {
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+}

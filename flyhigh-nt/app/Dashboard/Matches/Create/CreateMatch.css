@@ -1,85 +1,81 @@
-.creatematch-container {
-    max-width: 800px;
+.page-wrapper-cm {
+    max-width: 600px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 2rem 0;
+}
+
+.header-row-cm {
     display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
-.create-match-subtext {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    margin-top: -1rem;
-    margin-bottom: 1rem;
+.btn-cancel-cm {
+    color: #94a3b8;
+    text-decoration: none;
+    font-weight: bold;
 }
 
-.match-form-container {
+.btn-cancel-cm:hover {
+    color: #ffffff;
+}
+
+.form-card-cm {
     padding: 2rem;
+    border-radius: 12px;
 }
 
-.form-row-cm {
-    display: flex;
-    gap: 1.5rem;
+.error-box-cm {
+    background-color: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 8px;
     margin-bottom: 1.5rem;
 }
 
 .form-group-cm {
-    flex: 1;
+    margin-bottom: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
 }
 
-.form-group-cm label {
-    font-size: 0.95rem;
-    color: var(--text-primary);
+.form-label-cm {
+    color: #cbd5e1;
     font-weight: 600;
+    font-size: 0.9rem;
 }
 
-.form-group-cm input,
-.form-group-cm select {
+.form-input-cm {
     padding: 0.8rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid #334155;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.3);
     color: white;
     font-size: 1rem;
 }
 
-.form-actions-cm {
-    display: flex;
-    justify-content: flex-end;
+.form-input-cm:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.btn-submit-cm {
+    width: 100%;
+    padding: 1rem;
+    background-color: #3b82f6;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
     margin-top: 1rem;
 }
 
-.button-primary {
-    background: #3b82f6;
-    color: white;
-    border: none;
-    padding: 0.8rem 2rem;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.button-primary:hover {
-    background: #2563eb;
-}
-
-.error-alert {
-    background: rgba(239, 68, 68, 0.1);
-    border-left: 4px solid #ef4444;
-    color: #ef4444;
-    padding: 1rem;
-    border-radius: 4px;
-}
-
-@media (max-width: 600px) {
-    .form-row-cm {
-        flex-direction: column;
-        gap: 0;
-    }
+.btn-submit-cm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
