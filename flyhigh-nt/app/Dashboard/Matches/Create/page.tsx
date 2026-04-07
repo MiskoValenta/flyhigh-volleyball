@@ -1,152 +1,146 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCreateMatch } from "@/hooks/Matches/useCreateMatch";
-import { useTeamList } from "@/hooks/Teams/useTeamList";
-import { CreateMatchDto } from "@/types/match";
+import { getMyTeams } from "@/lib/teamApi";
 import { TeamResponseDto } from "@/types/team";
 import "./CreateMatch.css";
 
 export default function CreateMatchPage() {
     const router = useRouter();
-    const { handleCreateMatch, isLoading, error } = useCreateMatch();
-    const { teams, isLoading: isLoadingTeams, error: teamsError } = useTeamList();
+    const { createNewMatch, isCreating, createError } = useCreateMatch();
+    const [myTeams, setMyTeams] = useState<TeamResponseDto[]>([]);
 
-    const [homeTeamId, setHomeTeamId] = useState<string>("");
-    const [awayTeamId, setAwayTeamId] = useState<string>("");
-    const [scheduledAt, setScheduledAt] = useState<string>("");
-    const [location, setLocation] = useState<string>("");
-    const [refereeId, setRefereeId] = useState<string>("");
+    const [homeTeamId, setHomeTeamId] = useState("");
+    const [awayTeamId, setAwayTeamId] = useState("");
+    const [date, setDate] = useState("");
+    const [location, setLocation] = useState("");
+    const [refereeId, setRefereeId] = useState("");
 
     useEffect(() => {
-        if (teams.length > 0) {
-            if (homeTeamId === "") {
-                setHomeTeamId(teams[0].id);
+        const fetchTeams = async () => {
+            try {
+                const teams = await getMyTeams();
+                let activeTeams = [];
+                for (let i = 0; i < teams.length; i++) {
+                    if (teams[i].status === "Active") {
+                        activeTeams.push(teams[i]);
+                    }
+                }
+                setMyTeams(activeTeams);
+            } catch (err) {
+                console.log("Nepodařilo se načíst týmy.");
             }
-        }
-    }, [teams, homeTeamId]);
+        };
+        fetchTeams();
+    }, []);
 
-    const onSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        let finalRefereeId: string | null = refereeId;
-        if (refereeId === "") {
-            finalRefereeId = null;
-        }
-
-        const dto: CreateMatchDto = {
+        const payload = {
             homeTeamId: homeTeamId,
             awayTeamId: awayTeamId,
-            scheduledAt: scheduledAt,
+            scheduledDate: date,
             location: location,
-            refereeId: finalRefereeId
+            refereeId: refereeId
         };
 
-        try {
-            await handleCreateMatch(dto);
-            router.push('/Dashboard/Matches');
-        } catch (err) {
-            console.error(err);
+        const result = await createNewMatch(payload);
+        if (result) {
+            alert("Výzva k zápasu byla úspěšně odeslána.");
+            router.push("/Dashboard/Matches");
         }
     };
 
-    let errorDisplay = null;
-    if (error !== "") {
-        errorDisplay = <div className="error-alert">{error}</div>;
-    }
-    if (teamsError !== "") {
-        errorDisplay = <div className="error-alert">{teamsError}</div>;
-    }
-
     let teamOptions = [];
-    if (isLoadingTeams) {
-        teamOptions.push(<option key="loading" value="">Načítám týmy...</option>);
-    } else {
-        if (teams.length === 0) {
-            teamOptions.push(<option key="empty" value="">Nemáte žádné týmy</option>);
-        } else {
-            for (let i = 0; i < teams.length; i++) {
-                const t: TeamResponseDto = teams[i];
-                teamOptions.push(<option key={t.id} value={t.id}>{t.teamName}</option>);
-            }
-        }
+    teamOptions.push(<option key="default" value="">Vyberte váš tým...</option>);
+    for (let i = 0; i < myTeams.length; i++) {
+        teamOptions.push(
+            <option key={myTeams[i].id} value={myTeams[i].id}>
+                {myTeams[i].teamName}
+            </option>
+        );
     }
 
-    let submitButtonText = "Vytvořit zápas";
-    if (isLoading) {
-        submitButtonText = "Vytvářím...";
+    let errorBox = null;
+    if (createError !== "") {
+        errorBox = <div className="error-box-cm">{createError}</div>;
     }
 
     return (
-        <div className="creatematch-container">
-            <h1 className="dashboard-heading">Nový zápas</h1>
-            <p className="create-match-subtext">Vyplňte detaily pro navržení nového zápasu.</p>
-
-            {errorDisplay}
-
-            <div className="match-form-container glass-card-dark">
-                <form onSubmit={onSubmit}>
-                    <div className="form-row-cm">
-                        <div className="form-group-cm">
-                            <label>Domácí tým (Váš tým)</label>
-                            <select value={homeTeamId} onChange={(e) => setHomeTeamId(e.target.value)} required>
-                                {teamOptions}
-                            </select>
-                        </div>
-
-                        <div className="form-group-cm">
-                            <label>Hostující tým (ID Týmu soupeře)</label>
-                            <input
-                                type="text"
-                                value={awayTeamId}
-                                onChange={(e) => setAwayTeamId(e.target.value)}
-                                placeholder="Zadejte ID týmu soupeře"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="form-row-cm">
-                        <div className="form-group-cm">
-                            <label>Datum a čas</label>
-                            <input
-                                type="datetime-local"
-                                value={scheduledAt}
-                                onChange={(e) => setScheduledAt(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group-cm">
-                            <label>Místo konání</label>
-                            <input
-                                type="text"
-                                value={location}
-                                onChange={(e) => setLocation(e.target.value)}
-                                placeholder="Název haly nebo hřiště"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="form-group-cm">
-                        <label>ID Rozhodčího (Volitelné)</label>
-                        <input
-                            type="text"
-                            value={refereeId}
-                            onChange={(e) => setRefereeId(e.target.value)}
-                            placeholder="Zadejte ID uživatele rozhodčího"
-                        />
-                    </div>
-
-                    <div className="form-actions-cm">
-                        <button type="submit" className="button-primary" disabled={isLoading}>
-                            {submitButtonText}
-                        </button>
-                    </div>
-                </form>
+        <div className="page-wrapper-cm">
+            <div className="header-row-cm">
+                <h1 className="dashboard-heading">Vytvořit výzvu k zápasu</h1>
+                <Link href="/Dashboard/Matches" className="btn-cancel-cm">Zrušit</Link>
             </div>
+
+            <form onSubmit={handleSubmit} className="form-card-cm glass-card-dark">
+                {errorBox}
+
+                <div className="form-group-cm">
+                    <label className="form-label-cm">Můj Tým (Domácí)</label>
+                    <select
+                        value={homeTeamId}
+                        onChange={(e) => setHomeTeamId(e.target.value)}
+                        className="form-input-cm"
+                        required
+                    >
+                        {teamOptions}
+                    </select>
+                </div>
+
+                <div className="form-group-cm">
+                    <label className="form-label-cm">ID Týmu Soupeře (Hosté)</label>
+                    <input
+                        type="text"
+                        value={awayTeamId}
+                        onChange={(e) => setAwayTeamId(e.target.value)}
+                        className="form-input-cm"
+                        placeholder="Zadejte přesné ID soupeře"
+                        required
+                    />
+                </div>
+
+                <div className="form-group-cm">
+                    <label className="form-label-cm">Datum konání</label>
+                    <input
+                        type="datetime-local"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="form-input-cm"
+                        required
+                    />
+                </div>
+
+                <div className="form-group-cm">
+                    <label className="form-label-cm">Místo (Volitelné)</label>
+                    <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="form-input-cm"
+                        placeholder="Kde se bude hrát?"
+                    />
+                </div>
+
+                <div className="form-group-cm">
+                    <label className="form-label-cm">Rozhodčí - ID Uživatele (Volitelné)</label>
+                    <input
+                        type="text"
+                        value={refereeId}
+                        onChange={(e) => setRefereeId(e.target.value)}
+                        className="form-input-cm"
+                        placeholder="Lze přidat i později..."
+                    />
+                </div>
+
+                <button type="submit" className="btn-submit-cm" disabled={isCreating}>
+                    {isCreating ? "Odesílám..." : "Odeslat výzvu"}
+                </button>
+            </form>
         </div>
     );
 }

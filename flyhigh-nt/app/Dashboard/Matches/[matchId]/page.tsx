@@ -1,218 +1,294 @@
-'use client';
+"use client";
 
-import React, { use, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useMatchDetail } from "@/hooks/Matches/useMatchDetail";
-import { MatchStatus } from "@/types/match";
+import { getTeamById } from "@/lib/teamApi";
+import { TeamDetail } from "@/types/team";
 import "./MatchDetail.css";
 
-export default function MatchDetailPage({ params }: { params: Promise<{ matchId: string }> }) {
-    const { matchId } = use(params);
-    const router = useRouter();
-    const {
-        match,
-        currentUserId,
-        isLoading,
-        error,
-        handleAcceptMatch,
-        handleRejectMatch,
-        handleCancelMatch,
-        handleAddRosterPlayer,
-        handleSetReferee
-    } = useMatchDetail(matchId);
+export default function MatchDetailPage() {
+    const params = useParams();
+    const matchId = params.matchId as string;
 
-    const [newPlayerId, setNewPlayerId] = useState("");
-    const [newJersey, setNewJersey] = useState("");
-    const [refereeId, setRefereeId] = useState("");
-    const [cancelReason, setCancelReason] = useState("");
+    const { match, isLoading, error, handleAddPlayer, handleSetReferee, fetchMatch } = useMatchDetail(matchId);
+
+    const [homeTeamInfo, setHomeTeamInfo] = useState<TeamDetail | null>(null);
+    const [awayTeamInfo, setAwayTeamInfo] = useState<TeamDetail | null>(null);
+
+    const [homePlayerInput, setHomePlayerInput] = useState("");
+    const [homeJerseyInput, setHomeJerseyInput] = useState("");
+
+    const [awayPlayerInput, setAwayPlayerInput] = useState("");
+    const [awayJerseyInput, setAwayJerseyInput] = useState("");
+
+    const [refereeInput, setRefereeInput] = useState("");
+
+    useEffect(() => {
+        const loadTeamsInfo = async () => {
+            if (match) {
+                try {
+                    const hTeam = await getTeamById(match.homeTeamId);
+                    setHomeTeamInfo(hTeam);
+                } catch (e) {
+                    
+                }
+
+                try {
+                    const aTeam = await getTeamById(match.awayTeamId);
+                    setAwayTeamInfo(aTeam);
+                } catch (e) {
+                    
+                }
+            }
+        };
+        loadTeamsInfo();
+    }, [match]);
 
     if (isLoading) {
-        return <div className="match-detail-loading">Načítám detail zápasu...</div>;
+        return <div className="detail-msg-md">Načítám detaily...</div>;
     }
 
     if (error !== "") {
-        return <div className="match-detail-error">{error}</div>;
+        return <div className="detail-msg-md error-md">{error}</div>;
     }
 
-    if (match === null) {
-        return <div className="match-detail-error">Zápas nebyl nalezen.</div>;
+    if (!match) {
+        return <div className="detail-msg-md">Zápas neexistuje.</div>;
     }
 
-    let isCreator = false;
-    if (match.creatorId === currentUserId) {
-        isCreator = true;
-    }
-
-    const submitAddPlayer = (e: React.FormEvent) => {
+    const submitHomePlayer = async (e: React.FormEvent) => {
         e.preventDefault();
-        let targetTeamId = match.awayTeamId;
-        if (isCreator) {
-            targetTeamId = match.homeTeamId;
+
+        const jerseyNum = parseInt(homeJerseyInput);
+        let isTaken = false;
+
+        for (let i = 0; i < match.homeRoster.length; i++) {
+            if (match.homeRoster[i].jerseyNumber === jerseyNum) {
+                isTaken = true;
+            }
         }
-        handleAddRosterPlayer(newPlayerId, targetTeamId, parseInt(newJersey));
-        setNewPlayerId("");
-        setNewJersey("");
+
+        if (isTaken) {
+            alert("Toto číslo dresu je v domácím týmu již zabrané.");
+        } else {
+            try {
+                await handleAddPlayer({ teamId: match.homeTeamId, playerId: homePlayerInput, jerseyNumber: jerseyNum });
+                setHomePlayerInput("");
+                setHomeJerseyInput("");
+            } catch (err) {
+                alert("Nepodařilo se přidat hráče.");
+            }
+        }
     };
 
-    const submitReferee = (e: React.FormEvent) => {
+    const submitAwayPlayer = async (e: React.FormEvent) => {
         e.preventDefault();
-        handleSetReferee(refereeId);
-        setRefereeId("");
+
+        const jerseyNum = parseInt(awayJerseyInput);
+        let isTaken = false;
+
+        for (let i = 0; i < match.awayRoster.length; i++) {
+            if (match.awayRoster[i].jerseyNumber === jerseyNum) {
+                isTaken = true;
+            }
+        }
+
+        if (isTaken) {
+            alert("Toto číslo dresu je v hostujícím týmu již zabrané.");
+        } else {
+            try {
+                await handleAddPlayer({ teamId: match.awayTeamId, playerId: awayPlayerInput, jerseyNumber: jerseyNum });
+                setAwayPlayerInput("");
+                setAwayJerseyInput("");
+            } catch (err) {
+                alert("Nepodařilo se přidat hráče.");
+            }
+        }
     };
 
-    const submitCancel = (e: React.FormEvent) => {
+    const submitReferee = async (e: React.FormEvent) => {
         e.preventDefault();
-        handleCancelMatch(cancelReason);
-        setCancelReason("");
+        try {
+            await handleSetReferee(refereeInput);
+            alert("Rozhodčí byl úspěšně nastaven.");
+            setRefereeInput("");
+        } catch (err) {
+            alert("Nepodařilo se nastavit rozhodčího.");
+        }
     };
 
-    let matchStatusText = "";
-    if (match.status === MatchStatus.Pending) { matchStatusText = "Čeká na schválení (Pending)"; }
-    else if (match.status === MatchStatus.Accepted) { matchStatusText = "Schváleno (Accepted)"; }
-    else if (match.status === MatchStatus.Rejected) { matchStatusText = "Zamítnuto (Rejected)"; }
-    else if (match.status === MatchStatus.InProgress) { matchStatusText = "Probíhá (In Progress)"; }
-    else if (match.status === MatchStatus.Finished) { matchStatusText = "Ukončeno (Finished)"; }
-    else if (match.status === MatchStatus.Cancelled) { matchStatusText = "Zrušeno (Cancelled)"; }
+    let homeOptions = [];
+    homeOptions.push(<option key="def" value="">Vyberte hráče...</option>);
+    if (homeTeamInfo) {
+        if (homeTeamInfo.members) {
+            for (let i = 0; i < homeTeamInfo.members.length; i++) {
+                const member = homeTeamInfo.members[i];
+                homeOptions.push(<option key={member.userId} value={member.userId}>{member.firstName} {member.lastName}</option>);
+            }
+        }
+    }
+
+    let awayOptions = [];
+    awayOptions.push(<option key="def" value="">Vyberte hráče...</option>);
+    if (awayTeamInfo) {
+        if (awayTeamInfo.members) {
+            for (let i = 0; i < awayTeamInfo.members.length; i++) {
+                const member = awayTeamInfo.members[i];
+                awayOptions.push(<option key={member.userId} value={member.userId}>{member.firstName} {member.lastName}</option>);
+            }
+        }
+    }
 
     let homeRosterList = [];
-    let awayRosterList = [];
-
-    for (let i = 0; i < match.roster.length; i++) {
-        const player = match.roster[i];
-        if (player.teamId === match.homeTeamId) {
-            homeRosterList.push(
-                <li key={player.teamMemberId} className="roster-item">
-                    <span className="roster-jersey">#{player.jerseyNumber}</span>
-                    <span className="roster-id">{player.teamMemberId}</span>
-                </li>
-            );
-        } else if (player.teamId === match.awayTeamId) {
-            awayRosterList.push(
-                <li key={player.teamMemberId} className="roster-item">
-                    <span className="roster-jersey">#{player.jerseyNumber}</span>
-                    <span className="roster-id">{player.teamMemberId}</span>
-                </li>
-            );
-        }
-    }
-
-    if (homeRosterList.length === 0) { homeRosterList.push(<li key="empty-home" className="roster-item empty">Zatím žádní hráči</li>); }
-    if (awayRosterList.length === 0) { awayRosterList.push(<li key="empty-away" className="roster-item empty">Zatím žádní hráči</li>); }
-
-    let actionsSection = null;
-    let formsSection = null;
-
-    if (match.status === MatchStatus.Pending) {
-        if (!isCreator) {
-            actionsSection = (
-                <div className="match-actions glass-card-dark">
-                    <h3 className="section-title">Nová pozvánka k zápasu</h3>
-                    <div className="button-group">
-                        <button className="btn-success" onClick={handleAcceptMatch}>Přijmout zápas</button>
-                        <button className="btn-danger" onClick={handleRejectMatch}>Odmítnout zápas</button>
-                    </div>
-                </div>
-            );
-        } else {
-            actionsSection = (
-                <div className="match-actions glass-card-dark">
-                    <h3 className="section-title">Čeká se na odpověď</h3>
-                    <p className="info-text">Tým {match.awayTeamName} se ještě nevyjádřil k pozvánce.</p>
-                </div>
-            );
-        }
-    } else if (match.status === MatchStatus.Accepted) {
-        if (isCreator) {
-            actionsSection = (
-                <div className="match-actions glass-card-dark">
-                    <h3 className="section-title">Správa zápasu (Zakladatel)</h3>
-                    <button className="btn-primary start-match-btn" onClick={() => router.push(`/Dashboard/Matches/${matchId}/Live`)}>
-                        Přejít do LIVE správy zápasu
-                    </button>
-                    <form className="inline-form" onSubmit={submitReferee}>
-                        <input type="text" placeholder="ID Rozhodčího (Volitelné)" value={refereeId} onChange={(e) => setRefereeId(e.target.value)} required />
-                        <button type="submit" className="btn-secondary">Nastavit</button>
-                    </form>
-                    <form className="inline-form cancel-form" onSubmit={submitCancel}>
-                        <input type="text" placeholder="Důvod zrušení" value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} required />
-                        <button type="submit" className="btn-danger">Zrušit zápas</button>
-                    </form>
-                </div>
-            );
-        }
-
-        let formTitle = "Přidat na soupisku (Hosté)";
-        if (isCreator) {
-            formTitle = "Přidat na soupisku (Domácí)";
-        }
-
-        formsSection = (
-            <div className="roster-forms-container">
-                <div className="roster-form glass-card-dark">
-                    <h4 className="form-title">{formTitle}</h4>
-                    <form onSubmit={submitAddPlayer}>
-                        <input type="text" placeholder="ID člena týmu" value={newPlayerId} onChange={(e) => setNewPlayerId(e.target.value)} required />
-                        <input type="number" placeholder="Číslo dresu" value={newJersey} onChange={(e) => setNewJersey(e.target.value)} required min="1" max="99" />
-                        <button type="submit" className="btn-primary">Přidat hráče na mou soupisku</button>
-                    </form>
-                </div>
+    for (let i = 0; i < match.homeRoster.length; i++) {
+        const player = match.homeRoster[i];
+        homeRosterList.push(
+            <div key={player.id} className="roster-item-md">
+                <span className="jersey-md">#{player.jerseyNumber}</span>
+                <span className="player-name-md">{player.playerId}</span>
             </div>
         );
-    } else if (match.status === MatchStatus.InProgress) {
-        if (isCreator) {
-            actionsSection = (
-                <div className="match-actions glass-card-dark">
-                    <h3 className="section-title">Zápas právě probíhá</h3>
-                    <button className="btn-primary start-match-btn" onClick={() => router.push(`/Dashboard/Matches/${matchId}/Live`)}>
-                        Zpět do LIVE správy zápasu
-                    </button>
-                </div>
-            );
-        } else {
-            actionsSection = (
-                <div className="match-actions glass-card-dark">
-                    <h3 className="section-title">Zápas právě probíhá</h3>
-                    <p className="info-text">Tento zápas je momentálně řízen zakladatelem. Přepněte se do Live zobrazení.</p>
-                    <button className="btn-primary start-match-btn" onClick={() => router.push(`/Dashboard/Matches/${matchId}/Live`)}>
-                        Sledovat zápas LIVE
-                    </button>
-                </div>
+    }
+
+    let awayRosterList = [];
+    for (let i = 0; i < match.awayRoster.length; i++) {
+        const player = match.awayRoster[i];
+        awayRosterList.push(
+            <div key={player.id} className="roster-item-md">
+                <span className="jersey-md">#{player.jerseyNumber}</span>
+                <span className="player-name-md">{player.playerId}</span>
+            </div>
+        );
+    }
+
+    let refereeSection = null;
+    if (match.status === "Accepted") {
+        let currentReferee = "Nenastaven";
+        if (match.refereeId) {
+            currentReferee = match.refereeId;
+        }
+
+        refereeSection = (
+            <div className="referee-box-md glass-card-dark">
+                <h3>Správa rozhodčího</h3>
+                <p>Aktuální rozhodčí: {currentReferee}</p>
+                <form onSubmit={submitReferee} className="ref-form-md">
+                    <input
+                        type="text"
+                        value={refereeInput}
+                        onChange={(e) => setRefereeInput(e.target.value)}
+                        placeholder="Zadejte ID nového rozhodčího"
+                        className="input-md"
+                        required
+                    />
+                    <button type="submit" className="btn-save-md">Uložit</button>
+                </form>
+            </div>
+        );
+    }
+
+    let engineButton = null;
+    if (match.status === "Accepted") {
+        engineButton = (
+            <Link href={`/Dashboard/Matches/${match.id}/Live`} className="btn-live-md">
+                Otevřít LIVE Engine
+            </Link>
+        );
+    } else {
+        if (match.status === "InProgress") {
+            engineButton = (
+                <Link href={`/Dashboard/Matches/${match.id}/Live`} className="btn-live-md">
+                    Otevřít LIVE Engine
+                </Link>
             );
         }
     }
 
+    let homeTeamDisplay = match.homeTeamId;
+    if (homeTeamInfo) {
+        homeTeamDisplay = homeTeamInfo.teamName;
+    }
+
+    let awayTeamDisplay = match.awayTeamId;
+    if (awayTeamInfo) {
+        awayTeamDisplay = awayTeamInfo.teamName;
+    }
+
+    let homeRosterContent = null;
+    if (homeRosterList.length > 0) {
+        homeRosterContent = homeRosterList;
+    } else {
+        homeRosterContent = <p className="empty-md">Žádní hráči</p>;
+    }
+
+    let awayRosterContent = null;
+    if (awayRosterList.length > 0) {
+        awayRosterContent = awayRosterList;
+    } else {
+        awayRosterContent = <p className="empty-md">Žádní hráči</p>;
+    }
+
+    let matchStatusLower = match.status.toLowerCase();
+
     return (
-        <div className="match-detail-page">
-            <div className="match-header glass-card-dark">
-                <div className="match-teams">
-                    <div className="team home-team">
-                        <h2>{match.homeTeamName}</h2>
-                        <span className="team-label">Domácí</span>
-                    </div>
-                    <div className="vs-badge">VS</div>
-                    <div className="team away-team">
-                        <h2>{match.awayTeamName}</h2>
-                        <span className="team-label">Hosté</span>
-                    </div>
-                </div>
-                <div className="match-meta">
-                    <p><strong>Datum:</strong> {new Date(match.scheduledAt).toLocaleString()}</p>
-                    <p><strong>Místo:</strong> {match.location}</p>
-                    <p><strong>Status:</strong> <span className={`status-badge ${match.status.toLowerCase()}`}>{matchStatusText}</span></p>
-                </div>
+        <div className="page-wrapper-md">
+            <div className="header-md">
+                <h1>Detail Zápasu</h1>
+                <span className={`status-badge-md status-${matchStatusLower}`}>{match.status}</span>
             </div>
 
-            {actionsSection}
-            {formsSection}
+            <div className="top-actions-md">
+                <Link href="/Dashboard/Matches" className="btn-back-md">Zpět</Link>
+                {engineButton}
+            </div>
 
-            <div className="rosters-container">
-                <div className="roster-box glass-card-dark">
-                    <h3 className="section-title">Soupiska: {match.homeTeamName}</h3>
-                    <ul className="roster-list">{homeRosterList}</ul>
+            {refereeSection}
+
+            <div className="rosters-grid-md">
+                <div className="roster-col-md glass-card-dark">
+                    <h2>Domácí ({homeTeamDisplay})</h2>
+                    <div className="roster-list-md">
+                        {homeRosterContent}
+                    </div>
+
+                    <form onSubmit={submitHomePlayer} className="add-form-md">
+                        <select value={homePlayerInput} onChange={(e) => setHomePlayerInput(e.target.value)} className="input-md" required>
+                            {homeOptions}
+                        </select>
+                        <input
+                            type="number"
+                            value={homeJerseyInput}
+                            onChange={(e) => setHomeJerseyInput(e.target.value)}
+                            placeholder="Dres"
+                            className="input-md num-md"
+                            required
+                        />
+                        <button type="submit" className="btn-add-md">Přidat</button>
+                    </form>
                 </div>
-                <div className="roster-box glass-card-dark">
-                    <h3 className="section-title">Soupiska: {match.awayTeamName}</h3>
-                    <ul className="roster-list">{awayRosterList}</ul>
+
+                <div className="roster-col-md glass-card-dark">
+                    <h2>Hosté ({awayTeamDisplay})</h2>
+                    <div className="roster-list-md">
+                        {awayRosterContent}
+                    </div>
+
+                    <form onSubmit={submitAwayPlayer} className="add-form-md">
+                        <select value={awayPlayerInput} onChange={(e) => setAwayPlayerInput(e.target.value)} className="input-md" required>
+                            {awayOptions}
+                        </select>
+                        <input
+                            type="number"
+                            value={awayJerseyInput}
+                            onChange={(e) => setAwayJerseyInput(e.target.value)}
+                            placeholder="Dres"
+                            className="input-md num-md"
+                            required
+                        />
+                        <button type="submit" className="btn-add-md">Přidat</button>
+                    </form>
                 </div>
             </div>
         </div>

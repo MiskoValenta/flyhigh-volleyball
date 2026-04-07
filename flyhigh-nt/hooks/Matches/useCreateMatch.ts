@@ -1,28 +1,32 @@
-import { useState } from 'react';
-import { proposeMatch } from '@/lib/matchApi';
-import { CreateMatchDto } from '@/types/match';
+import { useState } from "react";
+import { proposeMatch } from "@/lib/matchApi";
+import { CreateMatchDto } from "@/types/match";
 
 export const useCreateMatch = () => {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string>('');
+    const [isCreating, setIsCreating] = useState<boolean>(false);
+    const [createError, setCreateError] = useState<string>("");
 
-    const handleCreateMatch = async (data: CreateMatchDto) => {
-        setIsLoading(true);
-        setError('');
+    const createNewMatch = async (data: CreateMatchDto) => {
+        setIsCreating(true);
+        setCreateError("");
         try {
-            const result = await proposeMatch(data);
-            return result;
+            const newMatch = await proposeMatch(data);
+            setIsCreating(false);
+            return newMatch;
         } catch (err: any) {
+            setIsCreating(false);
             if (err.message) {
-                setError(err.message);
+                setCreateError(err.message);
             } else {
-                setError('Nastala neočekávaná chyba při vytváření zápasu.');
+                setCreateError("Nepodařilo se vytvořit zápas.");
             }
-            throw err;
-        } finally {
-            setIsLoading(false);
+            return null;
         }
     };
 
-    return { handleCreateMatch, isLoading, error };
+    return {
+        createNewMatch,
+        isCreating,
+        createError
+    };
 };
