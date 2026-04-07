@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { getMyMatches } from "@/lib/matchApi";
-import { MatchDto, MatchStatus } from "@/types/match";
+import { getTeamById } from "@/lib/teamApi";
+import { fetchWithAuth } from "@/lib/apiClient";
+import { MatchEnhanced, MatchStatus } from "@/types/match";
+import { useProfile } from "@/hooks/Profile/useProfile";
 
 export const useMatchesList = () => {
-    const [activeMatches, setActiveMatches] = useState<MatchDto[]>([]);
-    const [pendingMatches, setPendingMatches] = useState<MatchDto[]>([]);
+    const { user } = useProfile();
+    const [activeMatches, setActiveMatches] = useState<MatchEnhanced[]>([]);
+    const [pendingMatches, setPendingMatches] = useState<MatchEnhanced[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
 
@@ -21,14 +25,58 @@ export const useMatchesList = () => {
                 const match = data[i];
 
                 if (match.status === MatchStatus.Rejected) {
-                    // Odmítnuté zápasy vůbec nezobrazujeme
                     continue;
                 }
 
+                let hName = match.homeTeamId;
+                let hAbbr = "DOM";
+                try {
+                    const hTeam = await getTeamById(match.homeTeamId);
+                    hName = hTeam.teamName;
+                    if (hTeam.shortName) {
+                        hAbbr = hTeam.shortName;
+                    }
+                } catch (e) {
+                }
+
+                let aName = match.awayTeamId;
+                let aAbbr = "HOS";
+                try {
+                    const aTeam = await getTeamById(match.awayTeamId);
+                    aName = aTeam.teamName;
+                    if (aTeam.shortName) {
+                        aAbbr = aTeam.shortName;
+                    }
+                } catch (e) {
+                }
+
+                let cName = match.creatorId;
+                try {
+                    const creatorRes = await fetchWithAuth(`/api/Users/${match.creatorId}`);
+                    if (creatorRes.ok) {
+                        const creatorUser = await creatorRes.json();
+                        if (creatorUser) {
+                            if (creatorUser.firstName) {
+                                cName = creatorUser.firstName + " " + creatorUser.lastName;
+                            }
+                        }
+                    }
+                } catch (e) {
+                }
+
+                const enhancedMatch: MatchEnhanced = {
+                    ...match,
+                    homeTeamName: hName,
+                    homeTeamAbbr: hAbbr,
+                    awayTeamName: aName,
+                    awayTeamAbbr: aAbbr,
+                    creatorName: cName
+                };
+
                 if (match.status === MatchStatus.Pending) {
-                    pending.push(match);
+                    pending.push(enhancedMatch);
                 } else {
-                    active.push(match);
+                    active.push(enhancedMatch);
                 }
             }
 
@@ -53,6 +101,7 @@ export const useMatchesList = () => {
         pendingMatches,
         isLoading,
         error,
-        refetch: fetchMatches
+        refetch: fetchMatches,
+        profile: user
     };
 };
