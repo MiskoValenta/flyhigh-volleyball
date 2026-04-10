@@ -1,0 +1,82 @@
+[
+  {
+    "homeTeamAbbreviation": "OA",
+    "awayTeamAbbreviation": "SSKGB",
+    "creatorEmail": "valenta_2026_flyhigh@oaopava.cz",
+    "scheduledAt": "2026-05-28T18:00:00Z",
+    "location": "Tělocvična OA",
+    "status": "Accepted"
+  },
+  {
+    "homeTeamAbbreviation": "OA",
+    "awayTeamAbbreviation": "ZLTRD",
+    "creatorEmail": "subject1@oaopava.cz",
+    "scheduledAt": "2026-06-03T17:00:00Z",
+    "location": "Hala ZŠ Boženy Němcové",
+    "status": "Pending"
+  },
+  {
+    "homeTeamAbbreviation": "SSKGB",
+    "awayTeamAbbreviation": "GVP",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "scheduledAt": "2026-06-11T19:00:00Z",
+    "location": "Hala OJSŠ",
+    "status": "Accepted"
+  },
+  {
+    "homeTeamAbbreviation": "SSKGB",
+    "awayTeamAbbreviation": "OA",
+    "creatorEmail": "michalvystrk@seznam.cz",
+    "scheduledAt": "2026-06-25T18:30:00Z",
+    "location": "Hala SŠPU",
+    "status": "Accepted"
+  },
+  {
+    "homeTeamAbbreviation": "ZLTRD",
+    "awayTeamAbbreviation": "BVO",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "scheduledAt": "2026-07-04T14:00:00Z",
+    "location": "Hala SŠPU",
+    "status": "Accepted"
+  },
+  {
+    "homeTeamAbbreviation": "ZLTRD",
+    "awayTeamAbbreviation": "OA",
+    "creatorEmail": "michalvystrk@seznam.cz",
+    "scheduledAt": "2026-07-16T19:00:00Z",
+    "location": "Hala ZŠ Boženy Němcové",
+    "status": "Pending"
+  },
+  {
+    "homeTeamAbbreviation": "GVP",
+    "awayTeamAbbreviation": "BVO",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "scheduledAt": "2026-07-29T17:00:00Z",
+    "location": "Hala ZŠ Boženy Němcové",
+    "status": "Pending"
+  },
+  {
+    "homeTeamAbbreviation": "GVP",
+    "awayTeamAbbreviation": "OA",
+    "creatorEmail": "valenta_2026_flyhigh@oaopava.cz",
+    "scheduledAt": "2026-08-12T18:00:00Z",
+    "location": "Tělocvična OA",
+    "status": "Accepted"
+  },
+  {
+    "homeTeamAbbreviation": "BVO",
+    "awayTeamAbbreviation": "SSKGB",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "scheduledAt": "2026-08-20T20:00:00Z",
+    "location": "Hala OJSŠ",
+    "status": "Accepted"
+  },
+  {
+    "homeTeamAbbreviation": "BVO",
+    "awayTeamAbbreviation": "ZLTRD",
+    "creatorEmail": "subject8@oaopava.cz",
+    "scheduledAt": "2026-09-02T18:00:00Z",
+    "location": "Hala SŠPU",
+    "status": "Pending"
+  }
+]

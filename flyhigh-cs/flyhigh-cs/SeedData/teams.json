@@ -3,8 +3,10 @@
     "name": "OA a SOŠL",
     "abbreviation": "OA",
     "ownerEmail": "valenta_2026_flyhigh@oaopava.cz",
+    "coachEmails": [
+      "subject1@oaopava.cz"
+    ],
     "memberEmails": [
-      "subject1@oaopava.cz",
       "subject2@oaopava.cz",
       "subject3@oaopava.cz",
       "subject4@oaopava.cz",
@@ -16,9 +18,57 @@
     "name": "Slezské Gymnázium",
     "abbreviation": "SSKGB",
     "ownerEmail": "m.valenta06@icloud.com",
+    "coachEmails": [
+      "michalvystrk@seznam.cz"
+    ],
     "memberEmails": [
       "subject7@oaopava.cz",
       "subject8@oaopava.cz",
+      "subject9@oaopava.cz",
+      "subject10@oaopava.cz",
+      "subject11@oaopava.cz",
+      "subject12@oaopava.cz"
+    ]
+  },
+  {
+    "name": "Žlutý Radek",
+    "abbreviation": "ZLTRD",
+    "ownerEmail": "m.valenta06@icloud.com",
+    "coachEmails": [
+      "michalvystrk@seznam.cz"
+    ],
+    "memberEmails": [
+      "subject1@oaopava.cz",
+      "subject2@oaopava.cz",
+      "subject3@oaopava.cz",
+      "subject4@oaopava.cz",
+      "subject5@oaopava.cz"
+    ]
+  },
+  {
+    "name": "Green Volley",
+    "abbreviation": "GVP",
+    "ownerEmail": "m.valenta06@icloud.com",
+    "coachEmails": [
+      "valenta_2026_flyhigh@oaopava.cz"
+    ],
+    "memberEmails": [
+      "subject8@oaopava.cz",
+      "subject9@oaopava.cz",
+      "subject10@oaopava.cz",
+      "subject11@oaopava.cz",
+      "subject12@oaopava.cz"
+    ]
+  },
+  {
+    "name": "Blue Volley",
+    "abbreviation": "BVO",
+    "ownerEmail": "m.valenta06@icloud.com",
+    "coachEmails": [
+      "subject8@oaopava.cz"
+    ],
+    "memberEmails": [
+      "valenta_2026_flyhigh@oaopava.cz",
       "subject9@oaopava.cz",
       "subject10@oaopava.cz",
       "subject11@oaopava.cz",
