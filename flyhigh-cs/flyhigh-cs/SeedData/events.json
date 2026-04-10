@@ -1,0 +1,437 @@
+[
+  {
+    "teamAbbreviation": "OA",
+    "creatorEmail": "valenta_2026_flyhigh@oaopava.cz",
+    "title": "Vánoční večírek",
+    "description": "Posezení v tělocvičně po tréninku a zhodnocení sezóny.",
+    "type": "Announcement",
+    "location": "Tělocvična OA",
+    "eventDate": "2026-12-21T18:00:00Z"
+  },
+  {
+    "teamAbbreviation": "OA",
+    "creatorEmail": "valenta_2026_flyhigh@oaopava.cz",
+    "title": "Celodenní turnaj",
+    "description": "Kdo by si chtěl zahrát na celodenním turnaji?",
+    "type": "Poll",
+    "location": "Hala ZŠ Štítina",
+    "eventDate": "2026-08-20T09:00:00Z",
+    "responses": [
+      {
+        "userEmail": "valenta_2026_flyhigh@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject2@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject4@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject3@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject6@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject1@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject5@oaopava.cz",
+        "response": "Unknown"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "OA",
+    "creatorEmail": "subject1@oaopava.cz",
+    "title": "Zápas proti SSKGB",
+    "description": "Kdo by byl schopen hrát v zápase proti Slezskému Gymnáziu?",
+    "type": "Match",
+    "location": "Hala ZŠ Boženy Němcové",
+    "eventDate": "2026-10-11T19:00:00Z",
+    "responses": [
+      {
+        "userEmail": "valenta_2026_flyhigh@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject2@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject4@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject3@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject6@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject1@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject5@oaopava.cz",
+        "response": "Accepted"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "SSKGB",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "title": "Večírek po tréninku",
+    "description": "Večírek úspěšného konce sezóny",
+    "type": "Announcement",
+    "location": "Hospoda - Kotelna",
+    "eventDate": "2026-06-15T12:00:00Z"
+  },
+  {
+    "teamAbbreviation": "SSKGB",
+    "creatorEmail": "michalvystrk@seznam.cz",
+    "title": "Účast na turnaji",
+    "description": "Kdo by se chtěl zúčastnit celodenního turnaje?",
+    "type": "Poll",
+    "location": "Hala ZŠ Štítina",
+    "eventDate": "2026-06-23T21:00:00Z",
+    "responses": [
+      {
+        "userEmail": "m.valenta06@icloud.com",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject7@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject12@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject10@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject9@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject11@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject8@oaopava.cz",
+        "response": "Unknown"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "SSKGB",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "title": "Záps proti BVO",
+    "description": "Kdo by byl schopný hrát na zápase proti Blue Volley Ostrava?",
+    "type": "Match",
+    "location": "Hala OJSŠ",
+    "eventDate": "2026-07-08T17:00:00Z",
+    "responses": [
+      {
+        "userEmail": "m.valenta06@icloud.com",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject7@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject12@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject10@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject9@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject11@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject8@oaopava.cz",
+        "response": "Accepted"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "ZLTRD",
+    "creatorEmail": "michalvystrk@seznam.cz",
+    "title": "Zrušen trénink",
+    "description": "Zrušen trénink - prázdniny",
+    "type": "Announcement",
+    "location": "Hala SŠPU",
+    "eventDate": "2026-09-30T19:00:00Z"
+  },
+  {
+    "teamAbbreviation": "ZLTRD",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "title": "Účast na Kempu",
+    "description": "Kdo by chtěl jet na Kemp?",
+    "type": "Poll",
+    "location": "Soběšovice",
+    "eventDate": "2026-07-12T08:00:00Z",
+    "responses": [
+      {
+        "userEmail": "m.valenta06@icloud.com",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject1@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject2@oaopava.cz",
+        "response": "Unknown"
+      },
+      {
+        "userEmail": "subject3@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject4@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject5@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "michalvystrk@seznam.cz",
+        "response": "Declined"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "ZLTRD",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "title": "Zápas proti GVP",
+    "description": "Kdo by se zúčastnil zápasu proti Green Volley Pardubice?",
+    "type": "Match",
+    "location": "Hala ZŠ Boženy Němcové",
+    "eventDate": "2026-09-03T12:00:00Z",
+    "responses": [
+      {
+        "userEmail": "m.valenta06@icloud.com",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject1@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject2@oaopava.cz",
+        "response": "Unknown"
+      },
+      {
+        "userEmail": "subject3@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject4@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject5@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "michalvystrk@seznam.cz",
+        "response": "Accepted"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "GVP",
+    "creatorEmail": "valenta_2026_flyhigh@oaopava.cz",
+    "title": "Soustředění - dotazník",
+    "description": "Kdo pojede na červnové soustředění?",
+    "type": "Announcement",
+    "location": "Budišov nad Budišovkou",
+    "eventDate": "2026-06-27T09:00:00Z"
+  },
+  {
+    "teamAbbreviation": "GVP",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "title": "Kondiční trénink",
+    "description": "Kdo by se zúčastnil kondičního tréninku u vody?",
+    "type": "Poll",
+    "location": "Stříbrné jezero",
+    "eventDate": "2026-06-25T07:00:00Z",
+    "responses": [
+      {
+        "userEmail": "m.valenta06@icloud.com",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "valenta_2026_flyhigh@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject8@oaopava.cz",
+        "response": "Unknown"
+      },
+      {
+        "userEmail": "subject9@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject10@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject11@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject12@oaopava.cz",
+        "response": "Accepted"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "GVP",
+    "creatorEmail": "valenta_2026_flyhigh@oaopava.cz",
+    "title": "Zápas proti Slezskému Gymnáziu",
+    "description": "Kdo by byl schopný hrát v zápse proti SSKGB",
+    "type": "Match",
+    "location": "Hala ZŠ Boženy Němcové",
+    "eventDate": "2026-07-11T12:00:00Z",
+    "responses": [
+      {
+        "userEmail": "m.valenta06@icloud.com",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "valenta_2026_flyhigh@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject8@oaopava.cz",
+        "response": "Unknown"
+      },
+      {
+        "userEmail": "subject9@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject10@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject11@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject12@oaopava.cz",
+        "response": "Declined"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "BVO",
+    "creatorEmail": "subject8@oaopava.cz",
+    "title": "Zrušen trénink",
+    "description": "Zrušen trénink z důvodu prázdnin",
+    "type": "Announcement",
+    "location": "Hala OJSŠ",
+    "eventDate": "2026-07-23T18:00:00Z"
+  },
+  {
+    "teamAbbreviation": "BVO",
+    "creatorEmail": "subject8@oaopava.cz",
+    "title": "Soustředění - dotazník",
+    "description": "Kdo pojede na srpnové soustředění?",
+    "type": "Poll",
+    "location": "Soběšovice",
+    "eventDate": "2026-08-17T08:00:00Z",
+    "responses": [
+      {
+        "userEmail": "m.valenta06@icloud.com",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "valenta_2026_flyhigh@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject8@oaopava.cz",
+        "response": "Unknown"
+      },
+      {
+        "userEmail": "subject9@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject10@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject11@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject12@oaopava.cz",
+        "response": "Declined"
+      }
+    ]
+  },
+  {
+    "teamAbbreviation": "BVO",
+    "creatorEmail": "m.valenta06@icloud.com",
+    "title": "Zápas proti Žlutému Radkovi",
+    "description": "Kdo by se mohl zúčastnit tohoto zápasu proti Žlutému Radkovi?",
+    "type": "Match",
+    "location": "Hala SŠPU",
+    "eventDate": "2026-06-29T20:20:00Z",
+    "responses": [
+      {
+        "userEmail": "m.valenta06@icloud.com",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "valenta_2026_flyhigh@oaopava.cz",
+        "response": "Declined"
+      },
+      {
+        "userEmail": "subject8@oaopava.cz",
+        "response": "Unknown"
+      },
+      {
+        "userEmail": "subject9@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject10@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject11@oaopava.cz",
+        "response": "Accepted"
+      },
+      {
+        "userEmail": "subject12@oaopava.cz",
+        "response": "Accepted"
+      }
+    ]
+  }
+]

@@ -82,5 +82,11 @@
     "lastName": "Valenta",
     "email": "m.valenta06@icloud.com",
     "password": "misko"
+  },
+  {
+    "firstName": "Michal",
+    "lastName": "Vystrk",
+    "email": "michalvystrk@seznam.cz",
+    "password": "misko"
   }
 ]
