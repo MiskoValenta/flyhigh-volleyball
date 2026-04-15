@@ -1,11 +1,15 @@
-﻿using Domain.Entities.Matches.MatchEnums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Domain.Entities.Matches.Rules;
 
-public class VolleyballMatchRules : IMatchRules
+public static class VolleyballMatchRules
 {
-  public int SetsToWin => 3;
+  public static bool IsMatchFinished(int homeSetsWon, int awaySetsWon)
+  {
+    int setsToWin = 3;
+
+    return homeSetsWon >= setsToWin || awaySetsWon >= setsToWin;
+  }
 }

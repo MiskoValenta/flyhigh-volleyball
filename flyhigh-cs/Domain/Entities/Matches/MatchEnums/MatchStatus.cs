@@ -6,10 +6,9 @@ namespace Domain.Entities.Matches.MatchEnums;
 
 public enum MatchStatus
 {
-  Pending,
-  Accepted,
-  Rejected,
-  InProgress,
-  Finished,
-  Cancelled
+  Pending = 0,
+  Accepted = 1,
+  InProgress = 2,
+  Finished = 3,
+  Cancelled = 4
 }

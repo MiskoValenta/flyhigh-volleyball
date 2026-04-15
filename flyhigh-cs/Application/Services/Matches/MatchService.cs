@@ -3,6 +3,7 @@ using Application.DTOs.Events;
 using Application.DTOs.Matches;
 using Application.Interfaces.Events;
 using Application.Interfaces.Matches;
+using Application.Interfaces.Teams;
 using Domain.Entities.Matches;
 using Domain.Entities.Matches.Exceptions;
 using Domain.Entities.Matches.MatchEnums;
@@ -17,265 +18,162 @@ public class MatchService : IMatchService
 {
   private readonly IMatchRepository _matchRepository;
   private readonly IUnitOfWork _unitOfWork;
-  private readonly ISetRules _setRules;
-  private readonly IMatchRules _matchRules;
-  private readonly IEventService _eventService;
-  private readonly ITeamRepository _teamRepository;
+  private readonly ITeamAuthorizationService _teamAuth;
 
   public MatchService(
       IMatchRepository matchRepository,
       IUnitOfWork unitOfWork,
-      ISetRules setRules,
-      IMatchRules matchRules,
-      IEventService eventService,
-      ITeamRepository teamRepository)
+      ITeamAuthorizationService teamAuth)
   {
     _matchRepository = matchRepository;
     _unitOfWork = unitOfWork;
-    _setRules = setRules;
-    _matchRules = matchRules;
-    _eventService = eventService;
-    _teamRepository = teamRepository;
+    _teamAuth = teamAuth;
   }
 
-  private void EnsureIsMatchCreator(Match match, Guid currentUserId)
+  public async Task<MatchDto> CreateMatchAsync(Guid userId, CreateMatchRequest request)
   {
-    if (match.CreatorId.Value != currentUserId)
-    {
-      throw new UnauthorizedAccessException("Tuto akci může provést pouze zakladatel zápasu.");
-    }
+    bool isAuthorized = await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), new TeamId(request.HomeTeamId));
+    if (!isAuthorized) throw new MatchInvalidException("Pouze Coach nebo Owner domácího týmu může vytvořit zápas.");
+
+    var match = Match.Create(
+        new TeamId(request.HomeTeamId),
+        new TeamId(request.AwayTeamId),
+        request.Location,
+        request.ScheduledDate);
+
+    await _matchRepository.AddAsync(match);
+    await _unitOfWork.SaveChangesAsync();
+
+    return MapToDto(match);
   }
 
-  public async Task<Guid> ProposeMatchAsync(CreateMatchDto dto, Guid currentUserId, CancellationToken cancellationToken = default)
+  public async Task AcceptMatchAsync(Guid userId, Guid matchId)
   {
-    UserId refereeIdObj = null;
-    if (dto.RefereeId != null)
-    {
-      refereeIdObj = new UserId(dto.RefereeId.Value);
-    }
+    var match = await GetMatchOrThrow(matchId);
 
-    var match = Match.CreateInvitation(
-        new UserId(currentUserId),
-        new TeamId(dto.HomeTeamId),
-        new TeamId(dto.AwayTeamId),
-        dto.ScheduledAt,
-        dto.Location,
-        refereeIdObj
-    );
+    bool isAuthorized = await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), match.AwayTeamId);
+    if (!isAuthorized) throw new MatchInvalidException("Pouze hostující tým může přijmout pozvánku.");
 
-    await _matchRepository.AddAsync(match, cancellationToken);
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-    try
-    {
-      var awayTeam = await _teamRepository.GetByIdAsync(new TeamId(dto.AwayTeamId), cancellationToken);
-      string awayTeamName = "Neznámý tým";
-      if (awayTeam != null)
-      {
-        awayTeamName = awayTeam.TeamName;
-      }
-
-      var eventDto = new CreateEventDto(
-          dto.HomeTeamId,
-          $"Zápas: vs {awayTeamName}",
-          $"Zápas s týmem {awayTeamName} na hřišti {dto.Location}.",
-          Domain.Entities.Events.EventEnums.EventType.Match,
-          dto.ScheduledAt,
-          dto.Location,
-          new List<Guid>()
-      );
-
-      await _eventService.CreateEventAsync(eventDto, currentUserId, cancellationToken);
-    }
-    catch (Exception)
-    {
-
-    }
-
-    return match.Id.Value;
+    match.AcceptMatch();
+    await _unitOfWork.SaveChangesAsync();
   }
 
-  public async Task AcceptMatchAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default)
+  public async Task RejectMatchAsync(Guid userId, Guid matchId)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
+    var match = await GetMatchOrThrow(matchId);
 
-    match.AcceptInvitation();
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    bool isAuthorized = await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), match.AwayTeamId);
+    if (!isAuthorized) throw new MatchInvalidException("Pouze hostující tým může odmítnout pozvánku.");
 
-    try
-    {
-      var homeTeam = await _teamRepository.GetByIdAsync(match.HomeTeamId, cancellationToken);
-      string homeTeamName = "Neznámý tým";
-      if (homeTeam != null)
-      {
-        homeTeamName = homeTeam.TeamName;
-      }
-
-      var eventDto = new CreateEventDto(
-          match.AwayTeamId.Value,
-          "Přijatý Zápas",
-          $"Hrajeme zápas proti týmu {homeTeamName} v {match.Location}.",
-          Domain.Entities.Events.EventEnums.EventType.Match,
-          match.ScheduledAt,
-          match.Location,
-          new List<Guid>()
-      );
-
-      await _eventService.CreateEventAsync(eventDto, currentUserId, cancellationToken);
-    }
-    catch (Exception)
-    {
-
-    }
+    _matchRepository.Remove(match);
+    await _unitOfWork.SaveChangesAsync();
   }
 
-  public async Task<MatchDetailDto> GetMatchByIdAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default)
+  public async Task CancelMatchAsync(Guid userId, Guid matchId)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
+    var match = await GetMatchOrThrow(matchId);
 
-    var homeTeam = await _teamRepository.GetByIdAsync(match.HomeTeamId, cancellationToken);
-    var awayTeam = await _teamRepository.GetByIdAsync(match.AwayTeamId, cancellationToken);
+    bool isAuthorized = await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), match.HomeTeamId);
+    if (!isAuthorized) throw new MatchInvalidException("Pouze zakladatel může zrušit zápas.");
 
-    var rosterDtos = match.Roster.Select(r => new RosterPlayerDto(
-        r.TeamMemberId.Value,
-        r.TeamId.Value,
-        r.JerseyNumber
-    )).ToList();
-
-    var setDtos = match.Sets.Select(s => new MatchSetDto(
-        s.SetNumber,
-        s.Type.ToString(),
-        s.HomeScore,
-        s.AwayScore,
-        s.IsFinished,
-        s.IsStarted,
-        s.Winner.ToString(),
-        s.Positions.Select(p => new MatchPlayerPositionDto(p.TeamMemberId.Value, p.Position.ToString())).ToList()
-    )).OrderBy(s => s.SetNumber).ToList();
-
-    string homeTeamName = homeTeam?.TeamName ?? "Neznámý tým";
-    string awayTeamName = awayTeam?.TeamName ?? "Neznámý tým";
-
-    return new MatchDetailDto(
-        match.Id.Value,
-        match.CreatorId.Value,
-        match.HomeTeamId.Value,
-        homeTeamName,
-        match.AwayTeamId.Value,
-        awayTeamName,
-        match.Location,
-        match.ScheduledAt,
-        match.Status.ToString(),
-        rosterDtos,
-        setDtos,
-        match.WinnerId?.Value,
-        match.RefereeId?.Value
-    );
+    match.CancelMatch();
+    await _unitOfWork.SaveChangesAsync();
   }
 
-  public async Task AddPlayerToRosterAsync(Guid matchId, RosterPlayerDto dto, CancellationToken cancellationToken = default)
+  public async Task AddRefereeAsync(Guid userId, Guid matchId, Guid refereeId)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    match.AddToRoster(new TeamMemberId(dto.TeamMemberId), new TeamId(dto.TeamId), dto.JerseyNumber);
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
-  }
+    var match = await GetMatchOrThrow(matchId);
 
-  public async Task SetRefereeAsync(Guid matchId, Guid refereeId, Guid currentUserId, CancellationToken cancellationToken = default)
-  {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    EnsureIsMatchCreator(match, currentUserId);
+    bool isAuthorized = await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), match.HomeTeamId);
+    if (!isAuthorized) throw new MatchInvalidException("Pouze zakladatel může přidat rozhodčího.");
+
     match.SetReferee(new UserId(refereeId));
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    await _unitOfWork.SaveChangesAsync();
   }
 
-  public async Task StartMatchAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default)
+  public async Task AddToRosterAsync(Guid userId, Guid matchId, AddToRosterRequest request)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    EnsureIsMatchCreator(match, currentUserId);
-    match.StartMatch(_setRules);
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    var match = await GetMatchOrThrow(matchId);
+
+    TeamId? actingTeamId = null;
+    if (await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), match.HomeTeamId)) actingTeamId = match.HomeTeamId;
+    else if (await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), match.AwayTeamId)) actingTeamId = match.AwayTeamId;
+
+    if (actingTeamId == null) throw new MatchInvalidException("Nemáte oprávnění spravovat soupisku žádného týmu v tomto zápase.");
+
+    match.AddToRoster(actingTeamId, new UserId(request.UserId), request.JerseyNumber);
+    await _unitOfWork.SaveChangesAsync();
   }
 
-  public async Task StartCurrentSetAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default)
+  public async Task StartNextSetAsync(Guid userId, Guid matchId, StartSetRequest request)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    EnsureIsMatchCreator(match, currentUserId);
-    match.StartCurrentSet();
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    var match = await GetMatchOrThrow(matchId);
+
+    bool isAuthorized = await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), match.HomeTeamId);
+    if (!isAuthorized) throw new MatchInvalidException("Pouze zakladatel může zahájit set.");
+
+    var setups = request.PlayerPositions.Select(p => (
+        new TeamId(p.TeamId),
+        new UserId(p.UserId),
+        Enum.Parse<PlayerPosition>(p.Position)
+    ));
+
+    match.StartNextSet(setups);
+    await _unitOfWork.SaveChangesAsync();
   }
 
-  public async Task AssignPlayerPositionAsync(Guid matchId, Guid currentUserId, AssignPositionDto dto, CancellationToken cancellationToken = default)
+  public async Task RecordPointAsync(Guid userId, Guid matchId, RecordPointRequest request)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    EnsureIsMatchCreator(match, currentUserId);
-    PlayerPosition positionEnum = Enum.Parse<PlayerPosition>(dto.Position, true);
-    match.AssignPlayerPositionForSet(dto.SetNumber, new TeamMemberId(dto.TeamMemberId), positionEnum);
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    var match = await GetMatchOrThrow(matchId);
+
+    bool isAuthorized = await _teamAuth.IsAtLeastCoachAsync(new UserId(userId), match.HomeTeamId);
+    if (!isAuthorized) throw new MatchInvalidException("Pouze zakladatel může zapisovat body.");
+
+    match.RecordPoint(new TeamId(request.ScoringTeamId));
+    await _unitOfWork.SaveChangesAsync();
   }
 
-  public async Task AddPointAsync(Guid matchId, Guid currentUserId, SetSide side, CancellationToken cancellationToken = default)
+  public async Task<MatchDto?> GetByIdAsync(Guid matchId)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    EnsureIsMatchCreator(match, currentUserId);
-    match.AddPoint(side, _setRules, _matchRules);
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    var match = await _matchRepository.GetByIdAsync(new MatchId(matchId));
+    return match != null ? MapToDto(match) : null;
   }
 
-  public async Task CancelMatchAsync(Guid matchId, Guid currentUserId, CancelMatchDto dto, CancellationToken cancellationToken = default)
+  public async Task<List<MatchDto>> GetTeamMatchesAsync(Guid teamId)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    EnsureIsMatchCreator(match, currentUserId);
-    match.CancelMatch(dto.Reason);
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
+    var matches = await _matchRepository.GetMatchesByTeamIdAsync(new TeamId(teamId));
+    return matches.OrderByDescending(m => m.ScheduledDate).Select(MapToDto).ToList();
   }
 
-  public async Task RejectMatchAsync(Guid matchId, CancellationToken cancellationToken = default)
+  private async Task<Match> GetMatchOrThrow(Guid matchId)
   {
-    var match = await GetMatchOrThrowAsync(matchId, cancellationToken);
-    match.RejectInvitation();
-    await _unitOfWork.SaveChangesAsync(cancellationToken);
-  }
-
-  public async Task<IEnumerable<MatchResponseDto>> GetUserMatchesAsync(Guid currentUserId, CancellationToken cancellationToken = default)
-  {
-    var teams = await _teamRepository.GetUserTeamsAsync(new UserId(currentUserId), cancellationToken);
-    var teamIds = teams.Select(t => t.Id).ToList();
-
-    if (!teamIds.Any())
-    {
-      return new List<MatchResponseDto>();
-    }
-
-    var matches = await _matchRepository.GetMatchesByTeamIdsAsync(teamIds, cancellationToken);
-    var result = new List<MatchResponseDto>();
-
-    foreach (var m in matches)
-    {
-      var homeTeam = await _teamRepository.GetByIdAsync(m.HomeTeamId, cancellationToken);
-      var awayTeam = await _teamRepository.GetByIdAsync(m.AwayTeamId, cancellationToken);
-
-      result.Add(new MatchResponseDto(
-          m.Id.Value,
-          m.HomeTeamId.Value,
-          homeTeam?.TeamName ?? "Neznámý tým",
-          m.AwayTeamId.Value,
-          awayTeam?.TeamName ?? "Neznámý tým",
-          m.Location,
-          m.ScheduledAt,
-          m.Status.ToString()
-      ));
-    }
-
-    return result;
-  }
-
-  private async Task<Match> GetMatchOrThrowAsync(Guid matchId, CancellationToken cancellationToken)
-  {
-    var match = await _matchRepository.GetByIdAsync(new MatchId(matchId), cancellationToken);
-    if (match == null)
-    {
-      throw new MatchInvalidException("Zápas nebyl nalezen.");
-    }
+    var match = await _matchRepository.GetByIdAsync(new MatchId(matchId));
+    if (match == null) throw new MatchInvalidException("Zápas nebyl nalezen.");
     return match;
+  }
+
+  private MatchDto MapToDto(Match m)
+  {
+    return new MatchDto(
+        m.Id.Value,
+        m.HomeTeamId.Value,
+        m.AwayTeamId.Value,
+        m.RefereeId?.Value,
+        m.Location,
+        m.ScheduledDate,
+        m.Status.ToString(),
+        m.HomeSetsWon,
+        m.AwaySetsWon,
+        m.Roster.Select(r => new MatchRosterDto(r.UserId.Value, r.TeamId.Value, r.JerseyNumber)).ToList(),
+        m.Sets.Select(s => new MatchSetDto(
+            s.Id.Value,
+            s.SetNumber,
+            s.HomeTeamScore,
+            s.AwayTeamScore,
+            s.IsCompleted,
+            s.WinnerTeamId?.Value,
+            s.PlayerPositions.Select(p => new MatchPlayerPositionDto(p.UserId.Value, p.TeamId.Value, p.Position.ToString())).ToList()
+        )).ToList()
+    );
   }
 }

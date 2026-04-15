@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Matches;
 using Domain.Value_Objects.Matches;
 using Domain.Value_Objects.Teams;
+using Domain.Value_Objects.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -18,33 +19,19 @@ public class MatchRosterEntryConfiguration : IEntityTypeConfiguration<MatchRoste
     builder.HasKey(r => r.Id);
 
     builder.Property(r => r.Id)
-        .HasConversion(
-            id => id.Value,
-            value => new MatchRosterEntryId(value)
-        );
+           .HasConversion(id => id.Value, 
+           value => new MatchRosterEntryId(value));
 
     builder.Property(r => r.MatchId)
-        .HasConversion(
-            id => id.Value,
-            value => new MatchId(value)
-        )
-        .IsRequired();
-
-    builder.Property(r => r.TeamMemberId)
-        .HasConversion(
-            id => id.Value,
-            value => new TeamMemberId(value)
-        )
-        .IsRequired();
+           .HasConversion(id => id.Value, 
+           value => new MatchId(value));
 
     builder.Property(r => r.TeamId)
-        .HasConversion(
-            id => id.Value,
-            value => new TeamId(value)
-        )
-        .IsRequired();
+           .HasConversion(id => id.Value, 
+           value => new TeamId(value));
 
-    builder.Property(r => r.JerseyNumber)
-        .IsRequired();
+    builder.Property(r => r.UserId)
+           .HasConversion(id => id.Value, 
+           value => new UserId(value));
   }
 }

@@ -5,72 +5,64 @@ using System.Text;
 
 namespace Application.DTOs.Matches;
 
-public class CreateMatchDto
-{
-  public Guid HomeTeamId { get; set; }
-  public Guid AwayTeamId { get; set; }
-  public DateTime ScheduledAt { get; set; }
-  public string Location { get; set; } = string.Empty;
-  public Guid? RefereeId { get; set; }
-}
-
-public class AssignPositionDto
-{
-  public int SetNumber { get; set; }
-  public Guid TeamMemberId { get; set; }
-  public string Position { get; set; } = string.Empty;
-}
-
-public record MatchPlayerPositionDto(
-    Guid TeamMemberId,
-    string Position
-);
-
-public record MatchDetailDto(
+public record MatchDto(
     Guid Id,
-    Guid CreatorId,
     Guid HomeTeamId,
-    string HomeTeamName,
     Guid AwayTeamId,
-    string AwayTeamName,
+    Guid? RefereeId,
     string Location,
-    DateTime ScheduledAt,
+    DateTime ScheduledDate,
     string Status,
-    List<RosterPlayerDto> Roster,
-    List<MatchSetDto> Sets,
-    Guid? WinnerId,
-    Guid? RefereeId
+    int HomeSetsWon,
+    int AwaySetsWon,
+    List<MatchRosterDto> Roster,
+    List<MatchSetDto> Sets
 );
 
-public record RosterPlayerDto(
-    Guid TeamMemberId,
+public record MatchRosterDto(
+    Guid UserId,
     Guid TeamId,
     int JerseyNumber
 );
 
-public class CancelMatchDto
-{
-  public string Reason { get; set; } = string.Empty;
-}
-
-public record MatchResponseDto(
+public record MatchSetDto(
     Guid Id,
-    Guid HomeTeamId,
-    string HomeTeamName,
-    Guid AwayTeamId,
-    string AwayTeamName,
-    string Location,
-    DateTime ScheduledAt,
-    string Status
+    int SetNumber,
+    int HomeTeamScore,
+    int AwayTeamScore,
+    bool IsCompleted,
+    Guid? WinnerTeamId,
+    List<MatchPlayerPositionDto> PlayerPositions
 );
 
-public record MatchSetDto(
-    int SetNumber,
-    string Type,
-    int HomeScore,
-    int AwayScore,
-    bool IsFinished,
-    bool IsStarted,
-    string Winner,
-    List<MatchPlayerPositionDto> Positions
+public record MatchPlayerPositionDto(
+    Guid UserId,
+    Guid TeamId,
+    string Position
+);
+
+public record CreateMatchRequest(
+    Guid HomeTeamId,
+    Guid AwayTeamId,
+    string Location,
+    DateTime ScheduledDate
+);
+
+public record AddToRosterRequest(
+    Guid UserId,
+    int JerseyNumber
+);
+
+public record StartSetRequest(
+    List<PlayerPositionSetup> PlayerPositions
+);
+
+public record PlayerPositionSetup(
+    Guid UserId,
+    Guid TeamId,
+    string Position
+);
+
+public record RecordPointRequest(
+    Guid ScoringTeamId
 );

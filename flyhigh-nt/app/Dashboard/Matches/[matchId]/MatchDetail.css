@@ -1,243 +1,167 @@
-.match-detail-wrapper-md {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    color: var(--normal-text);
-    width: 100%;
+.container-md {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
-.top-bar-md {
+.back-btn-md {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.header-md {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.btn-back-md {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-muted-foreground);
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
-
-.btn-back-md:hover {
-    color: var(--color-primary);
-}
-
-.back-icon-md {
-    font-size: 1.25rem;
-}
-
-.btn-start-md {
-    gap: var(--space-2);
-    background: #10b981;
-    color: white;
-}
-
-.btn-start-md:hover {
-    background: #059669;
-}
-
-.play-icon-md {
-    font-size: 1.3rem;
-}
-
-.header-card-md {
-    padding: var(--space-5);
-    text-align: center;
-    position: relative;
-    border-top: 4px solid #38bdf8;
-}
-
-.header-info-md h1 {
-    font-size: var(--fs-h1);
-    margin: var(--space-3) 0;
-}
-
-.location-md {
-    color: var(--color-muted-foreground);
-    font-size: 0.95rem;
+    margin-bottom: 40px;
 }
 
 .status-badge-md {
-    display: inline-block;
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 0.3rem 1rem;
+    padding: 6px 12px;
     border-radius: 20px;
-    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 0.9rem;
+    background: #333;
 }
 
-.status-1 {
-    background: rgba(59, 130, 246, 0.2);
-    color: #60a5fa;
-    border: 1px solid #3b82f6;
+.status-pending-md {
+    color: #ffa500;
+    border: 1px solid #ffa500;
 }
 
-.status-3 {
-    background: rgba(239, 68, 68, 0.2);
-    color: #f87171;
-    border: 1px solid #ef4444;
+.status-accepted-md {
+    color: #00ff00;
+    border: 1px solid #00ff00;
 }
 
-.roster-section-md {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-}
-
-.roster-form-card-md {
-    padding: var(--space-4);
-}
-
-.form-header-md {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-3);
-    color: #38bdf8;
-}
-
-.form-icon-md {
-    font-size: 1.5rem;
-}
-
-.form-header-md h3 {
-    font-size: var(--fs-h4);
-    font-weight: 600;
-    margin: 0;
-}
-
-.roster-form-md {
-    display: flex;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.input-md {
-    flex: 2;
-    min-width: 200px;
-    padding: 0.8rem 1rem;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--normal-text);
-    transition: border-color 0.2s;
-}
-
-.input-md:focus {
-    outline: none;
-    border-color: #38bdf8;
-}
-
-.jersey-input {
-    flex: 1;
-    min-width: 100px;
-}
-
-.btn-add-md {
-    flex: 1;
-    min-width: 120px;
-    padding: 0.8rem;
-}
-
-.roster-grid-md {
+.main-grid-md {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
+    gap: 30px;
+}
+
+.info-card-md,
+.roster-card-md {
+    background: #1a1a1a;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #333;
+}
+
+.info-card-md {
+    grid-column: span 2;
+}
+
+.info-card-md h3,
+.roster-card-md h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.pending-actions-md,
+.creator-actions-md {
+    margin-top: 25px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn-primary-md {
+    background: #0070f3;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-danger-md {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-start-md {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-cancel-md {
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 .roster-list-md {
-    padding: var(--space-4);
-}
-
-.list-title-md {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding-bottom: var(--space-2);
-}
-
-.team-icon-md {
-    font-size: 1.5rem;
-}
-
-.home-icon {
-    color: #38bdf8;
-}
-
-.away-icon {
-    color: #f43f5e;
-}
-
-.list-title-md h3 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.player-list-md {
     list-style: none;
     padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
+    margin-bottom: 20px;
 }
 
 .player-item-md {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-sm);
-    transition: background 0.2s;
+    padding: 10px 0;
+    border-bottom: 1px solid #222;
 }
 
-.player-item-md:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.player-info-md {
+.jersey-md {
+    background: #0070f3;
+    color: white;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    font-weight: 500;
+    justify-content: center;
+    border-radius: 50%;
+    margin-right: 15px;
+    font-size: 0.8rem;
 }
 
-.jersey-badge-md {
-    background: rgba(56, 189, 248, 0.2);
-    color: #38bdf8;
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
-    font-family: monospace;
-    font-weight: 800;
+.roster-form-md {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.btn-remove-md {
-    background: transparent;
+.input-md {
+    background: #000;
+    border: 1px solid #333;
+    color: white;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.btn-add-md {
+    background: #444;
+    color: white;
     border: none;
-    color: var(--color-muted-foreground);
+    padding: 10px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 1.2rem;
-    padding: 0.3rem;
-    border-radius: 4px;
-    transition: all 0.2s;
 }
 
-.btn-remove-md:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-}
-
-@media (max-width: 768px) {
-    .roster-grid-md {
+@media (max-width: 800px) {
+    .main-grid-md {
         grid-template-columns: 1fr;
+    }
+
+    .info-card-md {
+        grid-column: span 1;
     }
 }

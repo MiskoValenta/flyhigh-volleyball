@@ -1,127 +1,131 @@
-.create-match-wrapper-cm {
-    width: 100%;
+.container-cm {
     max-width: 600px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    color: var(--normal-text);
+    margin: 40px auto;
+    padding: 20px;
 }
 
-.top-bar-cm {
-    display: flex;
-    align-items: center;
+.form-card-cm {
+    background: #1a1a1a;
+    padding: 40px 30px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-.btn-back-cm {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-muted-foreground);
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
-
-.btn-back-cm:hover {
-    color: var(--color-primary);
-}
-
-.back-icon-cm {
-    font-size: 1.25rem;
-}
-
-.create-card-cm {
-    padding: var(--space-6) var(--space-5);
-}
-
-.card-header-cm {
-    text-align: center;
-    margin-bottom: var(--space-5);
-}
-
-.icon-wrapper-cm {
-    width: 64px;
-    height: 64px;
-    background: rgba(56, 189, 248, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto var(--space-3) auto;
-}
-
-.header-icon-cm {
+.title-cm {
     font-size: 2rem;
-    color: #38bdf8;
-}
-
-.card-header-cm h2 {
-    font-size: var(--fs-h2);
-    margin-bottom: var(--space-1);
-}
-
-.card-header-cm p {
-    color: var(--color-muted-foreground);
-    font-size: 0.95rem;
-}
-
-.create-form-cm {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+    margin-top: 0;
+    margin-bottom: 25px;
+    text-align: center;
+    color: #fff;
 }
 
 .form-group-cm {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    margin-bottom: 20px;
 }
 
-.form-group-cm label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
+.label-cm {
+    display: block;
+    margin-bottom: 8px;
+    color: #ccc;
+    font-weight: 500;
+    font-size: 0.95rem;
 }
 
-.input-with-icon-cm {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-icon-cm {
-    position: absolute;
-    left: 1rem;
-    color: var(--color-muted-foreground);
-    font-size: 1.25rem;
-}
-
-.input-glass-cm {
+.input-cm,
+.select-cm {
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--normal-text);
-    padding: 0.8rem 1rem 0.8rem 3rem;
-    border-radius: var(--radius-md);
-    font-family: var(--font-poppins);
-    transition: all 0.2s ease;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #0d0d0d;
+    color: #fff;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
 }
 
-.input-glass-cm:focus {
+.input-cm:focus,
+.select-cm:focus {
+    border-color: #0070f3;
     outline: none;
-    border-color: rgba(56, 189, 248, 0.5);
-    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.2);
 }
 
-.input-glass-cm::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.6;
-    cursor: pointer;
+.select-cm option {
+    background: #1a1a1a;
+    color: #fff;
+}
+
+.date-time-row-cm {
+    display: flex;
+    gap: 20px;
+}
+
+.date-time-row-cm>.form-group-cm {
+    flex: 1;
+}
+
+.error-msg-cm {
+    color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    font-size: 0.9rem;
+    text-align: center;
 }
 
 .submit-btn-cm {
-    margin-top: var(--space-2);
-    padding: 1rem;
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #0070f3, #0056b3);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
     font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.1s ease;
+    margin-top: 15px;
+}
+
+.submit-btn-cm:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.submit-btn-cm:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.submit-btn-cm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #444;
+}
+
+.back-link-cm {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.back-link-cm:hover {
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .form-card-cm {
+        padding: 25px 20px;
+    }
+
+    .date-time-row-cm {
+        flex-direction: column;
+        gap: 0;
+    }
 }

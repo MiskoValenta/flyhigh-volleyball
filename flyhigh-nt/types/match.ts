@@ -1,101 +1,78 @@
 export enum MatchStatus {
     Pending = "Pending",
     Accepted = "Accepted",
-    Rejected = "Rejected",
     InProgress = "InProgress",
     Finished = "Finished",
     Cancelled = "Cancelled"
 }
 
-export enum SetSide {
-    Home = "Home",
-    Away = "Away"
-}
-
 export enum PlayerPosition {
+    Bench = "Bench",
     Setter = "Setter",
-    Opposite = "Opposite",
-    MiddleBlocker = "MiddleBlocker",
     OutsideHitter = "OutsideHitter",
-    Libero = "Libero",
-    Bench = "Bench"
+    MiddleBlocker = "MiddleBlocker",
+    Opposite = "Opposite",
+    Libero = "Libero"
 }
 
-export enum SetType {
-    Standard = "Standard",
-    TieBreak = "TieBreak"
-}
-
-export enum SetWinner {
-    Home = "Home",
-    Away = "Away"
+export interface MatchRosterDto {
+    userId: string;
+    teamId: string;
+    jerseyNumber: number;
 }
 
 export interface MatchPlayerPositionDto {
-    id: string;
-    rosterEntryId: string;
-    teamSide: SetSide;
+    userId: string;
+    teamId: string;
     position: PlayerPosition;
 }
 
 export interface MatchSetDto {
     id: string;
     setNumber: number;
-    setType: SetType;
-    homeScore: number;
-    awayScore: number;
-    startTime: string;
-    endTime: string | null;
-    winnerSide: SetSide | null;
-    positions: MatchPlayerPositionDto[];
-}
-
-export interface MatchRosterEntryDto {
-    id: string;
-    teamSide: SetSide;
-    teamMemberId: string;
-    userName: string;
-    jerseyNumber: number;
+    homeTeamScore: number;
+    awayTeamScore: number;
+    isCompleted: boolean;
+    winnerTeamId?: string | null;
+    playerPositions: MatchPlayerPositionDto[];
 }
 
 export interface MatchDto {
     id: string;
     homeTeamId: string;
     awayTeamId: string;
-    homeTeamName: string;
-    awayTeamName: string;
-    date: string;
-    location: string | null;
+    refereeId?: string | null;
+    location: string;
+    scheduledDate: string;
     status: MatchStatus;
-    creatorId: string;
-    refereeId: string | null;
-    rosters: MatchRosterEntryDto[];
+    homeSetsWon: number;
+    awaySetsWon: number;
+    roster: MatchRosterDto[];
     sets: MatchSetDto[];
 }
 
-export interface ProposeMatchDto {
-    opponentTeamId: string;
-    matchDate: string;
-    location?: string;
-    refereeId?: string;
+export interface CreateMatchRequest {
+    homeTeamId: string;
+    awayTeamId: string;
+    location: string;
+    scheduledDate: string;
 }
 
-export interface AddRosterEntryDto {
-    teamSide: SetSide;
-    teamMemberId: string;
+export interface AddToRosterRequest {
+    userId: string;
     jerseyNumber: number;
 }
 
-export interface SetPlayerPositionDto {
-    rosterEntryId: string;
+export interface PlayerPositionSetup {
+    userId: string;
+    teamId: string;
     position: PlayerPosition;
 }
 
-export interface StartSetDto {
-    positions: SetPlayerPositionDto[];
+export interface StartSetRequest {
+    playerPositions: PlayerPositionSetup[];
 }
 
-export interface RecordPointDto {
-    teamSide: SetSide;
-    isPenalty: boolean;
+export interface RecordPointRequest {
+    scoringTeamId: string;
 }

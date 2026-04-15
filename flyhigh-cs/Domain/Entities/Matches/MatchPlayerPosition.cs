@@ -2,29 +2,52 @@
 using Domain.Entities.Matches.MatchEnums;
 using Domain.Value_Objects.Matches;
 using Domain.Value_Objects.Teams;
+using Domain.Value_Objects.Users;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Domain.Entities.Matches;
 
-public class MatchPlayerPosition : Entity<MatchPlayerPositionId>
+public sealed class MatchPlayerPosition : Entity<MatchPlayerPositionId>
 {
   public MatchSetId MatchSetId { get; private set; }
-  public TeamMemberId TeamMemberId { get; private set; }
+  public TeamId TeamId { get; private set; }
+  public UserId UserId { get; private set; }
   public PlayerPosition Position { get; private set; }
 
   private MatchPlayerPosition() { }
 
-  internal MatchPlayerPosition(MatchPlayerPositionId id, MatchSetId matchSetId, TeamMemberId teamMemberId, PlayerPosition position) : base(id)
+  private MatchPlayerPosition(
+    MatchPlayerPositionId id,
+    MatchSetId matchSetId, 
+    TeamId teamId, 
+    UserId userId, 
+    PlayerPosition position)
+      : base(id)
   {
     MatchSetId = matchSetId;
-    TeamMemberId = teamMemberId;
+    TeamId = teamId;
+    UserId = userId;
     Position = position;
   }
 
-  internal void UpdatePosition(PlayerPosition newPosition)
+  public static MatchPlayerPosition Create(
+    MatchSetId matchSetId, 
+    TeamId teamId, 
+    UserId userId, 
+    PlayerPosition position)
   {
-    Position = newPosition;
+    var newId = MatchPlayerPositionId.New();
+
+    var matchPlayerPosition = new MatchPlayerPosition(
+      newId,
+      matchSetId,
+      teamId,
+      userId,
+      position
+      );
+
+    return matchPlayerPosition;
   }
 }

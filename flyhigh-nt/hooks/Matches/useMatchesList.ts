@@ -1,46 +1,34 @@
-import { useState, useEffect, useCallback } from "react";
-import { getMyMatches, acceptMatch, rejectMatch } from "../../lib/matchApi";
-import { MatchDto } from "../../types/match";
+import { useState, useEffect, useCallback } from 'react';
+import { getTeamMatches } from '../../lib/matchApi';
+import { MatchDto } from '../../types/match';
 
-export const useMatchesList = () => {
+export const useMatchesList = (teamId: string) => {
     const [matches, setMatches] = useState<MatchDto[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     const fetchMatches = useCallback(async () => {
-        setIsLoading(true);
+        if (!teamId) return;
+        setLoading(true);
         setError(null);
         try {
-            const data = await getMyMatches();
+            const data = await getTeamMatches(teamId);
             setMatches(data);
         } catch (err: any) {
-            setError(err.message || "Nepodařilo se načíst seznam zápasů.");
+            setError(err.message || 'Nastala chyba při načítání seznamu zápasů.');
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
-    }, []);
+    }, [teamId]);
 
     useEffect(() => {
         fetchMatches();
     }, [fetchMatches]);
 
-    const handleAccept = async (matchId: string) => {
-        try {
-            await acceptMatch(matchId);
-            await fetchMatches();
-        } catch (err: any) {
-            alert(err.message || "Nepodařilo se přijmout výzvu k zápasu.");
-        }
+    return {
+        matches,
+        loading,
+        error,
+        refetch: fetchMatches
     };
-
-    const handleReject = async (matchId: string) => {
-        try {
-            await rejectMatch(matchId);
-            await fetchMatches();
-        } catch (err: any) {
-            alert(err.message || "Nepodařilo se odmítnout výzvu k zápasu.");
-        }
-    };
-
-    return { matches, isLoading, error, refetch: fetchMatches, handleAccept, handleReject };
 };

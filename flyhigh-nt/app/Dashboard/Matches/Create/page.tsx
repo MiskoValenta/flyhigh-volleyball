@@ -1,119 +1,141 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { useCreateMatch } from "../../../../hooks/Matches/useCreateMatch";
-import { ProposeMatchDto } from "../../../../types/match";
-import {
-    IoArrowBack,
-    IoCalendarOutline,
-    IoLocationOutline,
-    IoShieldHalfOutline,
-    IoPersonOutline,
-    IoTrophyOutline
-} from "react-icons/io5";
-import "./CreateMatch.css";
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useCreateMatch } from '@/hooks/Matches/useCreateMatch';
+import { useTeamList } from '@/hooks/Teams/useTeamList';
+import './CreateMatch.css';
 
 export default function CreateMatchPage() {
-    const { handleCreate, isLoading, error } = useCreateMatch();
-    const [opponentTeamId, setOpponentTeamId] = useState("");
-    const [date, setDate] = useState("");
-    const [location, setLocation] = useState("");
-    const [refereeId, setRefereeId] = useState("");
+    const router = useRouter();
+    const { createMatch, loading, error } = useCreateMatch();
+    const { teams, isLoading: teamsLoading } = useTeamList();
 
-    const onSubmit = (e: React.FormEvent) => {
+    const [homeTeamId, setHomeTeamId] = useState('');
+    const [awayTeamId, setAwayTeamId] = useState('');
+    const [location, setLocation] = useState('');
+    const [date, setDate] = useState('');
+    const [time, setTime] = useState('');
+    const [validationError, setValidationError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const dto: ProposeMatchDto = {
-            opponentTeamId,
-            matchDate: new Date(date).toISOString(),
-            location: location || undefined,
-            refereeId: refereeId || undefined
-        };
-        handleCreate(dto);
+        setValidationError('');
+
+        if (!homeTeamId || !awayTeamId || !location || !date || !time) {
+            setValidationError('Prosím vyplňte všechna pole.');
+            return;
+        }
+        if (homeTeamId === awayTeamId) {
+            setValidationError('Domácí a hostující tým nesmí být stejný.');
+            return;
+        }
+
+        const scheduledDate = new Date(`${date}T${time}:00`).toISOString();
+
+        const success = await createMatch({
+            homeTeamId,
+            awayTeamId,
+            location,
+            scheduledDate
+        });
+
+        if (success) {
+            router.push('/Dashboard/Matches');
+        }
     };
 
     return (
-        <div className="create-match-wrapper-cm">
-            <div className="top-bar-cm">
-                <Link href="/Dashboard/Matches" className="btn-back-cm">
-                    <IoArrowBack className="back-icon-cm" />
-                    <span>Zpět na přehled</span>
-                </Link>
-            </div>
+        <div className="container-cm">
+            <div className="form-card-cm">
+                <h1 className="title-cm">Navrhnout zápas</h1>
 
-            <div className="create-card-cm glass-card-dark">
-                <div className="card-header-cm">
-                    <div className="icon-wrapper-cm">
-                        <IoTrophyOutline className="header-icon-cm" />
+                {(error || validationError) && (
+                    <div className="error-msg-cm">
+                        {validationError || error}
                     </div>
-                    <h2>Vyzvat tým k zápasu</h2>
-                    <p>Navrhněte termín a místo. Soupeř musí výzvu potvrdit.</p>
-                </div>
+                )}
 
-                {error && <div className="error-message">{error}</div>}
-
-                <form onSubmit={onSubmit} className="create-form-cm">
+                <form onSubmit={handleSubmit}>
                     <div className="form-group-cm">
-                        <label>ID Soupeřova Týmu *</label>
-                        <div className="input-with-icon-cm">
-                            <IoShieldHalfOutline className="input-icon-cm" />
-                            <input
-                                type="text"
-                                required
-                                placeholder="Zadejte unikátní ID týmu"
-                                value={opponentTeamId}
-                                onChange={e => setOpponentTeamId(e.target.value)}
-                                className="input-glass-cm"
-                            />
-                        </div>
+                        <label className="label-cm" htmlFor="homeTeamId">Váš Tým (Domácí)</label>
+                        <select
+                            id="homeTeamId"
+                            className="select-cm"
+                            value={homeTeamId}
+                            onChange={(e) => setHomeTeamId(e.target.value)}
+                            disabled={teamsLoading}
+                        >
+                            <option value="">-- Vyberte váš tým --</option>
+                            {teams.map(team => (
+                                <option key={team.id} value={team.id}>
+                                    {team.teamName} ({team.shortName})
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="form-group-cm">
-                        <label>Datum a čas *</label>
-                        <div className="input-with-icon-cm">
-                            <IoCalendarOutline className="input-icon-cm" />
+                        <label className="label-cm" htmlFor="awayTeamId">ID Soupeře (Hosté)</label>
+                        <input
+                            id="awayTeamId"
+                            type="text"
+                            className="input-cm"
+                            placeholder="Zadejte ID soupeřova týmu"
+                            value={awayTeamId}
+                            onChange={(e) => setAwayTeamId(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-group-cm">
+                        <label className="label-cm" htmlFor="location">Místo konání</label>
+                        <input
+                            id="location"
+                            type="text"
+                            className="input-cm"
+                            placeholder="Např. Hala ZŠ Boženy Němcové"
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="date-time-row-cm">
+                        <div className="form-group-cm">
+                            <label className="label-cm" htmlFor="date">Datum</label>
                             <input
-                                type="datetime-local"
-                                required
+                                id="date"
+                                type="date"
+                                className="input-cm"
                                 value={date}
-                                onChange={e => setDate(e.target.value)}
-                                className="input-glass-cm"
+                                onChange={(e) => setDate(e.target.value)}
                             />
                         </div>
-                    </div>
 
-                    <div className="form-group-cm">
-                        <label>Místo konání</label>
-                        <div className="input-with-icon-cm">
-                            <IoLocationOutline className="input-icon-cm" />
+                        <div className="form-group-cm">
+                            <label className="label-cm" htmlFor="time">Čas</label>
                             <input
-                                type="text"
-                                placeholder="Název haly nebo adresa"
-                                value={location}
-                                onChange={e => setLocation(e.target.value)}
-                                className="input-glass-cm"
+                                id="time"
+                                type="time"
+                                className="input-cm"
+                                value={time}
+                                onChange={(e) => setTime(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <div className="form-group-cm">
-                        <label>Rozhodčí (volitelné)</label>
-                        <div className="input-with-icon-cm">
-                            <IoPersonOutline className="input-icon-cm" />
-                            <input
-                                type="text"
-                                placeholder="ID uživatele (Rozhodčího)"
-                                value={refereeId}
-                                onChange={e => setRefereeId(e.target.value)}
-                                className="input-glass-cm"
-                            />
-                        </div>
-                    </div>
-
-                    <button type="submit" disabled={isLoading} className="button-primary submit-btn-cm">
-                        {isLoading ? "Odesílám..." : "Odeslat výzvu"}
+                    <button
+                        type="submit"
+                        className="submit-btn-cm"
+                        disabled={loading || teamsLoading}
+                    >
+                        {loading ? 'Odesílám pozvánku...' : 'Navrhnout zápas'}
                     </button>
                 </form>
+
+                <Link href="/Dashboard/Matches" className="back-link-cm">
+                    ← Zrušit a vrátit se zpět
+                </Link>
             </div>
         </div>
     );

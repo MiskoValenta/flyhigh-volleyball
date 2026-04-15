@@ -1,35 +1,68 @@
-import { useState } from "react";
-import { startMatch, startNextSet, recordPoint, cancelMatch } from "../../lib/matchApi";
-import { StartSetDto, RecordPointDto } from "../../types/match";
+import { useState, useEffect, useCallback } from 'react';
+import { getMatchById, startNextSet, recordPoint } from '../../lib/matchApi';
+import { MatchDto, StartSetRequest, RecordPointRequest } from '../../types/match';
 
-export const useLiveMatch = (matchId: string, onSuccess?: () => void) => {
-    const [isActionLoading, setIsActionLoading] = useState<boolean>(false);
+export const useLiveMatch = (matchId: string) => {
+    const [match, setMatch] = useState<MatchDto | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [actionLoading, setActionLoading] = useState<boolean>(false);
 
-    const runAction = async (apiCall: () => Promise<void>) => {
-        setIsActionLoading(true);
+    const fetchMatch = useCallback(async () => {
+        if (!matchId) return;
+        if (!match) setLoading(true);
+        setError(null);
         try {
-            await apiCall();
-            if (onSuccess) onSuccess();
+            const data = await getMatchById(matchId);
+            setMatch(data);
         } catch (err: any) {
-            alert(err.message || "Akce selhala. Zkuste to prosím znovu.");
+            setError(err.message || 'Nastala chyba při načítání live zápasu.');
         } finally {
-            setIsActionLoading(false);
+            setLoading(false);
+        }
+    }, [matchId]);
+
+    useEffect(() => {
+        fetchMatch();
+        const interval = setInterval(() => {
+            fetchMatch();
+        }, 10000);
+        return () => clearInterval(interval);
+    }, [fetchMatch]);
+
+    const handleStartNextSet = async (data: StartSetRequest) => {
+        setActionLoading(true);
+        try {
+            await startNextSet(matchId, data);
+            await fetchMatch();
+        } catch (err: any) {
+            setError(err.message || 'Chyba při zahajování setu.');
+            throw err;
+        } finally {
+            setActionLoading(false);
         }
     };
 
-    const handleStartMatch = () => runAction(() => startMatch(matchId));
-
-    const handleStartNextSet = (dto: StartSetDto) => runAction(() => startNextSet(matchId, dto));
-
-    const handleRecordPoint = (dto: RecordPointDto) => runAction(() => recordPoint(matchId, dto));
-
-    const handleCancelMatch = () => runAction(() => cancelMatch(matchId));
+    const handleRecordPoint = async (data: RecordPointRequest) => {
+        setActionLoading(true);
+        try {
+            await recordPoint(matchId, data);
+            await fetchMatch();
+        } catch (err: any) {
+            setError(err.message || 'Chyba při zapisování bodu.');
+            throw err;
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     return {
-        handleStartMatch,
-        handleStartNextSet,
-        handleRecordPoint,
-        handleCancelMatch,
-        isActionLoading
+        match,
+        loading,
+        error,
+        actionLoading,
+        refetch: fetchMatch,
+        startNextSet: handleStartNextSet,
+        recordPoint: handleRecordPoint
     };
 };
