@@ -38,18 +38,14 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
                     HomeTeamId = table.Column<Guid>(type: "uuid", nullable: false),
                     AwayTeamId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ScheduledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Location = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false, defaultValue: "Pending"),
                     RefereeId = table.Column<Guid>(type: "uuid", nullable: true),
-                    WinnerId = table.Column<Guid>(type: "uuid", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Location = table.Column<string>(type: "text", nullable: false),
+                    ScheduledDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    HomeSetsWon = table.Column<int>(type: "integer", nullable: false),
+                    AwaySetsWon = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -122,8 +118,8 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MatchId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TeamMemberId = table.Column<Guid>(type: "uuid", nullable: false),
                     TeamId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     JerseyNumber = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -144,12 +140,10 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MatchId = table.Column<Guid>(type: "uuid", nullable: false),
                     SetNumber = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false, defaultValue: "Standard"),
-                    HomeScore = table.Column<int>(type: "integer", nullable: false),
-                    AwayScore = table.Column<int>(type: "integer", nullable: false),
-                    IsFinished = table.Column<bool>(type: "boolean", nullable: false),
-                    IsStarted = table.Column<bool>(type: "boolean", nullable: false),
-                    Winner = table.Column<string>(type: "text", nullable: false, defaultValue: "None")
+                    HomeTeamScore = table.Column<int>(type: "integer", nullable: false),
+                    AwayTeamScore = table.Column<int>(type: "integer", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
+                    WinnerTeamId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -197,8 +191,9 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MatchSetId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TeamMemberId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Position = table.Column<string>(type: "text", nullable: false)
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Position = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -101,46 +101,30 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("AwaySetsWon")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("AwayTeamId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CreatorId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("HomeSetsWon")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("HomeTeamId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("RefereeId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("ScheduledAt")
+                    b.Property<DateTime>("ScheduledDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("Pending");
-
-                    b.Property<Guid?>("WinnerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("isDeleted")
-                        .HasColumnType("boolean");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -155,18 +139,20 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("MatchSetId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Position")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
 
-                    b.Property<Guid>("TeamMemberId")
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MatchSetId");
 
-                    b.ToTable("MatchPlayerPositions");
+                    b.ToTable("MatchPlayerPositions", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Matches.MatchRosterEntry", b =>
@@ -183,7 +169,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("TeamMemberId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -198,16 +184,13 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("AwayScore")
+                    b.Property<int>("AwayTeamScore")
                         .HasColumnType("integer");
 
-                    b.Property<int>("HomeScore")
+                    b.Property<int>("HomeTeamScore")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("IsFinished")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsStarted")
+                    b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
 
                     b.Property<Guid>("MatchId")
@@ -216,23 +199,14 @@ namespace Infrastructure.Migrations
                     b.Property<int>("SetNumber")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("Standard");
-
-                    b.Property<string>("Winner")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("None");
+                    b.Property<Guid?>("WinnerTeamId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MatchId");
 
-                    b.ToTable("MatchSets");
+                    b.ToTable("MatchSets", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Teams.Team", b =>
@@ -390,7 +364,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Matches.MatchPlayerPosition", b =>
                 {
                     b.HasOne("Domain.Entities.Matches.MatchSet", null)
-                        .WithMany("Positions")
+                        .WithMany("PlayerPositions")
                         .HasForeignKey("MatchSetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -437,7 +411,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Matches.MatchSet", b =>
                 {
-                    b.Navigation("Positions");
+                    b.Navigation("PlayerPositions");
                 });
 
             modelBuilder.Entity("Domain.Entities.Teams.Team", b =>
