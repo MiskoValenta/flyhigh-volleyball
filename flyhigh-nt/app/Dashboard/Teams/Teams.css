@@ -16,7 +16,7 @@
 
 .teams-state-message {
     padding: 2rem;
-    color: #ffffff;
+    color: var(--normal-text);
     font-size: 1.1rem;
     text-align: center;
 }
@@ -76,7 +76,7 @@
 .team-name {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--normal-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -107,11 +107,11 @@
 }
 
 .info-label {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--normal-text);
 }
 
 .info-value.highlight {
-    color: #ffffff;
+    color: var(--normal-text);
     font-weight: 600;
 }
 

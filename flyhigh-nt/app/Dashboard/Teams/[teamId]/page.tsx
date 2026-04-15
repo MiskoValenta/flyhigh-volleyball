@@ -278,7 +278,7 @@ export default function TeamDetailPage() {
         managementSection = (
             <div className="management-section glass-card-dark">
                 <h2 className="section-title">
-                    <IoShieldCheckmarkOutline /> Přidat nového člena
+                    <IoShieldCheckmarkOutline className="icon-color"/> Přidat nového člena
                 </h2>
                 <hr className="section-divider" />
 
@@ -286,7 +286,7 @@ export default function TeamDetailPage() {
                     <div className="input-wrapper">
                         <label>ID Uživatele</label>
                         <div className="input-group">
-                            <IoPersonAddOutline className="input-icon" />
+                            <IoPersonAddOutline className="input-icon icon-color" />
                             <input
                                 type="text"
                                 value={memberInput}

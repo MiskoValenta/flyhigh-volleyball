@@ -104,8 +104,8 @@ export default function ContactPage() {
                         </div>
                         <div className="ContactInfoText">
                             <span className="Label">E-mailová podpora</span>
-                            <a href="mailto:info@flyhigh-volleyball.cz" className="Value">
-                                info@flyhigh-volleyball.cz
+                            <a href="mailto:flyhighinfo@seznam.cz" className="Value">
+                                flyhighinfo@seznam.cz
                             </a>
                         </div>
                     </div>

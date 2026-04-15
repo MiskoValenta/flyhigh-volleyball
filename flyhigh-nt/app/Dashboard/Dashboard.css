@@ -23,6 +23,14 @@
     border-left: 4px solid #38bdf8 !important;
 }
 
+.user-id-heading {
+    color: var(--normal-text);
+}
+
+.user-id-subtext {
+    color: var(--normal-text);
+}
+
 .user-id-text-container h3 {
     margin: 0 0 0.25rem 0;
     font-size: 1.1rem;
@@ -127,13 +135,13 @@
 .stat-value {
     font-size: 2.2rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--normal-text);
     line-height: 1.1;
 }
 
 .stat-label {
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--normal-text);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-top: 0.25rem;
