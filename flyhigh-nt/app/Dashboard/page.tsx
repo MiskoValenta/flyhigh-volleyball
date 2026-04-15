@@ -50,7 +50,6 @@ export default function DashboardPage() {
                 const teamIds = myTeams.map(team => team.id);
                 setUserTeamIds(teamIds);
 
-                // ZMĚNA: Vytvoříme slovník pro rychlé hledání jména týmu podle ID
                 const teamNameMap = new Map(myTeams.map(t => [t.id, t.teamName]));
 
                 if (teamIds.length > 0) {
@@ -63,7 +62,6 @@ export default function DashboardPage() {
 
                     const now = new Date();
 
-                    // ZMĚNA: Přidání teamName ke každé události
                     const upcomingEvents = combinedEvents.filter(evt => {
                         if (evt.eventDate) {
                             if (new Date(evt.eventDate) > now) {

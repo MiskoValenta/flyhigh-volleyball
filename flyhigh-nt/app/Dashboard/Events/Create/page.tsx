@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { IoArrowBack, IoCalendarOutline, IoLocationOutline, IoInformationCircleOutline } from "react-icons/io5";
-import { useCreateEvent } from "../../../../hooks/Events/useCreateEvent";
-import { EventType } from "../../../../types/event";
+import { useCreateEvent } from "@/hooks/Events/useCreateEvent";
+import { EventType } from "@/types/event";
+import { getMyTeams } from "@/lib/teamApi";
 import "./CreateEvent.css";
 
 export default function CreateEventPage() {
     const searchParams = useSearchParams();
-    const router = useRouter();
     const defaultTeamId = searchParams.get("teamId") || "";
 
     const { handleCreateEvent, isLoading, error } = useCreateEvent();
@@ -22,15 +22,37 @@ export default function CreateEventPage() {
     const [eventDate, setEventDate] = useState("");
     const [location, setLocation] = useState("");
 
+    const [teams, setTeams] = useState<{ id: string, teamName: string }[]>([]);
+    const [isLoadingTeams, setIsLoadingTeams] = useState(true);
+
     useEffect(() => {
-        if (!teamId) {
-            alert("Není vybrán žádný tým. Přesměrovávám zpět.");
-            router.push("/Dashboard/Teams");
-        }
-    }, [teamId, router]);
+        const fetchTeams = async () => {
+            setIsLoadingTeams(true);
+            try {
+                const myTeams = await getMyTeams();
+                setTeams(myTeams);
+
+                if (!defaultTeamId && myTeams.length === 1) {
+                    setTeamId(myTeams[0].id);
+                }
+            } catch (err) {
+                console.error("Nepodařilo se načíst týmy", err);
+            } finally {
+                setIsLoadingTeams(false);
+            }
+        };
+
+        fetchTeams();
+    }, [defaultTeamId]);
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!teamId) {
+            alert("Prosím, vyberte tým, pro který je událost určena.");
+            return;
+        }
+
         const formattedDate = eventDate ? new Date(eventDate).toISOString() : null;
 
         await handleCreateEvent({
@@ -44,14 +66,15 @@ export default function CreateEventPage() {
         });
     };
 
-    if (!teamId) return null;
+    const backLink = defaultTeamId ? `/Dashboard/Teams/${defaultTeamId}` : "/Dashboard";
+    const backText = defaultTeamId ? "Zpět na tým" : "Zpět na přehled";
 
     return (
         <div className="create-event-wrapper-ce">
             <div className="create-top-bar-ce">
-                <Link href={`/Dashboard/Teams/${teamId}`} className="btn-back-ce">
+                <Link href={backLink} className="btn-back-ce">
                     <IoArrowBack size={20} />
-                    <span>Zpět na tým</span>
+                    <span>{backText}</span>
                 </Link>
             </div>
 
@@ -64,6 +87,26 @@ export default function CreateEventPage() {
                 {error && <div className="error-message-ce">{error}</div>}
 
                 <form onSubmit={onSubmit} className="create-event-form-ce">
+
+                    <div className="form-group-ce">
+                        <label>Tým *</label>
+                        <select
+                            className="input-glass-ce select-glass-ce"
+                            value={teamId}
+                            onChange={(e) => setTeamId(e.target.value)}
+                            required
+                            disabled={isLoadingTeams}
+                        >
+                            <option value="" disabled>
+                                {isLoadingTeams ? "Načítám dostupné týmy..." : "Vyberte tým, pro který je událost určena"}
+                            </option>
+                            {teams.map(t => (
+                                <option key={t.id} value={t.id}>
+                                    {t.teamName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
                     <div className="form-group-ce">
                         <label>Název události *</label>
@@ -133,7 +176,11 @@ export default function CreateEventPage() {
                         </div>
                     </div>
 
-                    <button type="submit" className="button-primary submit-btn-ce" disabled={isLoading}>
+                    <button
+                        type="submit"
+                        className="button-primary submit-btn-ce"
+                        disabled={isLoading || !teamId || isLoadingTeams}
+                    >
                         {isLoading ? "Vytvářím..." : "Vytvořit událost"}
                     </button>
                 </form>
