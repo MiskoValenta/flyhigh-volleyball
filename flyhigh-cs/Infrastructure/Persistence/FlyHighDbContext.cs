@@ -7,6 +7,7 @@ using Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace Infrastructure.Persistence;
@@ -15,20 +16,20 @@ public class FlyHighDbContext : DbContext, IUnitOfWork
 {
   public FlyHighDbContext(DbContextOptions<FlyHighDbContext> options) : base(options) { }
 
-  public DbSet<User> Users => Set<User>();
-  public DbSet<Team> Teams => Set<Team>();
-  public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
-  public DbSet<Event> Events => Set<Event>();
-  public DbSet<EventParticipant> EventParticipants => Set<EventParticipant>();
-  public DbSet<Match> Matches => Set<Match>();
-  public DbSet<MatchRosterEntry> MatchRosterEntries => Set<MatchRosterEntry>();
-  public DbSet<MatchSet> MatchSets => Set<MatchSet>();
-  public DbSet<MatchPlayerPosition> MatchPlayerPositions => Set<MatchPlayerPosition>();
+  public DbSet<User> Users { get; set; } = null!;
+  public DbSet<Team> Teams { get; set; } = null!;
+  public DbSet<TeamMember> TeamMembers { get; set; } = null!;
+  public DbSet<Event> Events { get; set; } = null!;
+  public DbSet<EventParticipant> EventParticipants { get; set; } = null!;
+  public DbSet<Match> Matches { get; set; } = null!;
+  public DbSet<MatchSet> MatchSets { get; set; } = null!;
+  public DbSet<MatchRosterEntry> MatchRosterEntries { get; set; } = null!;
+  public DbSet<MatchPlayerPosition> MatchPlayerPositions { get; set; } = null!;
+
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
-    modelBuilder.ApplyConfigurationsFromAssembly(
-        typeof(FlyHighDbContext).Assembly);
+    modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     base.OnModelCreating(modelBuilder);
   }
 }

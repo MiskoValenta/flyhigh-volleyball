@@ -8,16 +8,17 @@ namespace Application.Interfaces.Matches;
 
 public interface IMatchService
 {
-  Task<Guid> ProposeMatchAsync(CreateMatchDto dto, Guid currentUserId, CancellationToken cancellationToken = default);
-  Task AcceptMatchAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default);
-  Task<MatchDetailDto> GetMatchByIdAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default);
-  Task SetRefereeAsync(Guid matchId, Guid refereeId, Guid currentUserId, CancellationToken cancellationToken = default);
-  Task AddPlayerToRosterAsync(Guid matchId, RosterPlayerDto dto, CancellationToken cancellationToken = default);
-  Task StartMatchAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default);
-  Task StartCurrentSetAsync(Guid matchId, Guid currentUserId, CancellationToken cancellationToken = default);
-  Task AssignPlayerPositionAsync(Guid matchId, Guid currentUserId, AssignPositionDto dto, CancellationToken cancellationToken = default);
-  Task AddPointAsync(Guid matchId, Guid currentUserId, SetSide side, CancellationToken cancellationToken = default);
-  Task CancelMatchAsync(Guid matchId, Guid currentUserId, CancelMatchDto dto, CancellationToken cancellationToken = default);
-  Task RejectMatchAsync(Guid matchId, CancellationToken cancellationToken = default);
-  Task<IEnumerable<MatchResponseDto>> GetUserMatchesAsync(Guid currentUserId, CancellationToken cancellationToken = default);
+  Task<MatchDto> CreateMatchAsync(Guid userId, CreateMatchRequest request);
+  Task AcceptMatchAsync(Guid userId, Guid matchId);
+  Task RejectMatchAsync(Guid userId, Guid matchId);
+  Task CancelMatchAsync(Guid userId, Guid matchId);
+
+  Task AddRefereeAsync(Guid userId, Guid matchId, Guid refereeId);
+  Task AddToRosterAsync(Guid userId, Guid matchId, AddToRosterRequest request);
+
+  Task StartNextSetAsync(Guid userId, Guid matchId, StartSetRequest request);
+  Task RecordPointAsync(Guid userId, Guid matchId, RecordPointRequest request);
+
+  Task<MatchDto?> GetByIdAsync(Guid matchId);
+  Task<List<MatchDto>> GetTeamMatchesAsync(Guid teamId);
 }

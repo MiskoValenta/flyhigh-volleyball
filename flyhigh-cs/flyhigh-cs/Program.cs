@@ -66,9 +66,6 @@ namespace API
             });
       });
 
-      builder.Services.AddSingleton<ISetRules, VolleyballSetRules>();
-      builder.Services.AddSingleton<IMatchRules, VolleyballMatchRules>();
-
       builder.Services.AddScoped<IUserRepository, UserRepository>();
       builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
       builder.Services.AddScoped<IJwtProvider, JwtProvider>();

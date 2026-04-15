@@ -1,64 +1,108 @@
-import { useState, useEffect, useCallback } from "react";
-import { getMatchById, addRosterEntry, removeRosterEntry } from "../../lib/matchApi";
-import { MatchDto, AddRosterEntryDto } from "../../types/match";
+import { useState, useEffect, useCallback } from 'react';
+import {
+    getMatchById, acceptMatch, rejectMatch, cancelMatch, addReferee, addToRoster
+} from '../../lib/matchApi';
+import { MatchDto, AddToRosterRequest } from '../../types/match';
 
-export const useMatchDetail = (matchId: string, enablePolling: boolean = false) => {
+export const useMatchDetail = (matchId: string) => {
     const [match, setMatch] = useState<MatchDto | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [actionLoading, setActionLoading] = useState<boolean>(false);
 
     const fetchMatch = useCallback(async () => {
         if (!matchId) return;
+        setLoading(true);
+        setError(null);
         try {
             const data = await getMatchById(matchId);
             setMatch(data);
-            setError(null);
         } catch (err: any) {
-            setError(err.message || "Nepodařilo se načíst detail zápasu.");
+            setError(err.message || 'Nastala chyba při načítání detailu zápasu.');
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     }, [matchId]);
 
     useEffect(() => {
         fetchMatch();
+    }, [fetchMatch]);
 
-        let intervalId: NodeJS.Timeout;
-        if (enablePolling) {
-            intervalId = setInterval(() => {
-                fetchMatch();
-            }, 3000);
-        }
-
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-        };
-    }, [fetchMatch, enablePolling]);
-
-    const handleAddRoster = async (dto: AddRosterEntryDto) => {
+    const handleAccept = async () => {
+        setActionLoading(true);
         try {
-            await addRosterEntry(matchId, dto);
+            await acceptMatch(matchId);
             await fetchMatch();
         } catch (err: any) {
-            throw new Error(err.message || "Chyba při přidávání hráče na soupisku.");
+            setError(err.message || 'Chyba při přijímání zápasu.');
+            throw err;
+        } finally {
+            setActionLoading(false);
         }
     };
 
-    const handleRemoveRoster = async (entryId: string) => {
+    const handleReject = async () => {
+        setActionLoading(true);
         try {
-            await removeRosterEntry(matchId, entryId);
+            await rejectMatch(matchId);
+            setMatch(null);
+        } catch (err: any) {
+            setError(err.message || 'Chyba při odmítání zápasu.');
+            throw err;
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleCancel = async () => {
+        setActionLoading(true);
+        try {
+            await cancelMatch(matchId);
             await fetchMatch();
         } catch (err: any) {
-            throw new Error(err.message || "Chyba při odebírání hráče ze soupisky.");
+            setError(err.message || 'Chyba při rušení zápasu.');
+            throw err;
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleAddReferee = async (refereeId: string) => {
+        setActionLoading(true);
+        try {
+            await addReferee(matchId, refereeId);
+            await fetchMatch();
+        } catch (err: any) {
+            setError(err.message || 'Chyba při přidávání rozhodčího.');
+            throw err;
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleAddToRoster = async (data: AddToRosterRequest) => {
+        setActionLoading(true);
+        try {
+            await addToRoster(matchId, data);
+            await fetchMatch();
+        } catch (err: any) {
+            setError(err.message || 'Chyba při přidávání hráče na soupisku.');
+            throw err;
+        } finally {
+            setActionLoading(false);
         }
     };
 
     return {
         match,
-        isLoading,
+        loading,
         error,
+        actionLoading,
         refetch: fetchMatch,
-        handleAddRoster,
-        handleRemoveRoster
+        acceptMatch: handleAccept,
+        rejectMatch: handleReject,
+        cancelMatch: handleCancel,
+        addReferee: handleAddReferee,
+        addToRoster: handleAddToRoster
     };
 };

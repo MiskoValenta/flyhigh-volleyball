@@ -1,7 +1,7 @@
 ﻿using Domain.Entities.Matches;
-using Domain.Entities.Matches.MatchEnums;
 using Domain.Value_Objects.Matches;
 using Domain.Value_Objects.Teams;
+using Domain.Value_Objects.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -14,20 +14,24 @@ public class MatchPlayerPositionConfiguration : IEntityTypeConfiguration<MatchPl
 {
   public void Configure(EntityTypeBuilder<MatchPlayerPosition> builder)
   {
+    builder.ToTable("MatchPlayerPositions");
+
     builder.HasKey(p => p.Id);
+
     builder.Property(p => p.Id)
-        .HasConversion(id => id.Value, value => new MatchPlayerPositionId(value));
+           .HasConversion(id => id.Value, 
+           value => new MatchPlayerPositionId(value));
 
     builder.Property(p => p.MatchSetId)
-        .HasConversion(id => id.Value, value => new MatchSetId(value))
-        .IsRequired();
+           .HasConversion(id => id.Value, 
+           value => new MatchSetId(value));
 
-    builder.Property(p => p.TeamMemberId)
-        .HasConversion(id => id.Value, value => new TeamMemberId(value))
-        .IsRequired();
+    builder.Property(p => p.TeamId)
+           .HasConversion(id => id.Value, 
+           value => new TeamId(value));
 
-    builder.Property(p => p.Position)
-        .HasConversion<string>()
-        .IsRequired();
+    builder.Property(p => p.UserId)
+           .HasConversion(id => id.Value, 
+           value => new UserId(value));
   }
 }

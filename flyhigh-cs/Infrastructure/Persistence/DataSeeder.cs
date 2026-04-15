@@ -53,6 +53,7 @@ public static class DataSeeder
     public string CreatorEmail { get; set; } = string.Empty;
     public DateTime ScheduledAt { get; set; }
     public string Location { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
   }
 
   public static async Task SeedAsync(FlyHighDbContext context, IPasswordHasher passwordHasher)
@@ -279,36 +280,27 @@ public static class DataSeeder
             var awayTeam = allTeams.FirstOrDefault(t => t.ShortName == sm.AwayTeamAbbreviation);
             var creator = allUsers.FirstOrDefault(u => u.Email == sm.CreatorEmail);
 
-            if (homeTeam != null)
+            if (homeTeam != null && awayTeam != null)
             {
-              if (awayTeam != null)
-              {
-                if (creator != null)
-                {
-                  var match = Match.CreateInvitation(
-                      creator.Id,
-                      homeTeam.Id,
-                      awayTeam.Id,
-                      sm.ScheduledAt,
-                      sm.Location
-                  );
+              var match = Match.Create(
+                  homeTeam.Id,
+                  awayTeam.Id,
+                  sm.Location,
+                  sm.ScheduledAt
+              );
 
-                  await context.Matches.AddAsync(match);
-                  Console.WriteLine($"✅ Zápas vytvořen: {homeTeam.ShortName} vs {awayTeam.ShortName} (Datum: {sm.ScheduledAt})");
-                }
-                else
-                {
-                  Console.WriteLine($"❌ Zápas přeskočen: Tvůrce {sm.CreatorEmail} nebyl nalezen.");
-                }
-              }
-              else
+              if (string.Equals(sm.Status, "Accepted", StringComparison.OrdinalIgnoreCase))
               {
-                Console.WriteLine($"❌ Zápas přeskočen: Hostující tým {sm.AwayTeamAbbreviation} nebyl nalezen.");
+                match.AcceptMatch();
               }
+
+              await context.Matches.AddAsync(match);
+              Console.WriteLine($"✅ Zápas vytvořen: {homeTeam.ShortName} vs {awayTeam.ShortName} (Stav: {match.Status}, Datum: {sm.ScheduledAt})");
             }
             else
             {
-              Console.WriteLine($"❌ Zápas přeskočen: Domácí tým {sm.HomeTeamAbbreviation} nebyl nalezen.");
+              if (homeTeam == null) Console.WriteLine($"❌ Zápas přeskočen: Domácí tým {sm.HomeTeamAbbreviation} nebyl nalezen.");
+              if (awayTeam == null) Console.WriteLine($"❌ Zápas přeskočen: Hostující tým {sm.AwayTeamAbbreviation} nebyl nalezen.");
             }
           }
           await context.SaveChangesAsync();

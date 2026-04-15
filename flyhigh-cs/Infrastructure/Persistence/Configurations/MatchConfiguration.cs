@@ -1,5 +1,4 @@
 ﻿using Domain.Entities.Matches;
-using Domain.Entities.Matches.MatchEnums;
 using Domain.Value_Objects.Matches;
 using Domain.Value_Objects.Teams;
 using Domain.Value_Objects.Users;
@@ -20,73 +19,36 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
     builder.HasKey(m => m.Id);
 
     builder.Property(m => m.Id)
-        .HasConversion(
-            id => id.Value,
-            value => new MatchId(value)
-        );
-
-    builder.Property(m => m.CreatorId)
-        .HasConversion(
-            id => id.Value,
-            value => new UserId(value)
-        )
-        .IsRequired();
+           .HasConversion(id => id.Value, 
+           value => new MatchId(value));
 
     builder.Property(m => m.HomeTeamId)
-        .HasConversion(
-            id => id.Value,
-            value => new TeamId(value)
-        )
-        .IsRequired();
+           .HasConversion(id => id.Value, 
+           value => new TeamId(value));
 
     builder.Property(m => m.AwayTeamId)
-        .HasConversion(
-            id => id.Value,
-            value => new TeamId(value)
-        )
-        .IsRequired();
+           .HasConversion(id => id.Value, 
+           value => new TeamId(value));
 
     builder.Property(m => m.RefereeId)
-        .HasConversion(
-            id => id.Value,
-            value => new UserId(value)
-        );
-
-    builder.Property(m => m.Location)
-        .IsRequired()
-        .HasMaxLength(255);
-
-    builder.Property(m => m.ScheduledAt)
-        .IsRequired();
-
-    builder.Property(m => m.Status)
-        .HasConversion<string>()
-        .HasDefaultValue(MatchStatus.Pending)
-        .IsRequired();
-
-    builder.Property(m => m.WinnerId)
-        .HasConversion(
-            id => id.Value,
-            value => new TeamId(value)
-        )
-        .IsRequired(false);
+           .HasConversion(id => id!.Value, 
+           value => new UserId(value))
+           .IsRequired(false);
 
     builder.HasMany(m => m.Sets)
-        .WithOne()
-        .HasForeignKey("MatchId")
-        .OnDelete(DeleteBehavior.Cascade);
-
-    builder.Metadata.FindNavigation(nameof(Match.Sets))!
-        .SetPropertyAccessMode(PropertyAccessMode.Field);
+           .WithOne()
+           .HasForeignKey(s => s.MatchId)
+           .OnDelete(DeleteBehavior.Cascade);
 
     builder.HasMany(m => m.Roster)
-        .WithOne()
-        .HasForeignKey("MatchId")
-        .OnDelete(DeleteBehavior.Cascade);
+           .WithOne()
+           .HasForeignKey(r => r.MatchId)
+           .OnDelete(DeleteBehavior.Cascade);
+
+    builder.Metadata.FindNavigation(nameof(Match.Sets))!
+           .SetPropertyAccessMode(PropertyAccessMode.Field);
 
     builder.Metadata.FindNavigation(nameof(Match.Roster))!
-        .SetPropertyAccessMode(PropertyAccessMode.Field);
-
-    builder.HasQueryFilter(m => !m.isDeleted);
+           .SetPropertyAccessMode(PropertyAccessMode.Field);
   }
 }

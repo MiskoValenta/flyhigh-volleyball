@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Matches;
-using Domain.Entities.Matches.MatchEnums;
 using Domain.Value_Objects.Matches;
+using Domain.Value_Objects.Teams;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -13,34 +13,29 @@ public class MatchSetConfiguration : IEntityTypeConfiguration<MatchSet>
 {
   public void Configure(EntityTypeBuilder<MatchSet> builder)
   {
+    builder.ToTable("MatchSets");
+
     builder.HasKey(s => s.Id);
+
     builder.Property(s => s.Id)
-        .HasConversion(id => id.Value, value => new MatchSetId(value));
+           .HasConversion(id => id.Value, 
+           value => new MatchSetId(value));
 
     builder.Property(s => s.MatchId)
-        .HasConversion(id => id.Value, value => new MatchId(value))
-        .IsRequired();
+           .HasConversion(id => id.Value, 
+           value => new MatchId(value));
 
-    builder.Property(s => s.SetNumber).IsRequired();
+    builder.Property(s => s.WinnerTeamId)
+           .HasConversion(id => id!.Value, 
+           value => new TeamId(value))
+           .IsRequired(false);
 
-    builder.Property(s => s.Type)
-        .HasConversion<string>()
-        .HasDefaultValue(SetType.Standard)
-        .IsRequired();
+    builder.HasMany(s => s.PlayerPositions)
+           .WithOne()
+           .HasForeignKey(p => p.MatchSetId)
+           .OnDelete(DeleteBehavior.Cascade);
 
-    builder.Property(s => s.HomeScore).IsRequired();
-    builder.Property(s => s.AwayScore).IsRequired();
-    builder.Property(s => s.IsFinished).IsRequired();
-    builder.Property(s => s.IsStarted).IsRequired();
-
-    builder.Property(s => s.Winner)
-        .HasConversion<string>()
-        .HasDefaultValue(SetWinner.None)
-        .IsRequired();
-
-    builder.HasMany(s => s.Positions)
-        .WithOne()
-        .HasForeignKey(p => p.MatchSetId)
-        .OnDelete(DeleteBehavior.Cascade);
+    builder.Metadata.FindNavigation(nameof(MatchSet.PlayerPositions))!
+           .SetPropertyAccessMode(PropertyAccessMode.Field);
   }
 }

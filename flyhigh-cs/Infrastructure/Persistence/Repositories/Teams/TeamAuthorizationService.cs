@@ -32,4 +32,30 @@ public class TeamAuthorizationService : ITeamAuthorizationService
 
     return requiredRoles.Contains(member.Role);
   }
+
+  public async Task<bool> IsOwnerAsync(UserId userId, TeamId teamId, CancellationToken cancellationToken = default)
+  {
+    return await _context.TeamMembers
+        .AnyAsync(tm => tm.TeamId == teamId
+                     && tm.UserId == userId
+                     && tm.Role == TeamRole.Owner
+                     && tm.Status == TeamMemberStatus.Active, cancellationToken);
+  }
+
+  public async Task<bool> IsAtLeastCoachAsync(UserId userId, TeamId teamId, CancellationToken cancellationToken = default)
+  {
+    return await _context.TeamMembers
+        .AnyAsync(tm => tm.TeamId == teamId
+                     && tm.UserId == userId
+                     && (tm.Role == TeamRole.Owner || tm.Role == TeamRole.Coach)
+                     && tm.Status == TeamMemberStatus.Active, cancellationToken);
+  }
+
+  public async Task<bool> IsMemberAsync(UserId userId, TeamId teamId, CancellationToken cancellationToken = default)
+  {
+    return await _context.TeamMembers
+        .AnyAsync(tm => tm.TeamId == teamId
+                     && tm.UserId == userId
+                     && tm.Status == TeamMemberStatus.Active, cancellationToken);
+  }
 }

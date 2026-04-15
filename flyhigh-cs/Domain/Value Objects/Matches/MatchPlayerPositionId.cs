@@ -7,5 +7,5 @@ namespace Domain.Value_Objects.Matches;
 
 public record MatchPlayerPositionId(Guid Value) : StronglyTypedId(Value)
 {
-  public static MatchPlayerPositionId New() => new(Guid.NewGuid()); 
+  public static MatchPlayerPositionId New() => new(Guid.NewGuid());
 }

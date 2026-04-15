@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Matches;
 using Application.Interfaces.Matches;
+using Domain.Entities.Matches.Exceptions;
 using Domain.Entities.Matches.MatchEnums;
 using Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
@@ -7,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Matches;
 
+[Authorize]
 [ApiController]
 [Route("api/matches")]
-[Authorize]
 public class MatchController : ControllerBase
 {
   private readonly IMatchService _matchService;
@@ -24,135 +25,130 @@ public class MatchController : ControllerBase
     return User.GetUserId();
   }
 
-  [HttpGet]
-  public async Task<IActionResult> GetMyMatches(CancellationToken ct)
+  [HttpPost]
+  public async Task<ActionResult<MatchDto>> CreateMatch([FromBody] CreateMatchRequest request)
   {
     try
     {
-      var matches = await _matchService.GetUserMatchesAsync(GetCurrentUserId(), ct);
-      return Ok(matches);
+      var match = await _matchService.CreateMatchAsync(GetCurrentUserId(), request);
+      return Ok(match);
     }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    catch (MatchInvalidException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
-  [HttpGet("{matchId}")]
-  public async Task<IActionResult> GetMatchDetail(Guid matchId, CancellationToken ct)
+  [HttpPost("{id:guid}/accept")]
+  public async Task<IActionResult> AcceptMatch(Guid id)
   {
     try
     {
-      var detail = await _matchService.GetMatchByIdAsync(matchId, GetCurrentUserId(), ct);
-      return Ok(detail);
+      await _matchService.AcceptMatchAsync(GetCurrentUserId(), id);
+      return NoContent();
     }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    catch (MatchInvalidException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
-  [HttpPost("propose")]
-  public async Task<IActionResult> ProposeMatch([FromBody] CreateMatchDto dto, CancellationToken ct)
+  [HttpDelete("{id:guid}")]
+  public async Task<IActionResult> RejectMatch(Guid id)
   {
     try
     {
-      var matchId = await _matchService.ProposeMatchAsync(dto, GetCurrentUserId(), ct);
-      return Ok(new { Id = matchId });
+      await _matchService.RejectMatchAsync(GetCurrentUserId(), id);
+      return NoContent();
     }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    catch (MatchInvalidException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
-  [HttpPost("{matchId}/accept")]
-  public async Task<IActionResult> AcceptMatch(Guid matchId, CancellationToken ct)
+  [HttpPost("{id:guid}/cancel")]
+  public async Task<IActionResult> CancelMatch(Guid id)
   {
     try
     {
-      await _matchService.AcceptMatchAsync(matchId, GetCurrentUserId(), ct);
-      return Ok(new { message = "Zápas byl přijat." });
+      await _matchService.CancelMatchAsync(GetCurrentUserId(), id);
+      return NoContent();
     }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    catch (MatchInvalidException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
-  [HttpPost("{matchId}/reject")]
-  public async Task<IActionResult> RejectMatch(Guid matchId, CancellationToken ct)
+  [HttpPost("{id:guid}/referee/{refereeId:guid}")]
+  public async Task<IActionResult> AddReferee(Guid id, Guid refereeId)
   {
     try
     {
-      await _matchService.RejectMatchAsync(matchId, ct);
-      return Ok(new { message = "Zápas byl odmítnut." });
+      await _matchService.AddRefereeAsync(GetCurrentUserId(), id, refereeId);
+      return NoContent();
     }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    catch (MatchInvalidException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
-  [HttpPost("{matchId}/roster")]
-  public async Task<IActionResult> AddPlayerToRoster(Guid matchId, [FromBody] RosterPlayerDto dto, CancellationToken ct)
+  [HttpPost("{id:guid}/roster")]
+  public async Task<IActionResult> AddToRoster(Guid id, [FromBody] AddToRosterRequest request)
   {
     try
     {
-      await _matchService.AddPlayerToRosterAsync(matchId, dto, ct);
-      return Ok(new { message = "Hráč byl přidán na soupisku." });
+      await _matchService.AddToRosterAsync(GetCurrentUserId(), id, request);
+      return NoContent();
     }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    catch (MatchInvalidException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
-  [HttpPost("{matchId}/start")]
-  public async Task<IActionResult> StartMatch(Guid matchId, CancellationToken ct)
+  [HttpPost("{id:guid}/sets")]
+  public async Task<IActionResult> StartNextSet(Guid id, [FromBody] StartSetRequest request)
   {
     try
     {
-      await _matchService.StartMatchAsync(matchId, GetCurrentUserId(), ct);
-      return Ok(new { message = "Zápas byl zahájen." });
+      await _matchService.StartNextSetAsync(GetCurrentUserId(), id, request);
+      return NoContent();
     }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    catch (MatchInvalidException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
-  [HttpPost("{matchId}/sets/start")]
-  public async Task<IActionResult> StartCurrentSet(Guid matchId, CancellationToken ct)
+  [HttpPost("{id:guid}/points")]
+  public async Task<IActionResult> RecordPoint(Guid id, [FromBody] RecordPointRequest request)
   {
     try
     {
-      await _matchService.StartCurrentSetAsync(matchId, GetCurrentUserId(), ct);
-      return Ok(new { message = "Set byl odstartován." });
+      await _matchService.RecordPointAsync(GetCurrentUserId(), id, request);
+      return NoContent();
     }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    catch (MatchInvalidException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
-  [HttpPost("{matchId}/positions")]
-  public async Task<IActionResult> AssignPlayerPosition(Guid matchId, [FromBody] AssignPositionDto dto, CancellationToken ct)
+  [HttpGet("{id:guid}")]
+  public async Task<ActionResult<MatchDto>> GetById(Guid id)
   {
-    try
-    {
-      await _matchService.AssignPlayerPositionAsync(matchId, GetCurrentUserId(), dto, ct);
-      return Ok(new { message = "Pozice byla přiřazena." });
-    }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    var match = await _matchService.GetByIdAsync(id);
+    if (match == null) return NotFound();
+    return Ok(match);
   }
 
-  [HttpPost("{matchId}/point/{side}")]
-  public async Task<IActionResult> AddPoint(Guid matchId, SetSide side, CancellationToken ct)
+  [HttpGet("team/{teamId:guid}")]
+  public async Task<ActionResult<List<MatchDto>>> GetTeamMatches(Guid teamId)
   {
-    try
-    {
-      await _matchService.AddPointAsync(matchId, GetCurrentUserId(), side, ct);
-      return Ok(new { message = "Bod byl přidán." });
-    }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
-  }
-
-  [HttpPost("{matchId}/referee/{refereeId}")]
-  public async Task<IActionResult> SetReferee(Guid matchId, Guid refereeId, CancellationToken ct)
-  {
-    try
-    {
-      await _matchService.SetRefereeAsync(matchId, refereeId, GetCurrentUserId(), ct);
-      return Ok(new { message = "Rozhodčí byl nastaven." });
-    }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
-  }
-
-  [HttpPost("{matchId}/cancel")]
-  public async Task<IActionResult> CancelMatch(Guid matchId, [FromBody] CancelMatchDto dto, CancellationToken ct)
-  {
-    try
-    {
-      await _matchService.CancelMatchAsync(matchId, GetCurrentUserId(), dto, ct);
-      return Ok(new { message = "Zápas byl zrušen." });
-    }
-    catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+    var matches = await _matchService.GetTeamMatchesAsync(teamId);
+    return Ok(matches);
   }
 }
