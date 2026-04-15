@@ -1,86 +1,35 @@
 import { useState } from "react";
-import {
-    startMatch,
-    startCurrentSet,
-    addPoint,
-    assignPosition
-} from "@/lib/matchApi";
-import { SetSide, AssignPositionDto } from "@/types/match";
+import { startMatch, startNextSet, recordPoint, cancelMatch } from "../../lib/matchApi";
+import { StartSetDto, RecordPointDto } from "../../types/match";
 
-export const useLiveMatch = (matchId: string, onUpdateCallback: () => void) => {
-    const [isLiveLoading, setIsLiveLoading] = useState<boolean>(false);
-    const [liveError, setLiveError] = useState<string>("");
+export const useLiveMatch = (matchId: string, onSuccess?: () => void) => {
+    const [isActionLoading, setIsActionLoading] = useState<boolean>(false);
 
-    const handleStartMatch = async () => {
-        setIsLiveLoading(true);
-        setLiveError("");
+    const runAction = async (apiCall: () => Promise<void>) => {
+        setIsActionLoading(true);
         try {
-            await startMatch(matchId);
-            onUpdateCallback();
+            await apiCall();
+            if (onSuccess) onSuccess();
         } catch (err: any) {
-            if (err.message) {
-                setLiveError(err.message);
-            } else {
-                setLiveError("Nepodařilo se odstartovat zápas.");
-            }
+            alert(err.message || "Akce selhala. Zkuste to prosím znovu.");
+        } finally {
+            setIsActionLoading(false);
         }
-        setIsLiveLoading(false);
     };
 
-    const handleStartSet = async () => {
-        setIsLiveLoading(true);
-        setLiveError("");
-        try {
-            await startCurrentSet(matchId);
-            onUpdateCallback();
-        } catch (err: any) {
-            if (err.message) {
-                setLiveError(err.message);
-            } else {
-                setLiveError("Nepodařilo se odstartovat set.");
-            }
-        }
-        setIsLiveLoading(false);
-    };
+    const handleStartMatch = () => runAction(() => startMatch(matchId));
 
-    const handleAddPoint = async (side: SetSide) => {
-        setIsLiveLoading(true);
-        setLiveError("");
-        try {
-            await addPoint(matchId, side);
-            onUpdateCallback();
-        } catch (err: any) {
-            if (err.message) {
-                setLiveError(err.message);
-            } else {
-                setLiveError("Nepodařilo se přidat bod.");
-            }
-        }
-        setIsLiveLoading(false);
-    };
+    const handleStartNextSet = (dto: StartSetDto) => runAction(() => startNextSet(matchId, dto));
 
-    const handleAssignPosition = async (data: AssignPositionDto) => {
-        setIsLiveLoading(true);
-        setLiveError("");
-        try {
-            await assignPosition(matchId, data);
-            onUpdateCallback();
-        } catch (err: any) {
-            if (err.message) {
-                setLiveError(err.message);
-            } else {
-                setLiveError("Nepodařilo se přiřadit pozici.");
-            }
-        }
-        setIsLiveLoading(false);
-    };
+    const handleRecordPoint = (dto: RecordPointDto) => runAction(() => recordPoint(matchId, dto));
+
+    const handleCancelMatch = () => runAction(() => cancelMatch(matchId));
 
     return {
-        isLiveLoading,
-        liveError,
         handleStartMatch,
-        handleStartSet,
-        handleAddPoint,
-        handleAssignPosition
+        handleStartNextSet,
+        handleRecordPoint,
+        handleCancelMatch,
+        isActionLoading
     };
 };

@@ -1,32 +1,25 @@
 import { useState } from "react";
-import { proposeMatch } from "@/lib/matchApi";
-import { CreateMatchDto } from "@/types/match";
+import { useRouter } from "next/navigation";
+import { proposeMatch } from "../../lib/matchApi";
+import { ProposeMatchDto } from "../../types/match";
 
 export const useCreateMatch = () => {
-    const [isCreating, setIsCreating] = useState<boolean>(false);
-    const [createError, setCreateError] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
-    const createNewMatch = async (data: CreateMatchDto) => {
-        setIsCreating(true);
-        setCreateError("");
+    const handleCreate = async (dto: ProposeMatchDto) => {
+        setIsLoading(true);
+        setError(null);
         try {
-            const newMatch = await proposeMatch(data);
-            setIsCreating(false);
-            return newMatch;
+            const newMatchId = await proposeMatch(dto);
+            router.push(`/Dashboard/Matches/${newMatchId}`);
         } catch (err: any) {
-            setIsCreating(false);
-            if (err.message) {
-                setCreateError(err.message);
-            } else {
-                setCreateError("Nepodařilo se vytvořit zápas.");
-            }
-            return null;
+            setError(err.message || "Chyba při vytváření výzvy k zápasu.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    return {
-        createNewMatch,
-        isCreating,
-        createError
-    };
+    return { handleCreate, isLoading, error };
 };

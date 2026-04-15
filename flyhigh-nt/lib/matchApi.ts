@@ -1,253 +1,85 @@
 import { fetchWithAuth } from "./apiClient";
-import { CreateMatchDto, MatchDto, PlayerPosition, SetSide, RosterPlayerDto, AssignPositionDto } from "@/types/match";
+import {
+    MatchDto,
+    ProposeMatchDto,
+    AddRosterEntryDto,
+    StartSetDto,
+    RecordPointDto
+} from "../types/match";
 
-const MATCH_URL = '/matches';
+const BASE_URL = '/matches';
 
 export const getMyMatches = async (): Promise<MatchDto[]> => {
-    const res = await fetchWithAuth(`${MATCH_URL}`);
-    if (!res.ok) {
-        throw new Error('Nepodařilo se načíst zápasy.');
-    }
-    return res.json();
-}
+    const res = await fetchWithAuth(`${BASE_URL}/my`, {
+        method: 'GET'
+    });
+    return await res.json();
+};
 
 export const getMatchById = async (matchId: string): Promise<MatchDto> => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}`);
-    if (!res.ok) {
-        throw new Error('Nepodařilo se načíst detail zápasu.');
-    }
-    return res.json();
-}
+    const res = await fetchWithAuth(`${BASE_URL}/${matchId}`, {
+        method: 'GET'
+    });
+    return await res.json();
+};
 
-export const proposeMatch = async (data: CreateMatchDto) => {
-    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-    if (!guidRegex.test(data.homeTeamId)) {
-        throw new Error("Vyberte platný domácí tým.");
-    }
-
-    if (!guidRegex.test(data.awayTeamId)) {
-        throw new Error("Vyberte platný hostující tým.");
-    }
-
-    let finalDate = data.scheduledDate;
-    if (finalDate === "") {
-        throw new Error("Datum zápasu je povinné.");
-    }
-    if (finalDate === null) {
-        throw new Error("Datum zápasu je povinné.");
-    }
-    finalDate = new Date(finalDate).toISOString();
-
-    let finalRefereeId = null;
-    if (data.refereeId !== null) {
-        if (data.refereeId !== "") {
-            finalRefereeId = data.refereeId;
-        }
-    }
-
-    const payload = {
-        homeTeamId: data.homeTeamId,
-        awayTeamId: data.awayTeamId,
-        scheduledAt: finalDate,
-        location: data.location,
-        refereeId: finalRefereeId
-    };
-
-    const res = await fetchWithAuth(`${MATCH_URL}/propose`, {
+export const proposeMatch = async (dto: ProposeMatchDto): Promise<string> => {
+    const res = await fetchWithAuth(`${BASE_URL}`, {
         method: 'POST',
-        body: JSON.stringify(payload),
+        body: JSON.stringify(dto)
     });
 
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
+    const data = await res.json();
+    return data.matchId;
+};
 
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            if (errorData.errors) {
-                throw new Error(Object.values(errorData.errors).flat().join(' '));
-            } else {
-                throw new Error('Nepodařilo se vytvořit zápas.');
-            }
-        }
-    }
-    return res.json();
-}
-
-export const acceptMatch = async (matchId: string) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/accept`, { method: 'POST' });
-
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se přijmout zápas.');
-        }
-    }
-}
-
-export const rejectMatch = async (matchId: string) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/reject`, { method: 'POST' });
-
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se odmítnout zápas.');
-        }
-    }
-}
-
-export const addRosterPlayer = async (matchId: string, data: RosterPlayerDto) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/roster`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se přidat hráče na soupisku.');
-        }
-    }
-}
-
-export const startMatch = async (matchId: string) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/start`, { method: 'POST' });
-
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se zahájit zápas.');
-        }
-    }
-}
-
-export const startCurrentSet = async (matchId: string) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/sets/start`, { method: 'POST' });
-
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se odstartovat set.');
-        }
-    }
-}
-
-export const addPoint = async (matchId: string, side: SetSide) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/point/${side}`, { method: 'POST' });
-
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se přidat bod.');
-        }
-    }
-}
-
-export const assignPosition = async (matchId: string, data: AssignPositionDto) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/positions`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se přiřadit pozici.');
-        }
-    }
-}
-
-export const setReferee = async (matchId: string, refereeId: string) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/referee/${refereeId}`, {
+export const acceptMatch = async (matchId: string): Promise<void> => {
+    await fetchWithAuth(`${BASE_URL}/${matchId}/accept`, {
         method: 'POST'
     });
+};
 
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
-
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se nastavit rozhodčího.');
-        }
-    }
-}
-
-export const cancelMatch = async (matchId: string, reason: string) => {
-    const res = await fetchWithAuth(`${MATCH_URL}/${matchId}/cancel`, {
-        method: 'POST',
-        body: JSON.stringify({ reason })
+export const rejectMatch = async (matchId: string): Promise<void> => {
+    await fetchWithAuth(`${BASE_URL}/${matchId}/reject`, {
+        method: 'POST'
     });
+};
 
-    if (!res.ok) {
-        let errorData: any = {};
-        try {
-            errorData = await res.json();
-        } catch (e) {
-        }
+export const addRosterEntry = async (matchId: string, dto: AddRosterEntryDto): Promise<void> => {
+    await fetchWithAuth(`${BASE_URL}/${matchId}/roster`, {
+        method: 'POST',
+        body: JSON.stringify(dto)
+    });
+};
 
-        if (errorData.message) {
-            throw new Error(errorData.message);
-        } else {
-            throw new Error('Nepodařilo se zrušit zápas.');
-        }
-    }
-}
+export const removeRosterEntry = async (matchId: string, entryId: string): Promise<void> => {
+    await fetchWithAuth(`${BASE_URL}/${matchId}/roster/${entryId}`, {
+        method: 'DELETE'
+    });
+};
+
+export const startMatch = async (matchId: string): Promise<void> => {
+    await fetchWithAuth(`${BASE_URL}/${matchId}/start`, {
+        method: 'POST'
+    });
+};
+
+export const startNextSet = async (matchId: string, dto: StartSetDto): Promise<void> => {
+    await fetchWithAuth(`${BASE_URL}/${matchId}/sets`, {
+        method: 'POST',
+        body: JSON.stringify(dto)
+    });
+};
+
+export const recordPoint = async (matchId: string, dto: RecordPointDto): Promise<void> => {
+    await fetchWithAuth(`${BASE_URL}/${matchId}/points`, {
+        method: 'POST',
+        body: JSON.stringify(dto)
+    });
+};
+
+export const cancelMatch = async (matchId: string): Promise<void> => {
+    await fetchWithAuth(`${BASE_URL}/${matchId}/cancel`, {
+        method: 'POST'
+    });
+};

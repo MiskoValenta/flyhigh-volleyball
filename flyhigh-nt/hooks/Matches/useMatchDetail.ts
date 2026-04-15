@@ -1,89 +1,55 @@
-import { useState, useCallback, useEffect } from "react";
-import {
-    getMatchById,
-    acceptMatch,
-    rejectMatch,
-    addRosterPlayer,
-    setReferee,
-    cancelMatch
-} from "@/lib/matchApi";
-import { MatchDto, RosterPlayerDto } from "@/types/match";
+import { useState, useEffect, useCallback } from "react";
+import { getMatchById, addRosterEntry, removeRosterEntry } from "../../lib/matchApi";
+import { MatchDto, AddRosterEntryDto } from "../../types/match";
 
-export const useMatchDetail = (matchId: string) => {
+export const useMatchDetail = (matchId: string, enablePolling: boolean = false) => {
     const [match, setMatch] = useState<MatchDto | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string>("");
+    const [error, setError] = useState<string | null>(null);
 
     const fetchMatch = useCallback(async () => {
-        if (!matchId) {
-            return;
-        }
-        if (matchId === "") {
-            return;
-        }
-
-        setIsLoading(true);
-        setError("");
-
+        if (!matchId) return;
         try {
             const data = await getMatchById(matchId);
             setMatch(data);
+            setError(null);
         } catch (err: any) {
-            if (err.message) {
-                setError(err.message);
-            } else {
-                setError("Nepodařilo se načíst detail zápasu.");
-            }
+            setError(err.message || "Nepodařilo se načíst detail zápasu.");
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, [matchId]);
 
     useEffect(() => {
         fetchMatch();
-    }, [fetchMatch]);
 
-    const handleAccept = async () => {
+        let intervalId: NodeJS.Timeout;
+        if (enablePolling) {
+            intervalId = setInterval(() => {
+                fetchMatch();
+            }, 3000);
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [fetchMatch, enablePolling]);
+
+    const handleAddRoster = async (dto: AddRosterEntryDto) => {
         try {
-            await acceptMatch(matchId);
+            await addRosterEntry(matchId, dto);
             await fetchMatch();
         } catch (err: any) {
-            throw err;
+            throw new Error(err.message || "Chyba při přidávání hráče na soupisku.");
         }
     };
 
-    const handleReject = async () => {
+    const handleRemoveRoster = async (entryId: string) => {
         try {
-            await rejectMatch(matchId);
+            await removeRosterEntry(matchId, entryId);
             await fetchMatch();
         } catch (err: any) {
-            throw err;
-        }
-    };
-
-    const handleAddPlayer = async (data: RosterPlayerDto) => {
-        try {
-            await addRosterPlayer(matchId, data);
-            await fetchMatch();
-        } catch (err: any) {
-            throw err;
-        }
-    };
-
-    const handleSetReferee = async (refereeId: string) => {
-        try {
-            await setReferee(matchId, refereeId);
-            await fetchMatch();
-        } catch (err: any) {
-            throw err;
-        }
-    };
-
-    const handleCancel = async (reason: string) => {
-        try {
-            await cancelMatch(matchId, reason);
-            await fetchMatch();
-        } catch (err: any) {
-            throw err;
+            throw new Error(err.message || "Chyba při odebírání hráče ze soupisky.");
         }
     };
 
@@ -91,11 +57,8 @@ export const useMatchDetail = (matchId: string) => {
         match,
         isLoading,
         error,
-        fetchMatch,
-        handleAccept,
-        handleReject,
-        handleAddPlayer,
-        handleSetReferee,
-        handleCancel
+        refetch: fetchMatch,
+        handleAddRoster,
+        handleRemoveRoster
     };
 };

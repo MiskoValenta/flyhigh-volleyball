@@ -7,6 +7,11 @@ export enum MatchStatus {
     Cancelled = "Cancelled"
 }
 
+export enum SetSide {
+    Home = "Home",
+    Away = "Away"
+}
+
 export enum PlayerPosition {
     Setter = "Setter",
     Opposite = "Opposite",
@@ -22,88 +27,75 @@ export enum SetType {
 }
 
 export enum SetWinner {
-    None = "None",
     Home = "Home",
     Away = "Away"
-}
-
-export enum SetSide {
-    Home = "Home",
-    Away = "Away"
-}
-
-export interface RosterPlayerDto {
-    teamId: string;
-    playerId: string;
-    jerseyNumber: number;
-};
-
-export interface AssignPositionDto {
-    playerId: string;
-    position: PlayerPosition;
-    side: SetSide;
-};
-
-export interface MatchDto {
-    id: string;
-    creatorId: string;
-    receiverId: string;
-    homeTeamId: string;
-    awayTeamId: string;
-    status: MatchStatus;
-    homeSetsWon: number;
-    awaySetsWon: number;
-    scheduledDate: string | null;
-    location: string | null;
-    refereeId: string | null;
-    createdAt: string;
-    sets: MatchSetDto[];
-    homeRoster: MatchRosterEntryDto[];
-    awayRoster: MatchRosterEntryDto[];
-}
-
-export interface MatchSetDto {
-    id: string;
-    matchId: string;
-    setNumber: number;
-    setType: SetType;
-    homeScore: number;
-    awayScore: number;
-    isFinished: boolean;
-    winner: SetWinner;
-    playerPositions: MatchPlayerPositionDto[];
-}
-
-export interface MatchRosterEntryDto {
-    id: string;
-    matchId: string;
-    teamId: string;
-    playerId: string;
-    jerseyNumber: number;
-    playerName: string;
 }
 
 export interface MatchPlayerPositionDto {
     id: string;
-    matchSetId: string;
-    playerId: string;
+    rosterEntryId: string;
+    teamSide: SetSide;
     position: PlayerPosition;
-    side: SetSide;
-    playerName: string;
 }
 
-export interface CreateMatchDto {
+export interface MatchSetDto {
+    id: string;
+    setNumber: number;
+    setType: SetType;
+    homeScore: number;
+    awayScore: number;
+    startTime: string;
+    endTime: string | null;
+    winnerSide: SetSide | null;
+    positions: MatchPlayerPositionDto[];
+}
+
+export interface MatchRosterEntryDto {
+    id: string;
+    teamSide: SetSide;
+    teamMemberId: string;
+    userName: string;
+    jerseyNumber: number;
+}
+
+export interface MatchDto {
+    id: string;
     homeTeamId: string;
     awayTeamId: string;
-    scheduledDate: string | null;
+    homeTeamName: string;
+    awayTeamName: string;
+    date: string;
     location: string | null;
+    status: MatchStatus;
+    creatorId: string;
     refereeId: string | null;
+    rosters: MatchRosterEntryDto[];
+    sets: MatchSetDto[];
 }
 
-export interface MatchEnhanced extends MatchDto {
-    homeTeamName: string;
-    homeTeamAbbr: string;
-    awayTeamName: string;
-    awayTeamAbbr: string;
-    creatorName: string;
+export interface ProposeMatchDto {
+    opponentTeamId: string;
+    matchDate: string;
+    location?: string;
+    refereeId?: string;
+}
+
+export interface AddRosterEntryDto {
+    teamSide: SetSide;
+    teamMemberId: string;
+    jerseyNumber: number;
+}
+
+export interface SetPlayerPositionDto {
+    rosterEntryId: string;
+    position: PlayerPosition;
+}
+
+export interface StartSetDto {
+    positions: SetPlayerPositionDto[];
+}
+
+export interface RecordPointDto {
+    teamSide: SetSide;
+    isPenalty: boolean;
 }
