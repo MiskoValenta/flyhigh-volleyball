@@ -1,217 +1,117 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
-import { IoChevronForward } from "react-icons/io5";
-import { useMatchesList } from "@/hooks/Matches/useMatchesList";
-import { acceptMatch, rejectMatch } from "@/lib/matchApi";
-import { getMyTeams } from "@/lib/teamApi";
+import { useMatchesList } from "../../../hooks/Matches/useMatchesList";
+import { MatchStatus } from "../../../types/match";
+import {
+    IoAddOutline,
+    IoCheckmarkOutline,
+    IoCloseOutline,
+    IoCalendarClearOutline,
+    IoLocationOutline,
+    IoPlayCircleOutline,
+    IoTrophyOutline
+} from "react-icons/io5";
 import "./Matches.css";
 
 export default function MatchesPage() {
-    const { activeMatches, pendingMatches, isLoading, error, refetch, profile } = useMatchesList();
-    const [myTeamIds, setMyTeamIds] = useState<string[]>([]);
+    const { matches, isLoading, error, handleAccept, handleReject } = useMatchesList();
 
-    useEffect(() => {
-        const fetchMyTeamIds = async () => {
-            try {
-                const teams = await getMyTeams();
-                const ids = [];
-                for (let i = 0; i < teams.length; i++) {
-                    ids.push(teams[i].id);
-                }
-                setMyTeamIds(ids);
-            } catch (err) {
-            }
-        };
-        fetchMyTeamIds();
-    }, []);
+    if (isLoading) return <div className="loading-state">Načítání zápasů...</div>;
+    if (error) return <div className="error-message">{error}</div>;
 
-    const handleAccept = async (matchId: string) => {
-        try {
-            await acceptMatch(matchId);
-            await refetch();
-        } catch (err: any) {
-            alert("Chyba při přijímání zápasu.");
-        }
-    };
-
-    const handleReject = async (matchId: string) => {
-        try {
-            await rejectMatch(matchId);
-            await refetch();
-        } catch (err: any) {
-            alert("Chyba při odmítání zápasu.");
-        }
-    };
-
-    if (isLoading) {
-        return <div className="matches-state-message">Načítám zápasy...</div>;
-    }
-
-    if (error !== "") {
-        return <div className="matches-state-message match-error">Chyba: {error}</div>;
-    }
-
-    let pendingSection = null;
-    if (pendingMatches.length > 0) {
-        let pendingCards = [];
-        for (let i = 0; i < pendingMatches.length; i++) {
-            const match = pendingMatches[i];
-
-            let isHomeTeamMember = false;
-            for (let j = 0; j < myTeamIds.length; j++) {
-                if (myTeamIds[j] === match.homeTeamId) {
-                    isHomeTeamMember = true;
-                }
-            }
-
-            let actionsContent = null;
-            if (isHomeTeamMember) {
-                actionsContent = <p className="pending-waiting-text">Čeká se na přijetí soupeřem...</p>;
-            } else {
-                actionsContent = (
-                    <div className="match-actions">
-                        <button className="btn-accept" onClick={() => handleAccept(match.id)}>Přijmout</button>
-                        <button className="btn-reject" onClick={() => handleReject(match.id)}>Odmítnout</button>
-                    </div>
-                );
-            }
-
-            let showDate = "Nenastaveno";
-            if (match.scheduledDate) {
-                const d = new Date(match.scheduledDate);
-                showDate = d.toLocaleDateString("cs-CZ") + " " + d.toLocaleTimeString("cs-CZ", { hour: '2-digit', minute: '2-digit' });
-            }
-
-            pendingCards.push(
-                <div key={match.id} className="match-card pending-card glass-card-dark">
-                    <div className="match-card-top">
-                        <span className="match-badge">Pozvánka</span>
-                        <span className="match-date">{showDate}</span>
-                    </div>
-                    <div className="match-card-center">
-                        <span className="team-name-full">{match.homeTeamName}</span>
-                        <span className="vs-text">VS</span>
-                        <span className="team-name-full">{match.awayTeamName}</span>
-                    </div>
-                    {actionsContent}
-                </div>
-            );
-        }
-
-        pendingSection = (
-            <div className="pending-matches-section">
-                <div className="matches-page-header">
-                    <h1 className="dashboard-heading">Čekající výzvy</h1>
-                </div>
-                <div className="matches-grid">
-                    {pendingCards}
-                </div>
-            </div>
-        );
-    }
-
-    let activeCards = [];
-    if (activeMatches.length > 0) {
-        for (let i = 0; i < activeMatches.length; i++) {
-            const match = activeMatches[i];
-
-            let statusClass = "status-default";
-            if (match.status === "InProgress") {
-                statusClass = "status-in-progress";
-            } else {
-                if (match.status === "Finished") {
-                    statusClass = "status-finished";
-                }
-            }
-
-            let isHomeTeamMember = false;
-            for (let j = 0; j < myTeamIds.length; j++) {
-                if (myTeamIds[j] === match.homeTeamId) {
-                    isHomeTeamMember = true;
-                }
-            }
-
-            let opponentName = match.awayTeamName;
-            if (isHomeTeamMember === false) {
-                opponentName = match.homeTeamName;
-            }
-
-            let matchLocation = "Neuvedeno";
-            if (match.location) {
-                matchLocation = match.location;
-            }
-
-            let showDate = "Nenastaveno";
-            if (match.scheduledDate) {
-                const d = new Date(match.scheduledDate);
-                showDate = d.toLocaleDateString("cs-CZ") + " " + d.toLocaleTimeString("cs-CZ", { hour: '2-digit', minute: '2-digit' });
-            }
-
-            activeCards.push(
-                <Link key={match.id} href={`/Dashboard/Matches/${match.id}`} className="match-card glass-card-dark">
-
-                    <div className="match-card-top">
-                        <span className={`status-badge ${statusClass}`}>{match.status}</span>
-                        <span className="match-date">{showDate}</span>
-                    </div>
-
-                    <div className="match-card-center-big">
-                        <span className="team-abbr">{match.homeTeamAbbr}</span>
-                        <span className="vs-divider">:</span>
-                        <span className="team-abbr">{match.awayTeamAbbr}</span>
-                    </div>
-
-                    <div className="match-details-list">
-                        <div className="detail-row">
-                            <span className="detail-label">Vytvořil:</span>
-                            <span className="detail-value">{match.creatorName}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Místo:</span>
-                            <span className="detail-value">{matchLocation}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Soupeř:</span>
-                            <span className="detail-value">{opponentName}</span>
-                        </div>
-                    </div>
-
-                    <div className="match-card-footer">
-                        <span className="show-more-text">
-                            Zobrazit detail zápasu <IoChevronForward className="show-more-icon" />
-                        </span>
-                    </div>
-
-                </Link>
-            );
-        }
-    } else {
-        activeCards.push(
-            <div key="empty" className="matches-empty-state glass-card-dark">
-                <p>Zatím nehrajete žádné zápasy.</p>
-                <Link href="/Dashboard/Matches/Create" className="button-primary">
-                    Vytvořit novou výzvu
-                </Link>
-            </div>
-        );
-    }
+    const pending = matches.filter(m => m.status === MatchStatus.Pending);
+    const active = matches.filter(m => [MatchStatus.Accepted, MatchStatus.InProgress].includes(m.status));
+    const history = matches.filter(m => [MatchStatus.Finished, MatchStatus.Cancelled].includes(m.status));
 
     return (
-        <div className="matches-page-wrapper">
-            {pendingSection}
-
-            <div className="matches-page-header">
-                <h1 className="dashboard-heading">Moje Zápasy</h1>
-                <Link href="/Dashboard/Matches/Create" className="button-primary">
-                    + Nový zápas
+        <div className="matches-wrapper">
+            <div className="matches-header">
+                <h1 className="dashboard-heading">Zápasy a výzvy</h1>
+                <Link href="/Dashboard/Matches/Create" className="button-primary btn-new-match">
+                    <IoAddOutline className="btn-icon" />
+                    <span>Nová výzva</span>
                 </Link>
             </div>
 
-            <div className="matches-grid">
-                {activeCards}
-            </div>
+            {pending.length > 0 && (
+                <section className="matches-section">
+                    <h3 className="section-title">Čekající výzvy</h3>
+                    <div className="matches-grid">
+                        {pending.map(m => (
+                            <div key={m.id} className="match-card glass-card-dark border-accent-warning">
+                                <div className="match-card-teams">
+                                    {m.homeTeamName} <span className="text-muted">vs</span> {m.awayTeamName}
+                                </div>
+                                <div className="match-card-detail">
+                                    <IoCalendarClearOutline className="detail-icon" />
+                                    <span>{new Date(m.date).toLocaleString()}</span>
+                                </div>
+                                <div className="match-actions">
+                                    <button onClick={() => handleAccept(m.id)} className="btn-action btn-accept">
+                                        <IoCheckmarkOutline className="action-icon" /> Přijmout
+                                    </button>
+                                    <button onClick={() => handleReject(m.id)} className="btn-action btn-reject">
+                                        <IoCloseOutline className="action-icon" /> Odmítnout
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            <section className="matches-section">
+                <h3 className="section-title">Aktivní zápasy</h3>
+                <div className="matches-grid">
+                    {active.map(m => (
+                        <Link
+                            href={m.status === MatchStatus.InProgress ? `/Dashboard/Matches/${m.id}/Live` : `/Dashboard/Matches/${m.id}`}
+                            key={m.id}
+                            className="match-card match-card-link glass-card-dark"
+                        >
+                            <span className={`status-badge status-${m.status}`}>
+                                {m.status === MatchStatus.InProgress ? <><IoPlayCircleOutline className="badge-icon pulse-anim" /> LIVE</> : "Naplánováno"}
+                            </span>
+                            <div className="match-card-teams">
+                                {m.homeTeamName} <span className="text-muted">vs</span> {m.awayTeamName}
+                            </div>
+                            <div className="match-card-detail">
+                                <IoCalendarClearOutline className="detail-icon" />
+                                <span>{new Date(m.date).toLocaleString()}</span>
+                            </div>
+                            {m.location && (
+                                <div className="match-card-detail">
+                                    <IoLocationOutline className="detail-icon" />
+                                    <span>{m.location}</span>
+                                </div>
+                            )}
+                        </Link>
+                    ))}
+                    {active.length === 0 && <p className="empty-text">Žádné aktivní zápasy. Vytvořte novou výzvu!</p>}
+                </div>
+            </section>
+
+            <section className="matches-section">
+                <h3 className="section-title">Historie</h3>
+                <div className="matches-grid history-grid">
+                    {history.map(m => (
+                        <Link href={`/Dashboard/Matches/${m.id}`} key={m.id} className="match-card match-card-link glass-card-dark opacity-hover">
+                            <span className="status-badge status-history">
+                                <IoTrophyOutline className="badge-icon" /> {MatchStatus[m.status]}
+                            </span>
+                            <div className="match-card-teams">
+                                {m.homeTeamName} <span className="text-muted">vs</span> {m.awayTeamName}
+                            </div>
+                            <div className="match-card-detail">
+                                <IoCalendarClearOutline className="detail-icon" />
+                                <span>{new Date(m.date).toLocaleDateString()}</span>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </section>
         </div>
     );
 }
